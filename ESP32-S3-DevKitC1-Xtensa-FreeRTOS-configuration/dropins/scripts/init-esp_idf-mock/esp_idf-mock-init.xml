@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ANT Buildfile
+
+  Copyright 2018-2020 MicroEJ Corp. All rights reserved.
+  This library is provided in source code for use, modification and test, subject to license terms.
+  Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+-->
+<project name="esp_idf-mock-init">
+
+	<import file="${scripts.dir}/extension-init.xml" />
+
+	<target name="init/esp_idf-mock-s3" extensionOf="init/execution" if="onS3">
+		<augment id="hil.main.classpath">
+			<fileset dir="${platform.dir}/mocks" includes="mockesp_idf-mock.jar"/>
+		</augment>
+		
+		<!--  Augment the classpath with the SNI native exception classes used -->
+		<augment id="init.application.classpath">
+			<fileset dir="${platform.dir}/javaLibs">
+				<include name="sni*.jar"/>
+			</fileset>
+		</augment>
+		
+		<!-- check the nvs root dir -->
+		<condition property="com.microej.enki.nvs.mock.root.dir" value="${com.microej.enki.nvs.mock.root}" else="${output.dir}/nvs">
+			<and>
+				<isset property="com.microej.enki.nvs.mock.root"/>
+				<not>
+					<equals arg1="${com.microej.enki.nvs.mock.root}" arg2="" trim="true"/>
+				</not>
+			</and>
+		</condition>
+		
+		<!-- ensure root dir is not a file -->
+		<fail message="The nvs root dir '${com.microej.enki.nvs.mock.root.dir}' targets a file, not a directory.">
+			<condition>
+				<available file="${com.microej.enki.nvs.mock.root.dir}" type="file"/>
+			</condition>
+		</fail>
+		
+		<!-- create root dir (may already exists) -->
+		<mkdir dir="${com.microej.enki.nvs.mock.root.dir}"/>
+		
+		<!--fs properties for the mock (mock root dir, path separator, etc.) -->
+		<augment id="hil.main.properties">
+			<propertyref name="com.microej.enki.nvs.mock.root.dir"/>
+		</augment>
+		
+		<!-- verbose -->
+		<property name="com.microej.enki.nvs.mock.root.file" location="${com.microej.enki.nvs.mock.root.dir}"/>
+		<echo message="Simulation NVS root directory is ${com.microej.enki.nvs.mock.root.file}" level="verbose"/>
+	</target>
+
+</project>

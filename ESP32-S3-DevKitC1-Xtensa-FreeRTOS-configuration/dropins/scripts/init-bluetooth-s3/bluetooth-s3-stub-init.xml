@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	XML
+
+	Copyright 2019-2020 MicroEJ Corp. All rights reserved.
+	This library is provided in source code for use, modification and test, subject to license terms.
+	Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+-->
+
+<project name="bluetooth-s3-stub-init">
+	<import file="${scripts.dir}/extension-init.xml"/>
+
+	<target name="init/bluetooth-s3-stub-onS3" if="onS3">
+		<condition property="bluetooth.mock.stub">
+			<equals arg1="${s3.bluetooth.mode}" arg2="stub"/>
+		</condition>
+	</target>
+
+	<target name="init/bluetooth-s3-stub" extensionOf="init/execution" if="bluetooth.mock.stub" depends="init/bluetooth-s3-stub-onS3">
+		<augment id="hil.main.classpath">
+			<fileset dir="${platform.dir}/mocks" includes="mockbluetooth-mock-stub.jar"/>
+		</augment>
+	</target>
+</project>

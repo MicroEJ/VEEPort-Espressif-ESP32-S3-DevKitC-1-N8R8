@@ -1,0 +1,17 @@
+#
+# YAML
+#
+# Copyright 2022 MicroEJ Corp. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+#
+
+variables:
+  BUILD_IMAGE: "p0286-docker.forge.microej.com/sdk-idf"
+  MODULE_DIR: "ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration"
+#  ANT_PROPERTIES: "-Dcom.microej.platformbuilder.architecture.usage=prod -Dskip.publish=false"
+  ANT_PROPERTIES: "-Dskip.publish=false -Dcom.microej.platformbuilder.bsp.build.enabled=true -Dcom.microej.platformbuilder.architecture.usage=prod"
+  APPLY_FIRST_BSP_COMPILE_HOOKS: "true"
+
+include:
+  - project: 'I0271_CI/I0271_Gitlab_Templates'
+    file: '/templates/Module-Flow.gitlab-ci.yml'

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	ANT
+
+	Copyright 2015-2019 MicroEJ Corp. All rights reserved.
+	This library is provided in source code for use, modification and test, subject to license terms.
+	Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+-->
+<project name="device-init">
+	<import file="${scripts.dir}/extension-init.xml" />
+
+	<target name="init/device" extensionOf="init/execution">
+		<augment id="init.application.classpath">
+			<fileset dir="${jpf.dir}/javaLibs" includes="device-*.jar"/>
+			<fileset dir="${jpf.dir}/javaLibs" includes="sni-*.jar"/>
+		</augment>
+	</target>
+</project>

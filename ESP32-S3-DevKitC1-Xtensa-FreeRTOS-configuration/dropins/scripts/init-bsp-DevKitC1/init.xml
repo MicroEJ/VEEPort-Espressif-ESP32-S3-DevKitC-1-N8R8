@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	ANT
+ 
+	Copyright 2017-2022 MicroEJ Corp. All rights reserved.
+	Use of this source code is governed by a BSD-style license that can be found with this software.
+    
+-->
+<project name="init-bsp-DevKitC1">
+  <description>Specify the bsp build script to use.</description>
+
+  <target name="init/bsp/DevKitC1" extensionOf="init/workbench" if="onBoard">
+    <condition property="deploy.bsp.microejscript.name" value="build" else="build_no_ota_no_systemview">
+      <or>
+	    <not>
+		  <isset property="com.microej.architecture.capability"/>
+	    </not>
+	    <equals arg1="${com.microej.architecture.capability}" arg2="single"/>
+	  </or>
+    </condition>
+  </target>
+</project>

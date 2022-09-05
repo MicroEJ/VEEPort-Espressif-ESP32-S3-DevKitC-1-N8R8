@@ -1,0 +1,28 @@
+<!--
+	ANT
+
+	Copyright 2022 MicroEJ Corp. All rights reserved.
+	Use of this source code is governed by a BSD-style license that can be found with this software.
+-->
+<project name="module">
+
+	<!--
+		Script called by MicroEJ Workbench when building the MMM module.
+	-->
+
+	<!-- Import Platform Configuration Additions build file -->
+	<dirname file="${ant.file.module}" property="module.dir"/>
+	<import file="${module.dir}/build/module/module.ant"/>
+
+	<!--
+		Specify the build script to invoke when option 'com.microej.platformbuilder.bsp.build.enabled' is set to 'true' (Platform validation with BSP build).
+
+        See dropins/init-bsp-DevKitC1/init.xml to specify the BSP build script to use at MicroEJ Application launch time.
+	-->
+	<target name="module:fixBuildScript" extensionOf="abstract-compile:compile">
+	  <condition property="bsp.microejscript.name" value="build_no_ota_no_systemview" else="build">
+		<istrue value="${com.microej.platformbuilder.module.multi.enabled}"/>
+	  </condition>
+	</target>
+
+</project>

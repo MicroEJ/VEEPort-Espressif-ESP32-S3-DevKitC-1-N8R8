@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	ANT
+
+	Copyright 2019 MicroEJ Corp. All rights reserved.
+	This library is provided in source code for use, modification and test, subject to license terms.
+	Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+-->
+<project name="device-s3-init">
+	<import file="${scripts.dir}/extension-init.xml" />
+
+	<!-- Add the mock to the classpath -->
+	<target name="init/device-s3" extensionOf="init/execution" if="onS3">
+		<!-- Add the mock directly in the S3 VM because the front panel use it to compute the title of the frame -->
+		<augment id="s3.mock.includes">
+			<fileset dir="${platform.dir}/mocks" includes="mockdevice-mock.jar"/>
+		</augment>
+	</target>
+
+	<!--
+		Customize architecture name if specified in launch option or if a default architecture is defined.
+	-->
+	<target name="init/device-s3/architecture" depends="init/device-s3/architecture/set" extensionOf="init/execution" if="s3.mock.device.architecture">
+		<!-- Synchronize property name with ej.util.Device class. -->
+		<!--
+			This is useless to add the property to "hil.main.properties" because the
+			mock is launched in the same VM than the S3.
+			Just keep this job in case we move back the Device mock into its own VM
+		-->
+		<augment id="hil.main.properties">
+			<propertyref name="s3.mock.device.architecture"/>
+		</augment>
+	</target>
+
+	<!--
+		Customize architecture name from launch option if specified,
+		otherwise use default architecture name if specified.
+	-->
+	<target name="init/device-s3/architecture/set" if="onS3">
+		<!-- Synchronize property name with ej.util.Device class and workbench extension -->
+		<condition property="s3.mock.device.architecture" value="${s3.mock.device.architecture.option}">
+			<istrue value="${s3.mock.device.architecture.option.use}"/>
+		</condition>
+
+		<!-- Try to load a default architecture name from a properties file defined in the scripts -->
+		<property file="${scripts.dir}/device.properties"/>
+
+		<condition property="s3.mock.device.architecture" value="${s3.mock.device.architecture.default}">
+			<isset property="s3.mock.device.architecture.default"/>
+		</condition>
+	</target>
+
+	<!-- Customize device id from launch option if specified -->
+	<target name="init/device-s3/id" extensionOf="init/execution" depends="init/device-s3/id/check" if="s3.mock.device.id.target.execute">
+		<!-- Synchronize property name with ej.util.Device class and workbench extension -->
+		<property name="s3.mock.device.id" value="${s3.mock.device.id.option}"/>
+
+		<!--
+			This is useless to add the property to "hil.main.properties" because the
+			mock is launched in the same VM than the S3.
+			Just keep this job in case we move back the Device mock into its own VM
+		-->
+		<augment id="hil.main.properties">
+			<propertyref name="s3.mock.device.id"/>
+		</augment>
+	</target>
+
+	<!--
+		Check if the device id option in the launcher must be used. It must be used if:
+		- we are on S3
+		- and the s3.mock.device.id.option.use is true (checkbox checked)
+	-->
+	<target name="init/device-s3/id/check" extensionOf="init/execution" if="onS3">
+		<condition property="s3.mock.device.id.target.execute" value="SET">
+			<istrue value="${s3.mock.device.id.option.use}"/>
+		</condition>
+	</target>
+</project>

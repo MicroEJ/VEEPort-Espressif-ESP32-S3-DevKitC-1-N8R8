@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	XML
+
+	Copyright 2018-2021 MicroEJ Corp. All rights reserved.
+	This library is provided in source code for use, modification and test, subject to license terms.
+	Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+-->
+
+<project name="bluetooth-init">
+	<import file="${scripts.dir}/extension-init.xml"/>
+
+	<target name="init/bluetooth" extensionOf="init/execution">
+		<augment id="init.application.classpath">
+			<fileset dir="${platform.dir}/javaLibs" includes="kf-*.jar"/>
+		</augment>
+
+		<augment id="init.properties">
+			<propertyref name="bluetooth.pump.buffer.size"/>
+		</augment>
+	</target>
+</project>

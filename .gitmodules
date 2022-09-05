@@ -1,0 +1,4 @@
+[submodule "ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf"]
+	path = ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf
+	url = https://github.com/espressif/esp-idf.git
+
