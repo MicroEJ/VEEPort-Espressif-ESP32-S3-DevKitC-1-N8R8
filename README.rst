@@ -4,7 +4,7 @@
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
-.. |PLATFORM_VER| replace:: 1.0.0
+.. |PLATFORM_VER| replace:: 1.0.1
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
@@ -100,7 +100,7 @@ Here is a list of |BOARD_NAME| useful documentation links:
 Platform Specifications
 =======================
 
-The Architecture version is ``7.16.1``.
+The Architecture version is ``7.16.0``.
 
 This Platform provides the following Foundation Libraries:
 
@@ -152,7 +152,7 @@ Requirements
 
 - PC with Windows 10 or Linux (tested with Ubuntu LTS 20.04)
 - Internet connection to `MicroEJ Central Repository <https://developer.microej.com/central-repository/>`_
-- |RCP| Dist. ``21.11`` or higher, available `here <https://developer.microej.com/get-started/>`_
+- |RCP| Dist. ``21.11`` or higher, available `here <https://developer.microej.com/microej-sdk-software-development-kit/>`_
 - |BOARD_NAME| board
 
 BSP Setup
@@ -314,7 +314,7 @@ If flashed, the pre-compiled application outputs ``Hello World`` on
 the UART.
 
 When running a Testsuite, logs must be redirected to a secondary UART
-port.  Please refer to `Testsuite Configuration`_ for a detailed
+port.  Please refer to `Test Suite Configuration`_ for a detailed
 explanation.
 
 Please refer to the |MANUFACTURER| documentation available `here
@@ -416,12 +416,11 @@ be redirected to a dedicated UART.  The property
 This property redirects the UART onto a different GPIO port. Connect a
 FTDI USB wire to the pin D4 of the J1 connector and ground.
 
-.. image:: ./images/ESP32-S3-DevKitC1_Test_Connections.JPG
+.. image:: ./images/ESP32-S3-DevKitC1_Test_Connections.jpg
 
 In ``config.properties``, the property ``target.platform.dir`` must be
 set to the absolute path to the platform.  For example
-``C:/Platform-ESP32-S3-DevKitC-1/ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-1.0.0/source
-``.
+``C:/Platform-ESP32-S3-DevKitC-1/ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-1.0.0/source``.
 
 Test Suite Projects
 -------------------

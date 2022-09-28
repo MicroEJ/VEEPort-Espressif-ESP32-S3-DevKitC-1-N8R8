@@ -7,7 +7,20 @@
 ===========
 
 ----------------------
+ [1.0.1] - 2022-09-29
+----------------------
+
+Fixed
+=====
+
+- Fix documentation issues.
+- Set pack FS to 6.0.2 to fix a resolution issue with 6.0.3.
+
+----------------------
  [1.0.0] - 2022-09-05
 ----------------------
 
-Initial release of the platform.
+Added
+=====
+
+- Initial release of the platform.

@@ -5,7 +5,7 @@
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
 .. |PLATFORM_NAME| replace:: ESP32-S3-DevKitC1 Platform
-.. |PLATFORM_VER| replace:: 1.0.0
+.. |PLATFORM_VER| replace:: 1.0.1
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
@@ -92,11 +92,11 @@ is a list of the most important ones:
      - FreeRTOS
      - 10.4.3
    * - TCP/IP stack 
-     - esp_lwip
+     - LwIP
      - 2.1.2
    * - Cryptographic stack 
      - Mbed TLS
-     - 2.16.11
+     - 2.28.0
    * - File System stack 
      - FatFS
      - R0.13c

@@ -13,7 +13,7 @@
          - Update the `PLATFORM_VER` in all `README.rst` files and in the `RELEASE_NOTES.rst` file.
          - Update the `CHANGELOG.rst` and `RELEASE_NOTES.rst` to reflect the changes.
     -->
-	<info organisation="com.microej.platform.esp32.ESP32-S3-DevKitC1" module="Platform" status="integration" revision="1.0.0">
+	<info organisation="com.microej.platform.esp32.ESP32-S3-DevKitC1" module="Platform" status="integration" revision="1.0.1">
         <ea:build organisation="com.is2t.easyant.buildtypes" module="build-custom" revision="1.+"/>
     	<ea:plugin org="com.is2t.easyant.plugins" module="eclipse-antRunner" revision="1.+"/>
     	<ea:plugin org="com.is2t.easyant.plugins" module="mam" revision="1.+"/>
@@ -47,7 +47,7 @@
 		<dependency org="com.microej.pack" name="hal" rev="2.0.2" transitive="false"/>
 		<dependency org="com.microej.pack.bluetooth" name="bluetooth-pack" rev="2.2.1" transitive="true"/>
 		<dependency org="com.microej.pack.device" name="device-pack" rev="1.1.1" transitive="true"/>
-		<dependency org="com.microej.pack" name="fs" rev="6.0.3" transitive="false"/>
+		<dependency org="com.microej.pack" name="fs" rev="6.0.2" transitive="false"/>
 		<dependency org="com.microej.api" name="esp_idf" rev="1.0.1" transitive="false"/>
 		<dependency org="com.microej.architecture.ESP32" name="esp_idf-impl" rev="1.1.1" transitive="false"/>
 		<dependency org="com.microej.architecture.ESP32" name="esp_idf-mock" rev="1.1.2" transitive="false"/>
