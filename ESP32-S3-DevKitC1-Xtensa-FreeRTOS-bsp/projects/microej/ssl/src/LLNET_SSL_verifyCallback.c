@@ -12,12 +12,8 @@
  * @version 2.1.5
  * @date 20 December 2021
  */
-
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+#include "mbedtls/build_info.h"
 #include "mbedtls/debug.h"
 #include "LLNET_SSL_CONTEXT_impl.h"
 #include "LLNET_SSL_CONSTANTS.h"

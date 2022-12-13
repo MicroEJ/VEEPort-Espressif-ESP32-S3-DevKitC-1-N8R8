@@ -25,7 +25,7 @@
 #include "lwip/dhcp.h"
 #include "lwip/dns.h"
 #include "netif/etharp.h"
-#include "netif/ethernetif.h"
+#include "lwip/esp_netif_net_stack.h"
 #include <netdb.h>
 #include <stddef.h>
 #include <string.h>

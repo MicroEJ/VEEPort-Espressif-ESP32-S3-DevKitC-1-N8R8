@@ -16,11 +16,7 @@
 #ifndef LLNET_SSL_VERIFY_CALLBACK
 #define LLNET_SSL_VERIFY_CALLBACK
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 #include "mbedtls/x509.h"
 
 #ifdef __cplusplus

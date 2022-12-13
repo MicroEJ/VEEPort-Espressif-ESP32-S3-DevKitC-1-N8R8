@@ -4,7 +4,7 @@
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
-.. |PLATFORM_VER| replace:: 1.0.1
+.. |PLATFORM_VER| replace:: 2.0.0
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
@@ -97,12 +97,19 @@ scripts are meant to run in a Windows and Linux environment respectively.
 - The **SysView** script is used to start the application, tracing and logging
   to files, (start the Segger SystemView tracing). More information about this feature
   can be found on `MicroEJ SystemView README`_ and also on the `Espressif official 
-  documentation <https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/api-guides/app_trace.html#system-behavior-analysis-with-segger-systemview>`_.
+  documentation <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/app_trace.html#system-behavior-analysis-with-segger-systemview>`_.
 
 Debugging with a |BOARD_NAME|
 =============================
 
-The entire process of debugging a |BOARD_NAME| is described `here <https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/api-guides/jtag-debugging/using-debugger.html>`_. 
+The entire process of debugging a |BOARD_NAME| is described `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/jtag-debugging/using-debugger.html>`_.
+
+Enable PSRAM
+============
+This platform is configured for PSRAM chip ESP32-S3-Wroom-1/M0N8R8, if your hardware has a different PSRAM chip, configure it properly in sdkconfig based on the aforementioned documentation from Espressif
+Because ESP32-S3-Wroom-1 has flash and PSRAM of different sizes. You need to know the flash and PSRAM size of your ESP32-S3 module first <https://www.espressif.com/sites/default/files/documentation/espressif_module_packaging_information_en.pdf>`_.
+Flash and PSRAM should be selected according to your actual hardware, you need to find all suported modes and Speed<https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf>`_.
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/flash_psram_config.html?highlight=psram>`_.
 
 Using Segger SystemView
 =======================

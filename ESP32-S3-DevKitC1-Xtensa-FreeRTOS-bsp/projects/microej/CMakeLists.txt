@@ -5,7 +5,7 @@
 # Use of this source code is governed by a BSD-style license that can be found with this software.
 #
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 
 # Set the project version
 set(PROJECT_VER "1")

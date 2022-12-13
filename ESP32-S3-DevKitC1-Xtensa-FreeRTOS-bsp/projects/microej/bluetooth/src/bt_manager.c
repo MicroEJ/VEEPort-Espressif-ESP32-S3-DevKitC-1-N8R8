@@ -71,39 +71,39 @@ bool BT_MANAGER_enable(void)
 	esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
 	int32_t status = esp_bt_controller_init(&bt_cfg);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_bt_controller_init status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_bt_controller_init status=%ld\n", status);
 		return false;
 	}
 
 	status = esp_bt_controller_enable(ESP_BT_MODE_BLE);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_bt_controller_enable status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_bt_controller_enable status=%ld\n", status);
 		return false;
 	}
 
 	status = esp_bluedroid_init();
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_bluedroid_init status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_bluedroid_init status=%ld\n", status);
 		return false;
 	}
 
 	status = esp_bluedroid_enable();
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_bluedroid_enable status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_bluedroid_enable status=%ld\n", status);
 		return false;
 	}
 
 	esp_ble_io_cap_t io_cap = BLE_IO_CAP;
 	status = esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &io_cap, sizeof(esp_ble_io_cap_t));
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_set_security_param status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_set_security_param status=%ld\n", status);
 		return false;
 	}
 
 	esp_ble_auth_req_t auth_req = BLE_AUTH_REQ;
 	status = esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, sizeof(esp_ble_auth_req_t));
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_set_security_param status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_set_security_param status=%ld\n", status);
 		return false;
 	}
 
@@ -130,25 +130,25 @@ void BT_MANAGER_disable(void)
 
 	int32_t status = esp_bluedroid_disable();
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_bluedroid_disable status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_bluedroid_disable status=%ld\n", status);
 		return;
 	}
 
 	status = esp_bluedroid_deinit();
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_bluedroid_deinit status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_bluedroid_deinit status=%ld\n", status);
 		return;
 	}
 
 	status = esp_bt_controller_disable();
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_bt_controller_disable status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_bt_controller_disable status=%ld\n", status);
 		return;
 	}
 
 	status = esp_bt_controller_deinit();
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_bt_controller_deinit status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_bt_controller_deinit status=%ld\n", status);
 		return;
 	}
 }
@@ -217,7 +217,7 @@ void BT_MANAGER_on_connected(uint16_t conn_id, const uint8_t *addr, esp_ble_addr
 
 		int32_t status = esp_ble_gattc_open(gattc_if, (uint8_t *) addr, *addr_type, true);
 		if (status != ESP_OK) {
-			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_open status=%d\n", status);
+			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_open status=%ld\n", status);
 		}
 	}
 
@@ -254,7 +254,7 @@ void BT_MANAGER_on_characteristic_discovered(uint16_t handle)
 {
 	int32_t status = esp_ble_gattc_register_for_notify(gattc_if, connected_addr, handle);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_register_for_notify status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_register_for_notify status=%ld\n", status);
 	}
 }
 
@@ -272,7 +272,7 @@ bool BT_MANAGER_add_service(BT_DATA_service_t *s)
 
 	int32_t status = esp_ble_gatts_create_service(gatts_if, &service_id, num_attr);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_create_service status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_create_service status=%ld\n", status);
 		return false;
 	}
 
@@ -301,7 +301,7 @@ bool BT_MANAGER_add_characteristic(uint16_t service_handle, BT_DATA_characterist
 	int32_t status = esp_ble_gatts_add_char(service_handle, &c->uuid, c->permissions, c->properties,
 			&attr_value, &attr_control);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_add_char status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_add_char status=%ld\n", status);
 		return false;
 	}
 
@@ -330,7 +330,7 @@ bool BT_MANAGER_add_descriptor(uint16_t service_handle, BT_DATA_descriptor_t *d)
 	int32_t status = esp_ble_gatts_add_char_descr(service_handle, &d->uuid, d->permissions,
 			&attr_value, &attr_control);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_add_char_descr status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_add_char_descr status=%ld\n", status);
 		return false;
 	}
 
@@ -348,7 +348,7 @@ bool BT_MANAGER_start_service(uint16_t service_handle)
 {
 	int32_t status = esp_ble_gatts_start_service(service_handle);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_start_service status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_start_service status=%ld\n", status);
 		return false;
 	}
 
@@ -374,13 +374,13 @@ bool BT_MANAGER_start_scan(void)
 
 	int32_t status = esp_ble_gap_set_scan_params(&scan_params);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_set_scan_params status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_set_scan_params status=%ld\n", status);
 		return false;
 	}
 
 	status = esp_ble_gap_start_scanning(0);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_start_scanning status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_start_scanning status=%ld\n", status);
 		return false;
 	}
 
@@ -391,7 +391,7 @@ bool BT_MANAGER_stop_scan(void)
 {
 	int32_t status = esp_ble_gap_stop_scanning();
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_stop_scanning status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_stop_scanning status=%ld\n", status);
 		return false;
 	}
 
@@ -411,13 +411,13 @@ bool BT_MANAGER_start_adv(const uint8_t *adv_data, uint8_t adv_data_size)
 
 	int32_t status = esp_ble_gap_config_adv_data_raw((uint8_t *) adv_data, adv_data_size);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_config_adv_data_raw status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_config_adv_data_raw status=%ld\n", status);
 		return false;
 	}
 
 	status = esp_ble_gap_start_advertising(&adv_params);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_start_advertising status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_start_advertising status=%ld\n", status);
 		return false;
 	}
 
@@ -428,7 +428,7 @@ bool BT_MANAGER_stop_adv(void)
 {
 	int32_t status = esp_ble_gap_stop_advertising();
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_stop_advertising status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_stop_advertising status=%ld\n", status);
 		return false;
 	}
 
@@ -445,7 +445,7 @@ bool BT_MANAGER_connect(const uint8_t *addr, esp_ble_addr_type_t addr_type)
 
 	int32_t status = esp_ble_gattc_open(gattc_if, (uint8_t *) addr, addr_type, true);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_open status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_open status=%ld\n", status);
 		return false;
 	}
 
@@ -456,7 +456,7 @@ bool BT_MANAGER_disconnect(uint16_t conn_id)
 {
 	int32_t status = esp_ble_gattc_close(gattc_if, conn_id);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_close status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_close status=%ld\n", status);
 		return false;
 	}
 
@@ -467,7 +467,7 @@ bool BT_MANAGER_send_pair_request(uint16_t conn_id)
 {
 	int32_t status = esp_ble_set_encryption(connected_addr, BLE_SECURITY_ACTION);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_set_encryption status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_set_encryption status=%ld\n", status);
 		return false;
 	}
 
@@ -478,7 +478,7 @@ bool BT_MANAGER_send_pair_response(uint16_t conn_id, bool accept)
 {
 	int32_t status = esp_ble_gap_security_rsp(connected_addr, accept);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_set_encryption status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_set_encryption status=%ld\n", status);
 		return false;
 	}
 
@@ -489,7 +489,7 @@ bool BT_MANAGER_send_passkey_response(uint16_t conn_id, bool accept, uint32_t pa
 {
 	int32_t status = esp_ble_passkey_reply(connected_addr, accept, passkey);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_passkey_reply status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_passkey_reply status=%ld\n", status);
 		return false;
 	}
 
@@ -500,7 +500,7 @@ bool BT_MANAGER_discover_services(uint16_t conn_id, const esp_bt_uuid_t *uuid)
 {
 	int32_t status = esp_ble_gattc_search_service(gattc_if, conn_id, (esp_bt_uuid_t *) uuid);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_search_service status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_search_service status=%ld\n", status);
 		return false;
 	}
 
@@ -517,13 +517,13 @@ bool BT_MANAGER_send_read_request(uint16_t conn_id, uint16_t attr_handle)
 	if (is_characteristic) {
 		int32_t status = esp_ble_gattc_read_char(gattc_if, conn_id, attr_handle, ESP_GATT_AUTH_REQ_NONE);
 		if (status != ESP_OK) {
-			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_read_char status=%d\n", status);
+			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_read_char status=%ld\n", status);
 			return false;
 		}
 	} else {
 		int32_t status = esp_ble_gattc_read_char_descr(gattc_if, conn_id, attr_handle, ESP_GATT_AUTH_REQ_NONE);
 		if (status != ESP_OK) {
-			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_read_char_descr status=%d\n", status);
+			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_read_char_descr status=%ld\n", status);
 			return false;
 		}
 	}
@@ -545,14 +545,14 @@ bool BT_MANAGER_send_write_request(uint16_t conn_id, uint16_t attr_handle, uint1
 		int32_t status = esp_ble_gattc_write_char(gattc_if, conn_id, attr_handle, value_size,
 				(uint8_t *) value, write_type, ESP_GATT_AUTH_REQ_NONE);
 		if (status != ESP_OK) {
-			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_write_char status=%d\n", status);
+			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_write_char status=%ld\n", status);
 			return false;
 		}
 	} else {
 		int32_t status = esp_ble_gattc_write_char_descr(gattc_if, conn_id, attr_handle, value_size,
 				(uint8_t *) value, write_type, ESP_GATT_AUTH_REQ_NONE);
 		if (status != ESP_OK) {
-			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_write_char_descr status=%d\n", status);
+			LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_write_char_descr status=%ld\n", status);
 			return false;
 		}
 	}
@@ -583,7 +583,7 @@ bool BT_MANAGER_send_read_response(uint16_t conn_id, uint16_t attr_handle, esp_g
 
 	int32_t error = esp_ble_gatts_send_response(gatts_if, conn_id, trans_id, status, &response);
 	if (error != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_send_response error=%d\n", error);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_send_response error=%ld\n", error);
 		return false;
 	}
 
@@ -606,7 +606,7 @@ bool BT_MANAGER_send_write_response(uint16_t conn_id, uint16_t attr_handle, esp_
 
 	int32_t error = esp_ble_gatts_send_response(gatts_if, conn_id, trans_id, status, &response);
 	if (error != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_send_response error=%d\n", error);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_send_response error=%ld\n", error);
 		return false;
 	}
 
@@ -621,7 +621,7 @@ bool BT_MANAGER_send_notification(uint16_t conn_id, uint16_t attr_handle, uint16
 	int32_t status = esp_ble_gatts_send_indicate(gatts_if, conn_id, attr_handle, value_size,
 			(uint8_t *) value, confirm);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_send_indicate status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_send_indicate status=%ld\n", status);
 		notification_attr_handle = ESP_GATT_ILLEGAL_HANDLE;
 		return false;
 	}
@@ -636,7 +636,7 @@ bool BT_MANAGER_get_num_attributes(uint16_t conn_id, uint16_t start_handle, uint
 	int32_t status = esp_ble_gattc_get_attr_count(gattc_if, conn_id, ESP_GATT_DB_ALL,
 			start_handle, end_handle, ESP_GATT_ILLEGAL_HANDLE, &count);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_get_attr_count status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_get_attr_count status=%ld\n", status);
 		return false;
 	}
 
@@ -657,7 +657,7 @@ bool BT_MANAGER_get_characteristic(uint16_t conn_id, uint16_t start_handle, uint
 	if (status == ESP_GATT_INVALID_OFFSET || status == ESP_GATT_NOT_FOUND) {
 		return false;
 	} else if (status != ESP_GATT_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_get_all_char status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_get_all_char status=%ld\n", status);
 		return false;
 	}
 
@@ -673,7 +673,7 @@ bool BT_MANAGER_get_descriptor(uint16_t conn_id, uint16_t char_handle, uint16_t 
 	if (status == ESP_GATT_INVALID_OFFSET || status == ESP_GATT_NOT_FOUND) {
 		return false;
 	} else if (status != ESP_GATT_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_get_all_descr status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_get_all_descr status=%ld\n", status);
 		return false;
 	}
 
@@ -686,7 +686,7 @@ bool BT_MANAGER_get_attribute_type(uint16_t conn_id, uint16_t attr_handle, bool 
 	int32_t status = esp_ble_gattc_get_attr_count(gattc_if, conn_id, ESP_GATT_DB_CHARACTERISTIC,
 			attr_handle, attr_handle, ESP_GATT_ILLEGAL_HANDLE, &count);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_get_attr_count status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_get_attr_count status=%ld\n", status);
 		return false;
 	}
 

@@ -4,7 +4,7 @@
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
-.. |PLATFORM_VER| replace:: 1.0.1
+.. |PLATFORM_VER| replace:: 2.0.0
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
@@ -90,8 +90,8 @@ Board Technical Specifications
 
 Here is a list of |BOARD_NAME| useful documentation links:
 
-- Board documentation available `here <https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#hardware-reference>`__
-- |MANUFACTURER| board Getting Started available `here <https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/get-started/index.html#introduction>`__
+- Board documentation available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#hardware-reference>`__
+- |MANUFACTURER| board Getting Started available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/index.html#introduction>`__
 - Board schematics available `here <https://dl.espressif.com/dl/SCH_ESP32-S3-DEVKITC-1_V1_20210312C.pdf>`__
 - MCU Technical Reference Manual available `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf>`__
 - MCU Datasheet available `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf>`__
@@ -159,36 +159,36 @@ BSP Setup
 =========
 
 Install the |MANUFACTURER| toolchain by following the section ``Setting up Development Environment`` described `here
-<https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/get-started/index.html#installation-step-by-step>`__, but skip the section ``Get ESP-IDF``. The ESP-IDF is already a submodule of this repository.
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/index.html#installation-step-by-step>`__, but skip the section ``Get ESP-IDF``. The ESP-IDF is already a submodule of this repository.
 
 Please pay attention on the limitations regarding the installation path (e.g. no white spaces, parentheses ...), 
 described in the above documentation.
 
-Please refer to the |MANUFACTURER| documentation available `here <https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/api-guides/tools/idf-tools.html#list-of-idf-tools>`__ 
+Please refer to the |MANUFACTURER| documentation available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/tools/idf-tools.html#list-of-idf-tools>`__
 for more details about |MANUFACTURER| tools.
 
 Windows Toolchain
 -----------------
 
 - C/C++ toolchain name: xtensa-esp32s3-elf-gcc
-- C/C++ toolchain version: 8.4.0 (crosstool-NG esp-2021r2)
-- C/C++ toolchain download link for 64-bit Windows: https://github.com/espressif/crosstool-NG/releases/download/esp-2021r2-patch3/xtensa-esp32s3-elf-gcc8_4_0-esp-2021r2-patch3-win64.zip
-- C/C++ toolchain download link for 32-bit Windows: https://github.com/espressif/crosstool-NG/releases/download/esp-2021r2-patch3/xtensa-esp32s3-elf-gcc8_4_0-esp-2021r2-patch3-win32.zip
+- C/C++ toolchain version: 11.2.0 (crosstool-NG esp-2022r1)
+- C/C++ toolchain download link for 64-bit Windows: https://github.com/espressif/crosstool-NG/releases/download/esp-2022r1/xtensa-esp32s3-elf-gcc11_2_0-esp-2022r1-win64.zip
+- C/C++ toolchain download link for 32-bit Windows: https://github.com/espressif/crosstool-NG/releases/download/esp-2022r1/xtensa-esp32s3-elf-gcc11_2_0-esp-2022r1-win32.zip
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/get-started/windows-setup.html>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/windows-setup.html>`__
 for more details.
 
 Linux Toolchain
 ---------------
 
 - C/C++ toolchain name: xtensa-esp32s3-elf-gcc
-- C/C++ toolchain version: 8.4.0 (crosstool-NG esp-2021r2)
-- C/C++ toolchain download link for 64-bit Linux: https://github.com/espressif/crosstool-NG/releases/download/esp-2021r2-patch3/xtensa-esp32s3-elf-gcc8_4_0-esp-2021r2-patch3-linux-amd64.tar.gz
-- C/C++ toolchain download link for 32-bit Linux: https://github.com/espressif/crosstool-NG/releases/download/esp-2021r2-patch3/xtensa-esp32s3-elf-gcc8_4_0-esp-2021r2-patch3-linux-i686.tar.gz
+- C/C++ toolchain version: 11.2.0 (crosstool-NG esp-2022r1)
+- C/C++ toolchain download link for 64-bit Linux: https://github.com/espressif/crosstool-NG/releases/download/esp-2022r1/xtensa-esp32s3-elf-gcc11_2_0-esp-2022r1-linux-amd64.tar.xz
+- C/C++ toolchain download link for 32-bit Linux: https://github.com/espressif/crosstool-NG/releases/download/esp-2022r1/xtensa-esp32s3-elf-gcc11_2_0-esp-2022r1-linux-i686.tar.xz
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/get-started/linux-setup.html>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/linux-macos-setup.html>`__
 for more details.
 
 BSP Compilation
@@ -234,7 +234,7 @@ Board Setup
 ===========
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html>`__
 for more details.
 
 Power Supply
@@ -243,7 +243,7 @@ Power Supply
 The board can be powered by USB cable or external 5V power supply.
 
 Please refer to the Espressif documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#getting-started>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#getting-started>`__
 for more details.
 
 Programming
@@ -283,7 +283,7 @@ The firmware is launched. Please wait for the final message:
     Done
 
 |MANUFACTURER| build and flash documentation are also available `here
-<https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/get-started/index.html#step-8-build-the-project>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/index.html#step-8-build-the-project>`__
 for more details.
 
 Logs Output
@@ -318,7 +318,7 @@ port.  Please refer to `Test Suite Configuration`_ for a detailed
 explanation.
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/get-started/establish-serial-connection.html#>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/establish-serial-connection.html#>`__
 for more details.
 
 Debugging

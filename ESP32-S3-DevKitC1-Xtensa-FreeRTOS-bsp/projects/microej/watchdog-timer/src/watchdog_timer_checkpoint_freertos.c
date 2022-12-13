@@ -45,7 +45,7 @@
 
 
 /* Static variables -------------------------------------------------------------------*/
-static xTimerHandle wtd_rtos_timer = NULL;
+static TimerHandle_t wtd_rtos_timer = NULL;
 
 /**
  * @brief Id of RTOS scheduler checkpoint
@@ -59,7 +59,7 @@ static volatile int32_t checkpoint_id_rtos_scheduler = WATCHDOG_TIMER_ERROR;
  *
  * @param[in] pxTimer, required parameter for TimerCallbackFunction_t
  */
-static void watchdog_timer_freertos_check_callback(xTimerHandle pxTimer);
+static void watchdog_timer_freertos_check_callback(TimerHandle_t pxTimer);
 
 
 /* API functions ----------------------------------------------------------*/
@@ -156,7 +156,7 @@ void watchdog_timer_freertos_print_tasks_state(void){
 
 /* Internal functions definition ---------------------------------------------*/
 
-static void watchdog_timer_freertos_check_callback(xTimerHandle pxTimer){
+static void watchdog_timer_freertos_check_callback(TimerHandle_t pxTimer){
 	LLWATCHDOG_TIMER_DEBUG_TRACE("Watchdog FreeRTOS SW timer callback: attest the FreeRTOS scheduler activity with the checkpoint ID %d", checkpoint_id_rtos_scheduler);
 	if(WATCHDOG_TIMER_ERROR == LLWATCHDOG_TIMER_IMPL_checkpoint(checkpoint_id_rtos_scheduler)){
 		LLWATCHDOG_TIMER_DEBUG_TRACE("Watchdog FreeRTOS fail to attest the scheduler activity\n");

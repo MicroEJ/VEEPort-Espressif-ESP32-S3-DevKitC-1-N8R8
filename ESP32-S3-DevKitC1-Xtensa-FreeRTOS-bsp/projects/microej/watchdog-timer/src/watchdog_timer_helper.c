@@ -31,6 +31,11 @@
 	extern "C" {
 #endif
 
+esp_task_wdt_config_t twdt_config = {
+    .timeout_ms = TWDT_TIMEOUT_S,
+    .idle_core_mask = 0, // Watch core 0 idle
+    .trigger_panic = true,
+};
 
 /**
  * @brief Initializes here the watchdog timer.
@@ -45,7 +50,7 @@
 int32_t LLWATCHDOG_TIMER_IMPL_init_action(void)
 {
     LLWATCHDOG_TIMER_DEBUG_TRACE("LLWATCHDOG_TIMER_IMPL_init_action\n");
-	if (ESP_OK == esp_task_wdt_init(TWDT_TIMEOUT_S, true))
+	if (ESP_OK == esp_task_wdt_init(&twdt_config))
 	{
         return WATCHDOG_TIMER_OK;	
 	}

@@ -6,8 +6,10 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "LED_DRIVER_WS2812.h"
 #include "LLUI_LED_impl.h"
+#include "driver/rmt_tx.h"
 
 /*============================================================================*/
 /* LOCAL CONSTANTS */
@@ -33,6 +35,9 @@
 /** @brief position definition of BLUE LED in RGB package */
 #define LLUI_LED_BLUE_POSITION (2)
 
+/** 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)*/
+#define RMT_LED_STRIP_RESOLUTION_HZ 10000000
+
 /*============================================================================*/
 /* LOCAL TYPEDEFINITIONS */
 
@@ -44,6 +49,7 @@
 
 /** @brief led strip type */
 static led_strip_t *pStrip_a;
+
 
 /** @brief set intensity for leds [0..255] */
 static uint32_t led_intensity[ESP32S_S3_DEV_KIT_C1_MAX_LEDS];
@@ -71,17 +77,30 @@ int32_t LLUI_LED_IMPL_initialize(void)
 		led_intensity[i] = 0;
 	}
 
-	/* LED strip initialization with the GPIO and pixels number*/
-	pStrip_a = led_strip_init(LED_RMT_CHANNEL, LED_CTRL_GPIO, 1);
-	if (NULL == pStrip_a){
-		led_count = 0;
-	}
-	else{
-		/* Set all LED off to clear all pixels */
-		if (ESP_OK != pStrip_a->clear(pStrip_a, 50)){
-			led_count = 0;
-		}
-	}
+    rmt_channel_handle_t led_chan = NULL;
+    rmt_tx_channel_config_t tx_chan_config = {
+        .clk_src = RMT_CLK_SRC_DEFAULT, // select source clock
+        .gpio_num = LED_CTRL_GPIO,
+        .mem_block_symbols = 64, // increase the block size can make the LED less flickering
+        .resolution_hz = RMT_LED_STRIP_RESOLUTION_HZ,
+        .trans_queue_depth = 4, // set the number of transactions that can be pending in the background
+    };
+    ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config, &led_chan));
+
+    rmt_encoder_handle_t led_encoder = NULL;
+    led_strip_encoder_config_t encoder_config = {
+        .resolution = RMT_LED_STRIP_RESOLUTION_HZ,
+    };
+    ESP_ERROR_CHECK(rmt_new_led_strip_encoder(&encoder_config, &led_encoder));
+
+
+    ESP_ERROR_CHECK(rmt_enable(led_chan));
+
+    rmt_transmit_config_t tx_config = {
+        .loop_count = 0, // no transfer loop
+    };
+    ESP_ERROR_CHECK(rmt_transmit(led_chan, led_encoder, led_intensity, sizeof(led_intensity), &tx_config));
+
 
 	return led_count;
 }

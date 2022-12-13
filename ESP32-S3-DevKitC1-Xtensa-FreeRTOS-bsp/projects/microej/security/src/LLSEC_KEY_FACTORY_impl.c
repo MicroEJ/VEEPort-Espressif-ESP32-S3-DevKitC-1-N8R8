@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "mbedtls/platform.h"
+#include "mbedtls/ctr_drbg.h"
 
 #define LLSEC_KEY_FACTORY_SUCCESS 0
 #define LLSEC_KEY_FACTORY_ERROR   1
@@ -79,12 +80,15 @@ static int32_t LLSEC_KEY_FACTORY_RSA_mbedtls_get_private_key_data(LLSEC_priv_key
     int ret;
     priv_key->type = TYPE_RSA;
     mbedtls_pk_context pk;
+    mbedtls_ctr_drbg_context ctr_drbg;
     mbedtls_pk_init(&pk);
-    ret = mbedtls_pk_parse_key(&pk, encoded_key, encoded_key_length, NULL, 0);
+    mbedtls_ctr_drbg_init(&ctr_drbg); //Initial random structure
+    ret = mbedtls_pk_parse_key(&pk, encoded_key, encoded_key_length, NULL, 0, mbedtls_ctr_drbg_random, &ctr_drbg);
 
     if(ret != 0) {
         LLSEC_KEY_FACTORY_DEBUG_TRACE("mbedtls private key parsing failed");
         mbedtls_free(priv_key);
+        mbedtls_ctr_drbg_free(&ctr_drbg);
         return LLSEC_KEY_FACTORY_ERROR;
     }
 
@@ -150,12 +154,15 @@ static int32_t LLSEC_KEY_FACTORY_EC_mbedtls_get_private_key_data(LLSEC_priv_key*
     int returnCode = 0;
     priv_key->type = TYPE_ECDSA;
     mbedtls_pk_context pk;
+    mbedtls_ctr_drbg_context ctr_drbg;
     mbedtls_pk_init(&pk);
-    returnCode  = mbedtls_pk_parse_key(&pk, encoded_key, encoded_key_length, NULL, 0);
+    mbedtls_ctr_drbg_init(&ctr_drbg); //Initial random structure
+    returnCode  = mbedtls_pk_parse_key(&pk, encoded_key, encoded_key_length, NULL, 0,  mbedtls_ctr_drbg_random, &ctr_drbg);
 
     if (0 != returnCode) {
         LLSEC_KEY_FACTORY_DEBUG_TRACE("parse private key error: %d\n", returnCode);
         mbedtls_free(priv_key);
+        mbedtls_ctr_drbg_free(&ctr_drbg);
         return LLSEC_KEY_FACTORY_ERROR;
     }
 

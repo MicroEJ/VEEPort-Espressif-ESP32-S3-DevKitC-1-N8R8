@@ -12,12 +12,8 @@
  * @version 2.1.5
  * @date 20 December 2021
  */
-
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+#include "mbedtls/build_info.h"
 #include "mbedtls/ssl.h"
 #include "mbedtls/net_sockets.h"
 #if defined(MBEDTLS_ENTROPY_C) && defined(MBEDTLS_CTR_DRBG_C)
@@ -372,7 +368,7 @@ static int32_t LLNET_SSL_SOCKET_IMPL_initialHandShake(int32_t sslID, int32_t fd,
 								MBEDTLS_SSL_ALERT_LEVEL_FATAL,
 								MBEDTLS_SSL_ALERT_MSG_BAD_CERT)))
 				{
-					printf("ERROR : failed to send alert_message : ret = %d", retAlert);
+					printf("ERROR : failed to send alert_message : ret = %ld", retAlert);
 				}
         	}
 

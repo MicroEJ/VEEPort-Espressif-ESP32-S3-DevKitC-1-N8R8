@@ -79,8 +79,7 @@ static int32_t LLSEC_KEY_PAIR_GENERATOR_RSA_mbedtls_generateKeyPair(int32_t rsa_
     mbedtls_ctr_drbg_init(&ctr_drbg); //Initial random structure
 
     /* init rsa structure */
-    mbedtls_rsa_init(ctx, MBEDTLS_RSA_PKCS_V21, //padding OAEP
-                     MBEDTLS_MD_SHA256);        //SHA256
+    mbedtls_rsa_init(ctx);        //SHA256
 
     /* update seed according personal string */
     ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,

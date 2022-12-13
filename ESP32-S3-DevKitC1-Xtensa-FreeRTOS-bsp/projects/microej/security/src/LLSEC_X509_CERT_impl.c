@@ -40,10 +40,10 @@ extern "C" {
 #define LLSEC_X509_DEBUG_TRACE(...) ((void)0)
 #endif
 
-static mbedtls_x509_crt* get_x509_certificate(int8_t* cert_data, int32_t len, int* cert_format);
+static mbedtls_x509_crt* get_x509_certificate(int8_t* cert_data, int32_t len, int32_t* cert_format);
 static int32_t LLSEC_X509_CERT_mbedtls_close_key(int32_t native_id);
 
-static mbedtls_x509_crt* get_x509_certificate(int8_t* cert_data, int32_t len, int* cert_format)
+static mbedtls_x509_crt* get_x509_certificate(int8_t* cert_data, int32_t len, int32_t* cert_format)
 {
     LLSEC_X509_DEBUG_TRACE("%s 00. cert_len:%d\n", __func__, len);
 

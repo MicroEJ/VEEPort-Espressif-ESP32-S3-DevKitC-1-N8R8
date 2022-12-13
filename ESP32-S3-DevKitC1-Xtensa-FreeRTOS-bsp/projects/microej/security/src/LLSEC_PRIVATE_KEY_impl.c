@@ -11,7 +11,7 @@
  * @author MicroEJ Developer Team
  * @version 0.10.0
  */
-
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
 #include <LLSEC_ERRORS.h>
 #include <LLSEC_PRIVATE_KEY_impl.h>
 #include <LLSEC_mbedtls.h>

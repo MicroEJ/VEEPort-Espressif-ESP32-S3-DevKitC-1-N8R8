@@ -71,7 +71,7 @@ int64_t microej_time_time_to_tick(int64_t time) {
 
 		// Check for no overflow
 		if (ticks64 >= 0) {
-			portTickType ticks = (portTickType)ticks64;
+			TickType_t ticks = (TickType_t)ticks64;
 
 			// Check for no overflow
 			if (ticks == ticks64) {
@@ -80,7 +80,7 @@ int64_t microej_time_time_to_tick(int64_t time) {
 		}
 	}
 
-	// An overflow occurs: saturate the value to the max value for a portTickType
+	// An overflow occurs: saturate the value to the max value for a TickType_t
 	return (int64_t)portMAX_DELAY;
 }
 

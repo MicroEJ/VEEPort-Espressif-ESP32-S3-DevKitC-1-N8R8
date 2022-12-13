@@ -10,6 +10,8 @@
 #include "freertos/task.h"
 #include "nvs_flash.h"
 #include "esp_heap_caps.h"
+#include "esp_flash.h"
+#include "esp_chip_info.h"
 #include "Outputter.h"
 #include "t_core_main.h"
 #include "x_ram_checks.h"
@@ -37,14 +39,14 @@ static void xUnitTestsTaskFunction(void * pvParameters)
 	printf("SPIRAM capabilities: \n");
 	heap_caps_print_heap_info(MALLOC_CAP_SPIRAM);
 	uint32_t heap_total_size = heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
-	printf("SPIRAM heap total size: %u \n", heap_total_size);
+	printf("SPIRAM heap total size: %lu \n", heap_total_size);
 	uint32_t heap_max_free_size = heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM);
-	printf("SPIRAM heap maximum block free size: %u \n", heap_max_free_size);	
+	printf("SPIRAM heap maximum block free size: %lu \n", heap_max_free_size);
 	
 	uint8_t* start_address_p = heap_caps_malloc(heap_max_free_size, MALLOC_CAP_SPIRAM);
 	if (start_address_p != NULL)
 	{
-		printf("Allocating memory at %X with size of %u.\n\n", (uint32_t)start_address_p, heap_max_free_size);
+		printf("Allocating memory at %lX with size of %lu.\n\n", (uint32_t)start_address_p, heap_max_free_size);
 
 		/* We populate the RAM zones array definition with start and length */
 		RAM_zones[0].start_address = (uint32_t)(start_address_p);
@@ -73,6 +75,7 @@ void app_main()
 {
     /* Print chip information */
     esp_chip_info_t chip_info;
+    uint32_t flash_size;
     esp_chip_info(&chip_info);
     printf("This is %s chip with %d CPU cores, WiFi%s%s, ",
 			CONFIG_IDF_TARGET,
@@ -82,7 +85,12 @@ void app_main()
 
     printf("silicon revision %d, ", chip_info.revision);
 
-    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
+    if(esp_flash_get_size(NULL, &flash_size) != ESP_OK) {
+        printf("Get flash size failed");
+        return;
+    }
+
+    printf("%ldMB %s flash\n", flash_size / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
     /* Initialize NVS */

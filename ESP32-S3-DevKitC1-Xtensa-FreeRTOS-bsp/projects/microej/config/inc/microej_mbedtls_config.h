@@ -6,8 +6,6 @@
  *
  */
 
-#if !defined __MICROEJ_MBEDTLS_CONFIG_H__
-#define __MICROEJ_MBEDTLS_CONFIG_H__
 
 // Define maximum certificate length to 4 (2 intermediate + 1 leaf + 1 root)
 #define MBEDTLS_X509_MAX_INTERMEDIATE_CA 2
@@ -33,5 +31,3 @@ extern time_t custom_mbedtls_time(time_t *time);
 
 #define MBEDTLS_ENTROPY_C
 #define MBEDTLS_CTR_DRBG_C
-
-#endif // !defined __MICROEJ_MBEDTLS_CONFIG_H__

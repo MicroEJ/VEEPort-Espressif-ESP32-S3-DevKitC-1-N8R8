@@ -11,7 +11,7 @@
  * @author MicroEJ Developer Team
  * @version 0.10.0
  */
-
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
 #include <LLSEC_ERRORS.h>
 #include <LLSEC_SIG_impl.h>
 #include <sni.h>
@@ -146,6 +146,7 @@ static int LLSEC_SIG_mbedtls_ec_sign(LLSEC_SIG_algorithm* algorithm, uint8_t* si
     ret = mbedtls_ecdsa_write_signature(ctx, MBEDTLS_MD_SHA256,
                                          digest, (size_t)digest_length,
                                          signature, (size_t*)signature_length,
+                                        sizeof(signature_length),
                                          mbedtls_ctr_drbg_random, &ctr_drbg);
     if (ret != 0) {
         mbedtls_ctr_drbg_free(&ctr_drbg);
@@ -185,8 +186,7 @@ static int LLSEC_SIG_mbedtls_verify(LLSEC_SIG_algorithm* algorithm, uint8_t* sig
     }
 
     ret = mbedtls_rsa_pkcs1_verify((mbedtls_rsa_context*)pub_key->key,
-                                        mbedtls_ctr_drbg_random, &ctr_drbg,
-                                        MBEDTLS_RSA_PUBLIC, MBEDTLS_MD_SHA256,
+                                        MBEDTLS_MD_SHA256,
                                         digest_length, digest, signature);
     if (ret != 0) {
         mbedtls_ctr_drbg_free(&ctr_drbg);
@@ -227,7 +227,7 @@ static int LLSEC_SIG_mbedtls_sign(LLSEC_SIG_algorithm* algorithm, uint8_t* signa
 
     ret = mbedtls_rsa_pkcs1_sign((mbedtls_rsa_context*)priv_key->key,
                                           mbedtls_ctr_drbg_random, &ctr_drbg,
-                                          MBEDTLS_RSA_PRIVATE, MBEDTLS_MD_SHA256,
+                                          MBEDTLS_MD_SHA256,
                                           digest_length, digest, signature);
     if (ret != 0) {
         mbedtls_ctr_drbg_free(&ctr_drbg);

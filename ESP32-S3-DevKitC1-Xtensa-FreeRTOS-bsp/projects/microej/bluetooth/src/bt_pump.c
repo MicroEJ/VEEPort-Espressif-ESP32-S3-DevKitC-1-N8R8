@@ -94,26 +94,26 @@ bool BT_PUMP_start(void)
 
 	int32_t status = esp_ble_gap_register_callback(handle_event_gap);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_register_callback status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_register_callback status=%ld\n", status);
 		return false;
 	}
 
 	status = esp_ble_gatts_register_callback(handle_event_gatts);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_register_callback status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_register_callback status=%ld\n", status);
 		return false;
 	}
 
 	status = esp_ble_gattc_register_callback(handle_event_gattc);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_register_callback status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_register_callback status=%ld\n", status);
 		return false;
 	}
 
 	// register app for GATTS
 	status = esp_ble_gatts_app_register(0);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_app_register status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_app_register status=%ld\n", status);
 		return false;
 	}
 
@@ -127,7 +127,7 @@ bool BT_PUMP_start(void)
 	// register app for GATTC
 	status = esp_ble_gattc_app_register(0);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_app_register status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_app_register status=%ld\n", status);
 		return false;
 	}
 
@@ -145,7 +145,7 @@ void BT_PUMP_stop() {
 	// unregister app for GATTS
 	int32_t status = esp_ble_gatts_app_unregister(BT_MANAGER_get_gatts_if());
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_app_unregister status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_app_unregister status=%ld\n", status);
 	}
 
 	// wait for register_lock to be given
@@ -154,7 +154,7 @@ void BT_PUMP_stop() {
 	// unregister app for GATTC
 	status = esp_ble_gattc_app_unregister(BT_MANAGER_get_gattc_if());
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_app_unregister status=%d\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_app_unregister status=%ld\n", status);
 	}
 
 	// wait for register_lock to be given

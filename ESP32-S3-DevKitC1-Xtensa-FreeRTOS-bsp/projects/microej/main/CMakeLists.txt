@@ -108,7 +108,7 @@ set(include_dirs
     "../trace/inc"
     "../uart/inc"
     "../ui/inc/"
-    "${IDF_PATH}/components/freertos/include/freertos"
+    "${IDF_PATH}/components/freertos/FreeRTOS-Kernel/include/freertos"
     "../util/inc"
     "../watchdog-timer/inc")
 
@@ -120,12 +120,19 @@ if(CONFIG_APPTRACE_SV_ENABLE)
     "../trace/inc")
 endif()
 
-idf_component_register(SRCS ${srcs}
-                       INCLUDE_DIRS ${include_dirs})
+set(requires esp_timer esp_wifi esp_ringbuf esp_netif freertos esp_rom spi_flash openthread bootloader app_update bootloader_support cmock)
+set(priv_requires soc mbedtls cmock driver bt vfs fatfs nvs_flash esptool_py partition_table esp_pm esptool_py esp_pm esp_rom esp_hw_support console bootloader_support)
+
+idf_component_register(SRCS "${srcs}"
+                       INCLUDE_DIRS "${include_dirs}"
+                       REQUIRES "${requires}"
+                       PRIV_REQUIRES "${priv_requires}")
 
 set(compile_flags 
     "-fno-strict-aliasing"
-    "-Wno-address")
+    "-Wno-address"
+    "-Wno-unused-variable"
+    "-Wno-cast-function-type")
 
 # Added to ignore the unused label "start_sysview_logging" used to start 
 # SysView logging.

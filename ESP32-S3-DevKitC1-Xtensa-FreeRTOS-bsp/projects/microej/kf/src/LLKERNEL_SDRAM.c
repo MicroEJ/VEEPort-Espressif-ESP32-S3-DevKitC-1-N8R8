@@ -19,7 +19,7 @@
 #define KERNEL_WORKING_BUFFER_SIZE 0x100000
 
 // Declare MicroEJ KF working buffer
-static uint8_t EXT_RAM_ATTR kernel_working_buffer[KERNEL_WORKING_BUFFER_SIZE] = {0};
+static uint8_t EXT_RAM_BSS_ATTR kernel_working_buffer[KERNEL_WORKING_BUFFER_SIZE] = {0};
 
 BESTFIT_ALLOCATOR allocatorInstance;
 uint32_t KERNEL_allocationInitialized;

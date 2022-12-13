@@ -16,7 +16,7 @@ set(compile_flags
     "-Wno-address")
 
 # Definition for the number of iterations
-add_compile_definitions(ITERATIONS=4000)
+add_compile_definitions(ITERATIONS=8000)
 
 target_compile_options(${COMPONENT_LIB} PRIVATE ${compile_flags})
 

@@ -5,7 +5,7 @@
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
 .. |PLATFORM_NAME| replace:: ESP32-S3-DevKitC1 Platform
-.. |PLATFORM_VER| replace:: 1.0.1
+.. |PLATFORM_VER| replace:: 2.0.0
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
@@ -72,17 +72,17 @@ Board Support Package
 ---------------------
 
 - BSP provider: |MANUFACTURER| (``esp-idf``)
-- BSP version: v4.4.1
+- BSP version: v5.0
 
 Please refer to the |MANUFACTURER| ``esp-idf`` GitHub git repository
 available `here
-<https://github.com/espressif/esp-idf/tree/v4.4.1>`__.
+<https://github.com/espressif/esp-idf/tree/v5.0>`__.
 
 Third Party Software
 --------------------
 
 Third party softwares used in BSP can be found `here
-<https://github.com/espressif/esp-idf/tree/v4.4.1/components>`__. Here
+<https://github.com/espressif/esp-idf/tree/v5.0/components>`__. Here
 is a list of the most important ones:
 
 .. list-table::
@@ -96,7 +96,7 @@ is a list of the most important ones:
      - 2.1.2
    * - Cryptographic stack 
      - Mbed TLS
-     - 2.28.0
+     - 3.2.1
    * - File System stack 
      - FatFS
      - R0.13c
@@ -120,7 +120,7 @@ SSL
 -------
 
 |PLATFORM| features a network secure interface. Available
-secured protocols are SSL 3.0, TLS 1.0, TLS 1.1, TLS 1.2. Supported
+secured protocols are TLS 1.2, TLS 1.3. Supported
 keys and certificates formats are PKCS#5 and PKCS#12, PEM or DER
 encoded.
 
@@ -133,15 +133,8 @@ Up to 2 files can be opened simultaneously.
 Known issues/limitations
 ========================
 
-- NET LL API cannot change the socket
-  send and receive buffer sizes (``LLNET_CHANNEL_IMPL_setOption`` function),
-- FS API does not support file
-  write/read with offset from/to immortal arrays,
-- FS API does not support file backward
-  skip,
-- FS library does not work when SystemView tracing is enabled. 
-- IPV6 is not supported,
-- OTA is enabled only on the Mono-Sandbox Platform. It has been disabled on the Multi-Sandbox Platform in order to fit into the FLASH memory.
+- Note that this platform is not fully qualified, qualification for modules: NET, FS, SSL, BLUETOOTH is ongoing at the time of the release. If more
+  details are needed about them, please contact MicroEJ Support.
 - On Windows, the toolchain doesn't support long paths. 
   The build directory, set with the variable ``ESP_BUILD_DIR``, can be moved closer to the root of the filesystem. 
   To override the default value create a copy of this file: ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp\projects\microej\scripts\set_local_env.bat.tpl``. 
@@ -155,7 +148,7 @@ Memory Sections
 
 Each memory section is discribed in the GCC linker file available
 `here
-<https://github.com/espressif/esp-idf/tree/v4.4.1/components/esp_system/ld/esp32s3>`__
+<https://github.com/espressif/esp-idf/tree/v5.0/components/esp_system/ld/esp32s3>`__
 
 Memory Layout
 -------------
@@ -211,7 +204,7 @@ Memory Layout
 
 For the C heap, please refer to the |MANUFACTURER| documentation
 available `here
-<https://docs.espressif.com/projects/esp-idf/en/v4.4.1/esp32s3/api-reference/system/heap_debug.html>`__
+<https://docs.espressif.com/projects/esp-idf/en/release-v5.0/esp32s3/api-reference/system/heap_debug.html?highlight=heap%20debug>`__
 
 Please also refer to the MicroEJ docs website page available `here
 <https://docs.microej.com/en/latest/PlatformDeveloperGuide/coreEngine.html#link>`__

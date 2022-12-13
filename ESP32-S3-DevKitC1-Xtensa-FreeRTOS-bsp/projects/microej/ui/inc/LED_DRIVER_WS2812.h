@@ -14,20 +14,16 @@ extern "C" {
  * @brief Driver implementation using RMT module, for the WS2812 LED strip.
  */
 
-#include "esp_err.h"
-
-/*============================================================================*/
-/* EXPORTED CONSTANTS */
+#include <stdint.h>
+#include "driver/rmt_encoder.h"
 
 /**
- * @brief Default configuration for LED strip
- *
+ * @brief Type of led strip encoder configuration
  */
-#define LED_STRIP_DEFAULT_CONFIG(number, dev_hdl) \
-    {                                             \
-        .max_leds = number,                       \
-        .dev = dev_hdl,                           \
-    }
+typedef struct {
+    uint32_t resolution; /*!< Encoder resolution, in Hz */
+} led_strip_encoder_config_t;
+
 
 /*============================================================================*/
 /* EXPORTED TYPEDEFINITIONS */
@@ -113,15 +109,6 @@ struct led_strip_s {
     esp_err_t (*del)(led_strip_t *strip);
 };
 
-/**
-* @brief LED Strip Configuration Type
-*
-*/
-typedef struct {
-    uint32_t max_leds;   /**< Maximum LEDs in a single strip */
-    led_strip_dev_t dev; /**< LED strip device (e.g. RMT channel, PWM channel, etc) */
-} led_strip_config_t;
-
 
 /*============================================================================*/
 /* EXPORTED VARIABLES */
@@ -131,42 +118,16 @@ typedef struct {
 /* EXPORTED FUNCTIONS */
 
 /**
- * @brief Install a new ws2812 driver (based on RMT peripheral)
- * @details
- * @param config: LED strip configuration
+ * @brief Create RMT encoder for encoding LED strip pixels into RMT symbols
+ *
+ * @param[in] config Encoder configuration
+ * @param[out] ret_encoder Returned encoder handle
  * @return
- *      LED strip instance or NULL
- * @author
- * @date
- * @version 1
+ *      - ESP_ERR_INVALID_ARG for any invalid arguments
+ *      - ESP_ERR_NO_MEM out of memory when creating led strip encoder
+ *      - ESP_OK if creating encoder successfully
  */
-led_strip_t *led_strip_new_rmt_ws2812(const led_strip_config_t *config);
-
-/**
- * @brief Init the RMT peripheral and LED strip configuration.
- * @param[in] channel: RMT peripheral channel number.
- * @param[in] gpio: GPIO number for the RMT data output.
- * @param[in] led_num: number of addressable LEDs.
- * @return
- *      LED strip instance or NULL
- * @author
- * @date
- * @version 1
- */
-led_strip_t * led_strip_init(uint8_t channel, uint8_t gpio, uint16_t led_num);
-
-/**
- * @brief Denit the RMT peripheral.
- * @details
- * @param[in] strip: LED strip
- * @return
- *     - ESP_OK
- *     - ESP_FAIL
- * @author
- * @date
- * @version 1
- */
-esp_err_t led_strip_denit(led_strip_t *strip);
+esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder);
 
 #ifdef __cplusplus
 }

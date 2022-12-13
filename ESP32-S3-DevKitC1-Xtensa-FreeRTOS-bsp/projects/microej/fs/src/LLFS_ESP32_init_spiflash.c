@@ -23,5 +23,5 @@ void LLFS_ESP32_init_spiflash(void) {
 	mount_config.format_if_mount_failed = true;
 	mount_config.max_files = 30;
 
-	ESP_ERROR_CHECK(esp_vfs_fat_spiflash_mount(base_path, NULL, &mount_config, &wl_handle));
+	ESP_ERROR_CHECK(esp_vfs_fat_spiflash_mount_rw_wl(base_path, NULL, &mount_config, &wl_handle));
 }

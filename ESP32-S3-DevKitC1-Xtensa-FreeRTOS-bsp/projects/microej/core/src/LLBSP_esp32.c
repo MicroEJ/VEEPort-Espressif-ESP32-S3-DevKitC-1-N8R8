@@ -13,6 +13,7 @@ Includes   <System Includes> , "Project Includes"
 #include "microej.h"
 #include <stdio.h>
 #include "esp_log.h"
+#include "esp32s3/rom/ets_sys.h"
 
 extern void* SOAR_START;
 extern void* SOAR_END;

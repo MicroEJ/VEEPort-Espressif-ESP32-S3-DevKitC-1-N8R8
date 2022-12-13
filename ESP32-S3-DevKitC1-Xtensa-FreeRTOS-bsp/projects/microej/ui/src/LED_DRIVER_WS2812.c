@@ -5,293 +5,114 @@
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <sys/cdefs.h>
+#include "esp_check.h"
 #include "LED_DRIVER_WS2812.h"
-#include "driver/rmt.h"
 
-/*============================================================================*/
-/* LOCAL CONSTANTS */
-
-/** @brief Timing definition for the WS2812 LED chip. */
-#define WS2812_T0H_NS (350)
-#define WS2812_T0L_NS (1000)
-#define WS2812_T1H_NS (1000)
-#define WS2812_T1L_NS (350)
-#define WS2812_RESET_US (280)
-
-/*============================================================================*/
-/* LOCAL TYPEDEFINITIONS */
-
-/** @brief Complete definition for a whole strip of WS2812's. */
 typedef struct {
-	led_strip_t parent;
-	rmt_channel_t rmt_channel;
-	uint32_t strip_len;
-	uint8_t buffer[0];
-} ws2812_t;
+    rmt_encoder_t base;
+    rmt_encoder_t *bytes_encoder;
+    rmt_encoder_t *copy_encoder;
+    int state;
+    rmt_symbol_word_t reset_code;
+} rmt_led_strip_encoder_t;
 
 /*============================================================================*/
-/* EXPORTED TYPEDEFINITIONS */
-
-/*============================================================================*/
-/* LOCAL VARIABLES */
-
-/** @brief Timing definition in ticks for the WS2812 LED chip */
-static uint32_t ws2812_t0h_ticks = 0;
-static uint32_t ws2812_t1h_ticks = 0;
-static uint32_t ws2812_t0l_ticks = 0;
-static uint32_t ws2812_t1l_ticks = 0;
-
-/*============================================================================*/
-/**
- * @brief Conver RGB data to RMT format.
- * @details
- * @note For WS2812, R,G,B each contains 256 different choices (i.e. uint8_t)
- * @param[in] src: source data, to converted to RMT format
- * @param[in] dest: place where to store the convert result
- * @param[in] src_size: size of source data
- * @param[in] wanted_num: number of RMT items that want to get
- * @param[out] translated_size: number of source data that got converted
- * @param[out] item_num: number of RMT items which are converted from source data
- * @author
- * @date
- * @version 1
- */
-static void ws2812_rmt_adapter(const void *src, rmt_item32_t *dest,
-		size_t src_size, size_t wanted_num, size_t *translated_size,
-		size_t *item_num)
+static size_t rmt_encode_led_strip(rmt_encoder_t *encoder, rmt_channel_handle_t channel, const void *primary_data, size_t data_size, rmt_encode_state_t *ret_state)
 {
-	if ((NULL == src) || (NULL == dest)){
-		*translated_size = 0;
-		*item_num = 0;
-		return;
-	}
-	const rmt_item32_t bit0 ={{{ws2812_t0h_ticks, 1, ws2812_t0l_ticks, 0}}}; /* Logical 0 */
-	const rmt_item32_t bit1 ={{{ws2812_t1h_ticks, 1, ws2812_t1l_ticks, 0}}}; /* Logical 1 */
-	size_t size = 0;
-	size_t num = 0;
-	uint8_t *psrc = (uint8_t*) src;
-	rmt_item32_t *pdest = dest;
-	while ((size < src_size) && (num < wanted_num)){
-		for (int i = 0; i < 8; i++) {
-			/* MSB first */
-			if (*psrc & (1 << (7 - i))){
-				pdest->val = bit1.val;
-			}
-			else{
-				pdest->val = bit0.val;
-			}
-			num++;
-			pdest++;
-		}
-		size++;
-		psrc++;
-	}
-	*translated_size = size;
-	*item_num = num;
-
-	return;
+    rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
+    rmt_encoder_handle_t bytes_encoder = led_encoder->bytes_encoder;
+    rmt_encoder_handle_t copy_encoder = led_encoder->copy_encoder;
+    rmt_encode_state_t session_state = 0;
+    rmt_encode_state_t state = 0;
+    size_t encoded_symbols = 0;
+    switch (led_encoder->state) {
+    case 0: // send RGB data
+        encoded_symbols += bytes_encoder->encode(bytes_encoder, channel, primary_data, data_size, &session_state);
+        if (session_state & RMT_ENCODING_COMPLETE) {
+            led_encoder->state = 1; // switch to next state when current encoding session finished
+        }
+        if (session_state & RMT_ENCODING_MEM_FULL) {
+            state |= RMT_ENCODING_MEM_FULL;
+            goto out; // yield if there's no free space for encoding artifacts
+        }
+    // fall-through
+    case 1: // send reset code
+        encoded_symbols += copy_encoder->encode(copy_encoder, channel, &led_encoder->reset_code,
+                                                sizeof(led_encoder->reset_code), &session_state);
+        if (session_state & RMT_ENCODING_COMPLETE) {
+            led_encoder->state = 0; // back to the initial encoding session
+            state |= RMT_ENCODING_COMPLETE;
+        }
+        if (session_state & RMT_ENCODING_MEM_FULL) {
+            state |= RMT_ENCODING_MEM_FULL;
+            goto out; // yield if there's no free space for encoding artifacts
+        }
+    }
+out:
+    *ret_state = state;
+    return encoded_symbols;
 }
 /*============================================================================*/
 
 /*============================================================================*/
-/* EXPORTED FUNCTIONS */
-
-/*============================================================================*/
-/**
- * @brief Set RGB for a specific pixel
- * @details
- * @param strip: LED strip
- * @param index: index of pixel to set
- * @param red: red part of color
- * @param green: green part of color
- * @param blue: blue part of color
- * @return
- *      - ESP_OK: Set RGB for a specific pixel successfully
- *      - ESP_ERR_INVALID_ARG: Set RGB for a specific pixel failed because of invalid parameters
- *      - ESP_FAIL: Set RGB for a specific pixel failed because other error occurred
- * @author
- * @date
- * @version 1
- */
-static esp_err_t ws2812_set_pixel(led_strip_t *strip, uint32_t index,
-		uint32_t red, uint32_t green, uint32_t blue)
+static esp_err_t rmt_del_led_strip_encoder(rmt_encoder_t *encoder)
 {
-	ws2812_t *ws2812 = __containerof(strip, ws2812_t, parent);
-	if (index >= ws2812->strip_len){
-		return ESP_ERR_INVALID_ARG;
-	}
-	uint32_t start = index * 3;
-	/* In thr order of GRB */
-	ws2812->buffer[start + 0] = green & 0xFF;
-	ws2812->buffer[start + 1] = red & 0xFF;
-	ws2812->buffer[start + 2] = blue & 0xFF;
+    rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
+    rmt_del_encoder(led_encoder->bytes_encoder);
+    rmt_del_encoder(led_encoder->copy_encoder);
+    free(led_encoder);
+    return ESP_OK;
+}
 
-	return ESP_OK;
+static esp_err_t rmt_led_strip_encoder_reset(rmt_encoder_t *encoder)
+{
+    rmt_led_strip_encoder_t *led_encoder = __containerof(encoder, rmt_led_strip_encoder_t, base);
+    rmt_encoder_reset(led_encoder->bytes_encoder);
+    rmt_encoder_reset(led_encoder->copy_encoder);
+    led_encoder->state = 0;
+    return ESP_OK;
 }
 /*============================================================================*/
 
 /*============================================================================*/
-/**
- * @brief Refresh memory colors to LEDs
- * @details
- * @param strip: LED strip
- * @param timeout_ms: timeout value for refreshing task
- * @return
- *      - ESP_OK: Refresh successfully
- *      - ESP_ERR_TIMEOUT: Refresh failed because of timeout
- *      - ESP_FAIL: Refresh failed because some other error occurred
- * @note:
- *      After updating the LED colors in the memory, a following invocation of
- *      this API is needed to flush colors to strip.
- * @author
- * @date
- * @version 1
- */
-static esp_err_t ws2812_refresh(led_strip_t *strip, uint32_t timeout_ms)
+esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder)
 {
-	ws2812_t *ws2812 = __containerof(strip, ws2812_t, parent);
-	if (ESP_OK != rmt_write_sample(ws2812->rmt_channel, ws2812->buffer,
-			ws2812->strip_len * 3, true)){
-		return ESP_FAIL;
-	}
+    esp_err_t ret = ESP_OK;
+    rmt_led_strip_encoder_t *led_encoder = NULL;
 
-	return rmt_wait_tx_done(ws2812->rmt_channel, pdMS_TO_TICKS(timeout_ms));
-}
-/*============================================================================*/
+    led_encoder = calloc(1, sizeof(rmt_led_strip_encoder_t));
 
-/*============================================================================*/
-/**
- * @brief Clear LED strip (turn off all LEDs)
- * @details
- * @param strip: LED strip
- * @param timeout_ms: timeout value for clearing task
- * @return
- *      - ESP_OK: Clear LEDs successfully
- *      - ESP_ERR_TIMEOUT: Clear LEDs failed because of timeout
- *      - ESP_FAIL: Clear LEDs failed because some other error occurred
- * @author
- * @date
- * @version 1
- */
-static esp_err_t ws2812_clear(led_strip_t *strip, uint32_t timeout_ms)
-{
-	ws2812_t *ws2812 = __containerof(strip, ws2812_t, parent);
-	/* Write zero to turn off all leds */
-	memset(ws2812->buffer, 0, ws2812->strip_len * 3);
+    led_encoder->base.encode = rmt_encode_led_strip;
+    led_encoder->base.del = rmt_del_led_strip_encoder;
+    led_encoder->base.reset = rmt_led_strip_encoder_reset;
+    // different led strip might have its own timing requirements, following parameter is for WS2812
+    rmt_bytes_encoder_config_t bytes_encoder_config = {
+        .bit0 = {
+            .level0 = 1,
+            .duration0 = 0.3 * config->resolution / 1000000, // T0H=0.3us
+            .level1 = 0,
+            .duration1 = 0.9 * config->resolution / 1000000, // T0L=0.9us
+        },
+        .bit1 = {
+            .level0 = 1,
+            .duration0 = 0.9 * config->resolution / 1000000, // T1H=0.9us
+            .level1 = 0,
+            .duration1 = 0.3 * config->resolution / 1000000, // T1L=0.3us
+        },
+        .flags.msb_first = 1 // WS2812 transfer bit order: G7...G0R7...R0B7...B0
+    };
 
-	return ws2812_refresh(strip, timeout_ms);
-}
-/*============================================================================*/
+    rmt_copy_encoder_config_t copy_encoder_config = {};
 
-/*============================================================================*/
-/**
- * @brief Free LED strip resources
- * @details
- * @param strip: LED strip
- * @return
- *      - ESP_OK: Free resources successfully
- *      - ESP_FAIL: Free resources failed because error occurred
- * @author
- * @date
- * @version 1
- */
-static esp_err_t ws2812_del(led_strip_t *strip)
-{
-	ws2812_t *ws2812 = __containerof(strip, ws2812_t, parent);
-	free(ws2812);
 
-	return ESP_OK;
-}
-/*============================================================================*/
-
-/*============================================================================*/
-/**
- * @brief Install a new ws2812 driver (based on RMT peripheral)
- */
-led_strip_t* led_strip_new_rmt_ws2812(const led_strip_config_t *config)
-{
-	if (NULL == config){
-		return NULL;
-	}
-
-	/* 24 bits per led */
-	uint32_t ws2812_size = sizeof(ws2812_t) + config->max_leds * 3;
-	ws2812_t *ws2812 = calloc(1, ws2812_size);
-	if (NULL == ws2812){
-		return NULL;
-	}
-
-	uint32_t counter_clk_hz = 0;
-	if (ESP_OK != rmt_get_counter_clock((rmt_channel_t) config->dev,
-			&counter_clk_hz)){
-		return NULL;
-	}
-	/* ns -> ticks */
-	float ratio = (float) counter_clk_hz / 1e9;
-	ws2812_t0h_ticks = (uint32_t) (ratio * WS2812_T0H_NS);
-	ws2812_t0l_ticks = (uint32_t) (ratio * WS2812_T0L_NS);
-	ws2812_t1h_ticks = (uint32_t) (ratio * WS2812_T1H_NS);
-	ws2812_t1l_ticks = (uint32_t) (ratio * WS2812_T1L_NS);
-
-	/* set ws2812 to rmt adapter */
-	rmt_translator_init((rmt_channel_t) config->dev, ws2812_rmt_adapter);
-
-	ws2812->rmt_channel = (rmt_channel_t) config->dev;
-	ws2812->strip_len = config->max_leds;
-
-	ws2812->parent.set_pixel = ws2812_set_pixel;
-	ws2812->parent.refresh = ws2812_refresh;
-	ws2812->parent.clear = ws2812_clear;
-	ws2812->parent.del = ws2812_del;
-
-	return &ws2812->parent;
-}
-/*============================================================================*/
-
-/*============================================================================*/
-/**
- * @brief Init the RMT peripheral and LED strip configuration.
- */
-led_strip_t* led_strip_init(uint8_t channel, uint8_t gpio, uint16_t led_num)
-{
-	static led_strip_t *pStrip;
-
-	rmt_config_t config = RMT_DEFAULT_CONFIG_TX(gpio, channel);
-	/* set counter clock to 40MHz */
-	config.clk_div = 2;
-
-	ESP_ERROR_CHECK(rmt_config(&config));
-	ESP_ERROR_CHECK(rmt_driver_install(config.channel, 0, 0));
-
-	/* install ws2812 driver */
-	led_strip_config_t strip_config =
-	LED_STRIP_DEFAULT_CONFIG(led_num, (led_strip_dev_t)config.channel);
-
-	pStrip = led_strip_new_rmt_ws2812(&strip_config);
-
-	if (!pStrip){
-		return NULL;
-	}
-
-	/* Clear LED strip (turn off all LEDs) */
-	ESP_ERROR_CHECK(pStrip->clear(pStrip, 100));
-
-	return pStrip;
-}
-/*============================================================================*/
-
-/*============================================================================*/
-/**
- * @brief Denit the RMT peripheral.
- */
-esp_err_t led_strip_denit(led_strip_t *strip)
-{
-	ws2812_t *ws2812 = __containerof(strip, ws2812_t, parent);
-	ESP_ERROR_CHECK(rmt_driver_uninstall(ws2812->rmt_channel));
-
-	return strip->del(strip);
+    uint32_t reset_ticks = config->resolution / 1000000 * 50 / 2; // reset code duration defaults to 50us
+    led_encoder->reset_code = (rmt_symbol_word_t) {
+        .level0 = 0,
+        .duration0 = reset_ticks,
+        .level1 = 0,
+        .duration1 = reset_ticks,
+    };
+    *ret_encoder = &led_encoder->base;
+    return ESP_OK;
 }
 /*============================================================================*/

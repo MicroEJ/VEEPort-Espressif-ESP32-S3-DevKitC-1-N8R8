@@ -13,16 +13,11 @@
  * @date 20 December 2021
  */
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 #include "mbedtls/aes.h"
 #include "mbedtls/asn1.h"
 #include "mbedtls/base64.h"
 #include "mbedtls/bignum.h"
-#include "mbedtls/blowfish.h"
 #include "mbedtls/camellia.h"
 #include "mbedtls/ccm.h"
 #include "mbedtls/cipher.h"
@@ -36,7 +31,6 @@
 #include "mbedtls/md.h"
 #include "mbedtls/net_sockets.h"
 #include "mbedtls/oid.h"
-#include "mbedtls/padlock.h"
 #include "mbedtls/pem.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/pkcs12.h"
@@ -45,7 +39,6 @@
 #include "mbedtls/ssl.h"
 #include "mbedtls/threading.h"
 #include "mbedtls/x509.h"
-#include "mbedtls/xtea.h"
 #include "LLNET_SSL_CONSTANTS.h"
 #include "LLNET_SSL_ERRORS.h"
 #include "sni.h"
@@ -220,7 +213,6 @@ jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 	case MBEDTLS_ERR_PKCS12_FEATURE_UNAVAILABLE:
 	case MBEDTLS_ERR_PKCS5_FEATURE_UNAVAILABLE:
 	case MBEDTLS_ERR_SSL_FEATURE_UNAVAILABLE:
-	case MBEDTLS_ERR_THREADING_FEATURE_UNAVAILABLE:
 	case MBEDTLS_ERR_X509_FEATURE_UNAVAILABLE:
 		return J_NOT_COMPILED_IN;
 
@@ -240,9 +232,6 @@ jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 	case MBEDTLS_ERR_CCM_AUTH_FAILED:
 		return J_AES_CCM_AUTH_ERROR;
 
-	case MBEDTLS_ERR_PADLOCK_DATA_MISALIGNED:
-		return J_BAD_ALIGN_ERROR;
-
 	case MBEDTLS_ERR_CIPHER_INVALID_PADDING:
 		return J_BAD_PADDING_ERROR;
 
@@ -253,26 +242,14 @@ jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 	case MBEDTLS_ERR_RSA_INVALID_PADDING:
 		return J_RSA_PAD_ERROR;
 
-	case MBEDTLS_ERR_SSL_UNKNOWN_CIPHER:
-		return J_UNSUPPORTED_SUITE;
-
-	case MBEDTLS_ERR_SSL_NO_CIPHER_CHOSEN:
-		return J_MATCH_SUITE_ERROR;
-
 	case MBEDTLS_ERR_AES_INVALID_INPUT_LENGTH:
-	case MBEDTLS_ERR_BLOWFISH_INVALID_INPUT_LENGTH:
 	case MBEDTLS_ERR_CAMELLIA_INVALID_INPUT_LENGTH:
 	case MBEDTLS_ERR_CTR_DRBG_INPUT_TOO_BIG:
 	case MBEDTLS_ERR_DES_INVALID_INPUT_LENGTH:
 	case MBEDTLS_ERR_HMAC_DRBG_INPUT_TOO_BIG:
 	case MBEDTLS_ERR_X509_BAD_INPUT_DATA:
-	case MBEDTLS_ERR_XTEA_INVALID_INPUT_LENGTH:
-		return J_INPUT_CASE_ERROR;
 
 	case MBEDTLS_ERR_AES_INVALID_KEY_LENGTH:
-	case MBEDTLS_ERR_BLOWFISH_INVALID_KEY_LENGTH:
-	case MBEDTLS_ERR_CAMELLIA_INVALID_KEY_LENGTH:
-		return J_PREFIX_ERROR;
 
 	case MBEDTLS_ERR_CIPHER_ALLOC_FAILED:
 	case MBEDTLS_ERR_DHM_ALLOC_FAILED:
@@ -284,20 +261,6 @@ jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 	case MBEDTLS_ERR_PK_ALLOC_FAILED:
 	case MBEDTLS_ERR_SSL_ALLOC_FAILED:
 		return J_MEMORY_ERROR;
-
-	case MBEDTLS_ERR_SSL_INVALID_VERIFY_HASH:
-		return J_VERIFY_FINISHED_ERROR;
-
-	case MBEDTLS_ERR_SSL_BAD_HS_SERVER_HELLO:
-		return J_HEADER_PARSE_ERROR;
-
-	case MBEDTLS_ERR_SSL_BAD_HS_CERTIFICATE:
-	case MBEDTLS_ERR_SSL_BAD_HS_CERTIFICATE_REQUEST:
-	case MBEDTLS_ERR_SSL_BAD_HS_CERTIFICATE_VERIFY:
-		return J_NO_PEER_CERT;
-
-	case MBEDTLS_ERR_SSL_BAD_HS_PROTOCOL_VERSION:
-		return J_UNKNOWN_HANDSHAKE_TYPE;
 
 	case MBEDTLS_ERR_NET_SOCKET_FAILED:
 	case MBEDTLS_ERR_NET_CONNECT_FAILED:
@@ -323,9 +286,6 @@ jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 
 	case MBEDTLS_ERR_RSA_PRIVATE_FAILED:
 		return J_RSA_PRIVATE_ERROR;
-
-	case MBEDTLS_ERR_SSL_BAD_HS_CLIENT_HELLO:
-		return J_BAD_HELLO;
 
 	case MBEDTLS_ERR_SSL_WANT_READ:
 		return J_WANT_READ;
@@ -361,9 +321,6 @@ jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 	case MBEDTLS_ERR_SSL_BAD_INPUT_DATA:
 		return J_LENGTH_ERROR;
 
-	case MBEDTLS_ERR_SSL_BAD_HS_SERVER_KEY_EXCHANGE:
-		return J_PEER_KEY_ERROR;
-
 	case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY:
 		return J_ZERO_RETURN;
 
@@ -385,20 +342,11 @@ jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 	case MBEDTLS_ERR_PEM_ALLOC_FAILED:
 		return J_BAD_CERT_MANAGER_ERROR;
 
-	case MBEDTLS_ERR_SSL_NO_USABLE_CIPHERSUITE:
-		return J_SUITES_ERROR;
-
 	case MBEDTLS_ERR_PEM_INVALID_DATA:
 		return J_SSL_NO_PEM_HEADER;
 
-	case MBEDTLS_ERR_SSL_PEER_VERIFY_FAILED:
-		return J_NO_PEER_VERIFY;
-
 	case MBEDTLS_ERR_SSL_WAITING_SERVER_HELLO_RENEGO:
 		return J_SECURE_RENEGOTIATION_ERROR;
-
-	case MBEDTLS_ERR_SSL_BAD_HS_CHANGE_CIPHER_SPEC:
-		return J_NO_CHANGE_CIPHER_ERROR;
 
 	case MBEDTLS_ERR_X509_INVALID_FORMAT :
 		return J_BAD_CERTTYPE;

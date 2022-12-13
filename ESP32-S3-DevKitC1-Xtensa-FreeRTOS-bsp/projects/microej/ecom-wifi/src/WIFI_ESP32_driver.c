@@ -582,11 +582,11 @@ static void event_handler_f(void *arg, esp_event_base_t event_base, int32_t even
         case WIFI_EVENT_STA_WPS_ER_TIMEOUT:
         case WIFI_EVENT_STA_WPS_ER_PIN:
         case WIFI_EVENT_STA_WPS_ER_PBC_OVERLAP:
-            WIFI_ESP32_WARNING_TRACE("WPS event id %d received, not treated\n", event_id);
+            WIFI_ESP32_WARNING_TRACE("WPS event id %ld received, not treated\n", event_id);
             break;
 
         default:
-            WIFI_ESP32_WARNING_TRACE("Event id %d received for base %d, not treated\n", event_id, (int)event_base);
+            WIFI_ESP32_WARNING_TRACE("Event id %ld received for base %d, not treated\n", event_id, (int)event_base);
             break;
         }
     }
@@ -630,12 +630,12 @@ static void event_handler_f(void *arg, esp_event_base_t event_base, int32_t even
         case IP_EVENT_PPP_GOT_IP:
         case IP_EVENT_PPP_LOST_IP:
         {
-            WIFI_ESP32_WARNING_TRACE("Ethernet/PPP event id %d received, not treated\n", event_id);
+            WIFI_ESP32_WARNING_TRACE("Ethernet/PPP event id %ld received, not treated\n", event_id);
             break;
         }
         default:
         {
-            WIFI_ESP32_WARNING_TRACE("Event id %d received for base %d, not treated\n", event_id, (int)event_base);
+            WIFI_ESP32_WARNING_TRACE("Event id %ld received for base %d, not treated\n", event_id, (int)event_base);
             break;
         }
         }
@@ -754,7 +754,7 @@ static bool start_wifi_f(wifi_mode_t mode, wifi_config_t *wifi_config)
         }
 
         /* Wait for the start event */
-        uxBits = xEventGroupWaitBits(gst_wifi_event_group, START_BIT, pdTRUE, pdTRUE, START_TIMEOUT_MS / portTICK_RATE_MS);
+        uxBits = xEventGroupWaitBits(gst_wifi_event_group, START_BIT, pdTRUE, pdTRUE, START_TIMEOUT_MS / portTICK_PERIOD_MS);
         if (!(uxBits & START_BIT))
         {
             WIFI_ESP32_ERROR_TRACE("Waiting for the start event ended in a timeout\n");
@@ -828,7 +828,7 @@ static bool stop_wifi_f(wifi_mode_t mode)
             }
 
             /* Wait for the stop event */
-            uxBits = xEventGroupWaitBits(gst_wifi_event_group, STOP_BIT, pdTRUE, pdTRUE, STOP_TIMEOUT_MS / portTICK_RATE_MS);
+            uxBits = xEventGroupWaitBits(gst_wifi_event_group, STOP_BIT, pdTRUE, pdTRUE, STOP_TIMEOUT_MS / portTICK_PERIOD_MS);
             if (!(uxBits & STOP_BIT))
             {
                 WIFI_ESP32_ERROR_TRACE("Waiting for the stop event ended in a timeout\n");
@@ -858,7 +858,7 @@ static bool connect_f(void)
     }
 
     /* Wait for the connected event */
-    uxBits = xEventGroupWaitBits(gst_wifi_event_group, CONNECTED_BIT, pdTRUE, pdTRUE, CONNECT_TIMEOUT_MS / portTICK_RATE_MS);
+    uxBits = xEventGroupWaitBits(gst_wifi_event_group, CONNECTED_BIT, pdTRUE, pdTRUE, CONNECT_TIMEOUT_MS / portTICK_PERIOD_MS);
     if (!(uxBits & CONNECTED_BIT))
     {
         WIFI_ESP32_ERROR_TRACE("Waiting for the connect event ended in a timeout\n");
@@ -890,7 +890,7 @@ static bool disconnect_f(void)
     }
 
     /* Wait for the disconnected event */
-    uxBits = xEventGroupWaitBits(gst_wifi_event_group, DISCONNECTED_BIT, pdTRUE, pdTRUE, DISCONNECT_TIMEOUT_MS / portTICK_RATE_MS);
+    uxBits = xEventGroupWaitBits(gst_wifi_event_group, DISCONNECTED_BIT, pdTRUE, pdTRUE, DISCONNECT_TIMEOUT_MS / portTICK_PERIOD_MS);
     if (!(uxBits & DISCONNECTED_BIT))
     {
         WIFI_ESP32_ERROR_TRACE("Waiting for the disconnect event ended in a timeout\n");
@@ -1747,7 +1747,7 @@ bool WIFI_ESP32_get_ap_count_f(short *const _ps_ap_count)
         }
 
         /* Wait for the scan event */
-        uxBits = xEventGroupWaitBits(gst_wifi_event_group, SCAN_BIT, pdTRUE, pdTRUE, SCAN_TIMEOUT_MS / portTICK_RATE_MS);
+        uxBits = xEventGroupWaitBits(gst_wifi_event_group, SCAN_BIT, pdTRUE, pdTRUE, SCAN_TIMEOUT_MS / portTICK_PERIOD_MS);
         if (uxBits & SCAN_BIT)
         {
             scan_succeeded = true;

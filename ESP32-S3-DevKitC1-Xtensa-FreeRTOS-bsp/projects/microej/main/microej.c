@@ -9,7 +9,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
-#include "esp_spi_flash.h"
+#include "spi_flash_mmap.h"
+#include "esp_flash.h"
 #include "esp_task_wdt.h"
 #include "nvs_flash.h"
 #include "microej_main.h"
@@ -17,6 +18,8 @@
 #include "esp_ota_ops.h"
 #include "esp_system.h"
 #include "sdkconfig.h"
+#include "esp_chip_info.h"
+#include "sni.h"
 
 #if CONFIG_APPTRACE_SV_ENABLE
 #include "SEGGER_SYSVIEW.h"
@@ -105,7 +108,8 @@ void app_main()
 	uart_switch();
 
     /* Print chip information */
-    esp_chip_info_t chip_info;
+	esp_chip_info_t chip_info;
+	uint32_t flash_size;
     esp_chip_info(&chip_info);
     printf("This is %s chip with %d CPU cores, WiFi%s%s, ",
 			CONFIG_IDF_TARGET,
@@ -115,7 +119,12 @@ void app_main()
 
     printf("silicon revision %d, ", chip_info.revision);
 
-    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
+	if(esp_flash_get_size(NULL, &flash_size) != ESP_OK) {
+        printf("Get flash size failed");
+        return;
+    }
+
+    printf("%ldMB %s flash\n", flash_size / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
     print_reset_reason();
@@ -159,10 +168,9 @@ start_sysview_logging:
 #endif // CONFIG_APPTRACE_SV_ENABLE
 }
 
-#include "soc/compare_set.h"
-unsigned int __atomic_exchange_4(unsigned int *ptr, unsigned int val){
+#include "hal/cpu_ll.h"
+unsigned int __atomic_exchange_4(uint32_t *ptr, uint32_t val){
 	uint32_t set = val;
-	compare_and_set_native(ptr, *ptr, &set);
+	cpu_ll_compare_and_set_native(ptr, *ptr, &set);
 	return set;
 }
-

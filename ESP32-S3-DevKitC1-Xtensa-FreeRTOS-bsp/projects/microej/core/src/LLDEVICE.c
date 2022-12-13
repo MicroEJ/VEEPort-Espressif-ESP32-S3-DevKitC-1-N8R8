@@ -9,6 +9,8 @@
 
 #include <stdint.h>
 #include <string.h>
+#include "esp_log.h"
+#include "esp_mac.h"
 
 #include "device.h"
 #include "LLDEVICE_impl.h"
