@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2022-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -168,9 +168,12 @@ start_sysview_logging:
 #endif // CONFIG_APPTRACE_SV_ENABLE
 }
 
-#include "hal/cpu_ll.h"
-unsigned int __atomic_exchange_4(uint32_t *ptr, uint32_t val){
-	uint32_t set = val;
-	cpu_ll_compare_and_set_native(ptr, *ptr, &set);
-	return set;
+#include "esp_cpu.h"
+unsigned int __atomic_exchange_4(volatile void *ptr, unsigned int val, int memmodel){
+	volatile uint32_t old = *((volatile uint32_t*)ptr);
+	while (!esp_cpu_compare_and_set(ptr, old, val)) {
+		// we lost a race setting *ptr
+		old = *((volatile uint32_t*)ptr);
+	}
+	return old;
 }

@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2018-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -192,7 +192,14 @@ static const wifi_config_t g_wifi_sta_default_config = {
         .threshold.rssi = WIFI_MIN_RSSI_THRESHOLD,
         .threshold.authmode = WIFI_AUTH_OPEN,
         .pmf_cfg.capable = false,
-        .pmf_cfg.required = false}};
+        .pmf_cfg.required = false,
+        .rm_enabled = 0,
+        .btm_enabled = 0,
+        .mbo_enabled = 0,
+        .ft_enabled = 0,
+        .owe_enabled = 0,
+        .reserved = 0,
+        .sae_pwe_h2e = WPA3_SAE_PWE_UNSPECIFIED}};
 
 /** @brief Default WiFi access point configuration */
 static const wifi_config_t g_wifi_ap_default_config = {
@@ -204,7 +211,11 @@ static const wifi_config_t g_wifi_ap_default_config = {
         .authmode = WIFI_AUTH_OPEN,
         .ssid_hidden = 0,
         .max_connection = WIFI_SOFT_AP_MAX_CONNECTIONS,
-        .beacon_interval = WIFI_SOFT_AP_BEACON_INTERVAL}};
+        .beacon_interval = WIFI_SOFT_AP_BEACON_INTERVAL,
+        .pairwise_cipher = WIFI_CIPHER_TYPE_NONE,
+        .ftm_responder = 0,
+        .pmf_cfg.capable = false,
+        .pmf_cfg.required = false}};
 
 /** @brief Station network interface */
 static esp_netif_t *sta_netif;
@@ -471,7 +482,7 @@ static void event_handler_f(void *arg, esp_event_base_t event_base, int32_t even
             wifi_event_sta_scan_done_t *event = (wifi_event_sta_scan_done_t *)event_data;
 
             (void)event;
-            WIFI_ESP32_INFO_TRACE("Scan finished with status: %d, scan results: %d, scan id: %d\n",
+            WIFI_ESP32_INFO_TRACE("Scan finished with status: %ld, scan results: %d, scan id: %d\n",
                                   event->status, event->number, event->scan_id);
 
             /* Unlock any waiting threads */

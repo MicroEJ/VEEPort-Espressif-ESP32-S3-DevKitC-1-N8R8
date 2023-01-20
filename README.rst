@@ -1,31 +1,35 @@
 ..
-    Copyright 2022 MicroEJ Corp. All rights reserved.
+    Copyright 2022-2023 MicroEJ Corp. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be found with this software.
+
+![VEE Port ESP32S3 1.0.0 Compatible](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/S3_platform_1.0.0_badges.json)
+![VEE Port ESP32S3 2.1.0 Compatible](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/S3_platform_2.1.0_badges.json)
+![SDK 4.4.1 Compatible](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/S3_sdk_v4.4.1.json)
+![SDK 5.0 Compatible](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/S3_sdk_v5.0.json)
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
-.. |PLATFORM_VER| replace:: 2.0.0
 .. |RCP| replace:: MICROEJ SDK
-.. |PLATFORM| replace:: MicroEJ Platform
-.. |PLATFORMS| replace:: MicroEJ Platforms
-.. |SIM| replace:: MicroEJ Simulator
-.. |ARCH| replace:: MicroEJ Architecture
+.. |VEEPORT| replace:: VEE Port
+.. |SIM| replace:: Simulator
 .. |CIDE| replace:: MICROEJ SDK
 .. |RTOS| replace:: FreeRTOS RTOS
 .. |MANUFACTURER| replace:: Espressif
+.. |BSP_FULL_NAME| replace:: Espressif IoT Development Framework 
+.. |BSP_SHORT_NAME| replace:: ESP-IDF
 
 .. _中文版: ./docs/zn_CH/README_CN.rst
-.. _README MicroEJ BSP: ./ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/README.rst
+.. _README BSP: ./ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/README.rst
 .. _RELEASE NOTES: ./RELEASE_NOTES.rst
 .. _CHANGELOG: ./CHANGELOG.rst
 
 ==========================================
-|PLATFORM| for |MANUFACTURER| |BOARD_NAME|
+|VEEPORT| for |MANUFACTURER| |BOARD_NAME|
 ==========================================
 
 `中文版`_
 
-This project is used to build a |PLATFORM| for the |BOARD_NAME|
+This project is used to build a |VEEPORT| for the |BOARD_NAME|
 development board.
 
 .. image:: ./images/ESP32-S3-DevKitC1.jpg
@@ -47,8 +51,7 @@ Related Files
 
 This directory also contains:
 
-* `CHANGELOG`_ to track the changes in the MicroEJ
-  |BOARD_NAME| Platform
+* `CHANGELOG`_ to track the changes in the |VEEPORT| for |BOARD_NAME| 
 * `RELEASE NOTES`_ to list:
 
   - the supported hardware,
@@ -56,8 +59,8 @@ This directory also contains:
   - the development environment,
   - the list of the dependencies and their versions.
 
-* `README MicroEJ BSP`_ recommended for users familiar with the
-  |MANUFACTURER| IDF and advanced usage on how to customize the build
+* `README BSP`_ recommended for users familiar with the
+  |MANUFACTURER| SDK/BSP and advanced usage on how to customize the build
   process.
 
 Board Technical Specifications
@@ -97,12 +100,12 @@ Here is a list of |BOARD_NAME| useful documentation links:
 - MCU Datasheet available `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf>`__
 
 
-Platform Specifications
+|VEEPORT| Specifications
 =======================
 
-The Architecture version is ``7.16.0``.
+The Architecture version is ``7.18.1``.
 
-This Platform provides the following Foundation Libraries:
+This |VEEPORT| provides the following Foundation Libraries:
 
 .. list-table::
    :header-rows: 1
@@ -126,7 +129,7 @@ This Platform provides the following Foundation Libraries:
    * - HAL
      - 1.0
    * - KF
-     - 1.5
+     - 1.6
    * - NET
      - 1.1
    * - NLS
@@ -142,10 +145,10 @@ This Platform provides the following Foundation Libraries:
    * - WATCHDOG
      - 1.0 
 
-The |PLATFORM| is derived into:
+The |VEEPORT| is derived into:
 
-- a Mono-Sandbox Platform (default)
-- a Multi-Sandbox Platform
+- a Mono-Sandbox |VEEPORT| (default)
+- a Multi-Sandbox |VEEPORT|
 
 Requirements
 ============
@@ -158,8 +161,9 @@ Requirements
 BSP Setup
 =========
 
-Install the |MANUFACTURER| toolchain by following the section ``Setting up Development Environment`` described `here
-<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/index.html#installation-step-by-step>`__, but skip the section ``Get ESP-IDF``. The ESP-IDF is already a submodule of this repository.
+Install the |MANUFACTURER| toolchain by following the section ``Manual Installation`` described `here
+<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/index.html#installation-step-by-step>`__. Use the ``Universal online installer`` and configure it to use an existing |BSP_FULL_NAME| (|BSP_SHORT_NAME|)
+directory and point it to ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf``.
 
 Please pay attention on the limitations regarding the installation path (e.g. no white spaces, parentheses ...), 
 described in the above documentation.
@@ -196,11 +200,11 @@ BSP Compilation
 
 Before the first build of the BSP, ensure you have cloned the repository and all its submodules
 and also the patch for the MicroEJ Segger SystemView implementation is applied. This can be done
-running the script **RunAtFirstBSPCompile** located in  ``xxx/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/scripts``.
-Please refer to the `README MicroEJ BSP`_ on further details.
+running the script ``RunAtFirstBSPCompile.*`` located in  ``xxx/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/scripts``.
+Please refer to the `README BSP`_ for further details.
 
-The Platform provides a pre-compiled Mono-Sandbox Application.
-Validate the BSP installation by compiling the BSP to build a MicroEJ
+The |VEEPORT| provides a pre-compiled Mono-Sandbox Application.
+Validate the BSP installation by compiling the BSP to build a |BOARD_NAME|
 Firmware.
 
 To build the ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp`` project, open a
@@ -227,7 +231,7 @@ The BSP project build is launched. Please wait for the final message:
       Project build complete. To flash, run this command:
 
 
-Please refer to `README MicroEJ BSP`_ for more details on how to
+Please refer to `README BSP`_ for more details on how to
 customize the build scripts.
 
 Board Setup
@@ -242,7 +246,7 @@ Power Supply
 
 The board can be powered by USB cable or external 5V power supply.
 
-Please refer to the Espressif documentation available `here
+Please refer to the |MANUFACTURER| documentation available `here
 <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#getting-started>`__
 for more details.
 
@@ -252,12 +256,12 @@ Programming
 The |BOARD_NAME| board can be flashed using |MANUFACTURER|
 bootloader. Please Follow the steps below:
 
-- Connect the USB connector of the board to your computer
-- Take a look at the new COM port available
+- Connect the USB connector of the board labelled UART to your computer
+- Find the new COM port available
 - Create the ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/scripts/set_local_env.xxx`` script
   by copying the template ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/scripts/set_local_env.xxx.tpl``
   (where ``xxx`` is ``bat`` for Windows and ``sh`` for Linux / macOS).
-- Edit in this script the the ``ESPPORT`` variable to put the newly COM port discovered previously.
+- Update the ``ESPPORT`` variable in the script to put the COM port discovered previously.
 - Open a terminal and enter the following command lines:
 
 **On Windows:**
@@ -289,8 +293,8 @@ for more details.
 Logs Output
 -----------
 
-MicroEJ platform uses the virtual UART from the |BOARD_NAME|
-USB port.  A COM port is automatically mounted when the board is
+This |VEEPORT| uses the virtual UART from the |BOARD_NAME|
+USB port. A COM port is automatically mounted when the board is
 plugged to a computer using USB cable.  All board logs are available
 through this COM port.
 
@@ -326,13 +330,13 @@ Debugging
 
 A JTAG interface is also directly available through the USB interface.
 
-Please refer to the `README MicroEJ BSP`_ section debugging for more
+Please refer to the `README BSP`_ section debugging for more
 details.
 
-Platform Setup
+|VEEPORT| Setup
 ==============
 
-Platform Import
+|VEEPORT| Import
 ---------------
 
 Import the projects in |RCP| Workspace:
@@ -346,7 +350,7 @@ Inside |RCP|, the selected example is imported as several projects
 prefixed by the given name:
 
 - ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration``: Contains the
-  platform configuration description. Some modules are described in a
+  |VEEPORT| configuration description. Some modules are described in a
   specific sub-folder / with some optional configuration files
   (``.properties`` and / or ``.xml``).
 
@@ -357,31 +361,31 @@ prefixed by the given name:
   support package.
 
 - ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-fp``: Contains the board description
-  and images for the |SIM|. This project is updated once the platform
+  and images for the |SIM|. This project is updated once the |VEEPORT|
   is built.
 
 - ``ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}``:
-  Contains the |RCP| Platform project which is empty by default until
-  the Platform is built.
+  Contains the |RCP| |VEEPORT| project which is empty by default until
+  the |VEEPORT| is built.
 
-By default, the Platform is configured as a Mono-Sandbox Evaluation
-Platform.  If the Platform is configured as Multi-Sandbox, use the
+By default, the |VEEPORT| is configured as a Mono-Sandbox Evaluation
+|VEEPORT|.  If the |VEEPORT| is configured as Multi-Sandbox, use the
 ``build_no_ota_no_systemview`` script (Please refer to the `RELEASE
 NOTES`_ limitations section for more details).
 
-Platform Build
+|VEEPORT| Build
 --------------
 
-To build the Platform, please follow the steps below:
+To build the |VEEPORT|, please follow the steps below:
 
 - Right-click on ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration``
   project in your |RCP| workspace.
 - Click on ``Build Module``
 
 The build starts.  This step may take several minutes.  The first
-time, the Platform build requires to download modules that are
+time, the |VEEPORT| build requires to download modules that are
 available on the MicroEJ Central Repository.  You can see the progress
-of the build steps in the MicroEJ console.
+of the build steps in the |RCP| console.
 
 Please wait for the final message:
 
@@ -389,12 +393,10 @@ Please wait for the final message:
 
                           BUILD SUCCESSFUL
 
-At the end of the execution the |PLATFORM| is fully built for the
-|BOARD_NAME| board and is ready to be linked into the |CIDE|
-project.
+At the end of the execution the |VEEPORT| is fully built for the
+|BOARD_NAME| board and is ready to be used.
 
-
-The Platform project should be refreshed with no error in the |RCP|
+The |VEEPORT| project should be refreshed with no error in the |RCP|
 ``ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}``.
 
 Please refer to
@@ -419,14 +421,8 @@ FTDI USB wire to the pin D4 of the J1 connector and ground.
 .. image:: ./images/ESP32-S3-DevKitC1_Test_Connections.jpg
 
 In ``config.properties``, the property ``target.platform.dir`` must be
-set to the absolute path to the platform.  For example
-``C:/Platform-ESP32-S3-DevKitC-1/ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-1.0.0/source``.
-
-Test Suite Projects
--------------------
-
-A ``config.properties`` and ``microej-testsuite-common.properties``
-are provided in ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/testsuites/*``.
+set to the absolute path to the VEE port. For example
+``C:/ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}/source``.
 
 Troubleshooting
 ===============

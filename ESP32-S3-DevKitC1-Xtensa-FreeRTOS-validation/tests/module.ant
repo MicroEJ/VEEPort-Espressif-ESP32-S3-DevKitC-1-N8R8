@@ -1,0 +1,11 @@
+<!--
+	ANT
+
+	Copyright 2018 IS2T. All rights reserved.
+	IS2T PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+-->
+<project name="jpf.testsuite.common" xmlns:ea="antlib:org.apache.easyant" xmlns:ivy="antlib:org.apache.ivy.ant">
+	<dirname file="${ant.file.jpf.testsuite}" property="project"/>
+	<dirname file="${project}/.." property="workspace"/>
+	<import file="${project}/${microej.testsuite.kind}/module.ant" optional="true"/>
+</project>

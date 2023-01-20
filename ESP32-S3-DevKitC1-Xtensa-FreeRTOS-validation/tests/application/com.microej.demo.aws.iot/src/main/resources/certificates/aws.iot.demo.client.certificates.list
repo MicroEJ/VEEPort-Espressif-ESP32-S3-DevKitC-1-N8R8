@@ -1,0 +1,6 @@
+# Copyright 2018-2019 MicroEJ Corp. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+# Place your client certificates here for the default SSL context
+/certificates/client/VeriSignClass3PublicPrimaryCertificationAuthority-G5.crt
+/certificates/client/Amazon-IoT.crt

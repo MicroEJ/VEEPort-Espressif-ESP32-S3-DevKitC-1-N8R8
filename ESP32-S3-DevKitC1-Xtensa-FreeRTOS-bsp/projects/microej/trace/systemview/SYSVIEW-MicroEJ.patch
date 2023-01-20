@@ -1,28 +1,3 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c989babd7a..48e19ee973 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -211,13 +211,13 @@ endif()
- 
- # For the transition period from 32-bit time_t to 64-bit time_t,
- # auto-detect the size of this type and set corresponding variable.
--include(CheckTypeSize)
--check_type_size("time_t" TIME_T_SIZE)
--if(TIME_T_SIZE)
--    idf_build_set_property(TIME_T_SIZE ${TIME_T_SIZE})
--else()
--    message(FATAL_ERROR "Failed to determine sizeof(time_t)")
--endif()
-+#include(CheckTypeSize)
-+#check_type_size("time_t" TIME_T_SIZE)
-+#if(TIME_T_SIZE)
-+#    idf_build_set_property(TIME_T_SIZE ${TIME_T_SIZE})
-+#else()
-+#    message(FATAL_ERROR "Failed to determine sizeof(time_t)")
-+#endif()
- 
- idf_build_set_property(COMPILE_OPTIONS "${compile_options}" APPEND)
- idf_build_set_property(C_COMPILE_OPTIONS "${c_compile_options}" APPEND)
 diff --git a/components/app_trace/sys_view/SEGGER/SEGGER_SYSVIEW.c b/components/app_trace/sys_view/SEGGER/SEGGER_SYSVIEW.c
 index a6659929eb..044f8d37a0 100644
 --- a/components/app_trace/sys_view/SEGGER/SEGGER_SYSVIEW.c

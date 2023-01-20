@@ -1,0 +1,8 @@
+# Copyright 2021 MicroEJ Corp. All rights reserved.
+# This library is provided in source code for use, modification and test, subject to license terms.
+# Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+
+# Embed the network manager to be used for AWS communication
+#com.microej.demo.aws.iot.EthernetNetworkManager
+#com.microej.demo.aws.iot.MobileNetworkManager
+com.microej.demo.aws.iot.WifiNetworkManager

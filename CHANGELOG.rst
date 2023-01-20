@@ -1,10 +1,33 @@
 ..
-	Copyright 2022 MicroEJ Corp. All rights reserved.
+	Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 	Use of this source code is governed by a BSD-style license that can be found with this software.
 
 ===========
  Changelog
 ===========
+
+----------------------
+ [2.1.0] - 2023-01-19
+----------------------
+
+Added
+=====
+
+- VEE Port validation projects (CORE, FS, NET, SSL, SECURITY, BLUETOOTH, ESP32)
+
+Updated
+=======
+
+- MicroEJ architecture to 7.18.1
+- FS pack to 6.0.3
+
+Fixed
+=====
+
+- Disable Mbed TLS certificate bundle
+- Enable Mbed TLS DHE RSA and DHE PK, DHM_C, DES_C, Blowfish and Xtea
+- Fix parameters passed to MbedTLS ``mbedtls_ecdsa_write_signature`` function
+- Correctly escape CMAKE_C_FLAGS to allow configuration step to find ``sizeof(time_t)``
 
 ---------------------
  [2.0.0] - 2022-12-13

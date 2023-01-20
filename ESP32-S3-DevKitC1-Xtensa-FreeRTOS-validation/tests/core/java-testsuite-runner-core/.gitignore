@@ -1,0 +1,5 @@
+target~/
+bin/
+launchers/*.properties
+src-adpgenerated/
+com.microej.core.tests.*/

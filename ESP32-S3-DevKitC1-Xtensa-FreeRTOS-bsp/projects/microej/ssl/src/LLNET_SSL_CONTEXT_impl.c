@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2018-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -167,7 +167,7 @@ int32_t LLNET_SSL_CONTEXT_IMPL_createContext(int32_t protocol, uint8_t isClientC
 #endif
 #endif
 
-		LLNET_SSL_DEBUG_TRACE("%s(method=%d) return ctx=%p\n", __func__, protocol,conf);
+		LLNET_SSL_DEBUG_TRACE("%s(method=%ld) return ctx=%p\n", __func__, protocol,conf);
 
 		return (int32_t)conf;
 	}

@@ -1,0 +1,46 @@
+<!--
+	IVY
+
+	Copyright 2021 MicroEJ Corp. All rights reserved.
+	This library is provided in source code for use, modification and test, subject to license terms.
+	Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+-->
+
+<ivy-module version="2.0" xmlns:ea="http://www.easyant.org" xmlns:m="http://ant.apache.org/ivy/extra" xmlns:ej="https://developer.microej.com" ej:version="2.0.0">
+	<info organisation="com.microej.testsuite.application" module="http-download-robustness-testsuite" status="integration" revision="1.1.0">
+		<ea:build organisation="com.is2t.easyant.buildtypes" module="build-microej-javaimpl" revision="4.+" microej.lib.name="http-download-1.1-testsuite" rip.printableName="HTTP Download Robustness Test"/>
+		<ea:property name="skip.test" value="true"/>
+	</info>
+
+	<configurations defaultconfmapping="default->default;provided->provided">
+		<conf name="default" visibility="public" description="Runtime dependencies to other artifacts"/>
+		<conf name="provided" visibility="public" description="Compile-time dependencies to APIs provided by the platform"/>
+		<conf name="documentation" visibility="public" description="Documentation related to the artifact (javadoc, PDF)"/>
+		<conf name="dist" visibility="public" description="Contains extra files like README.md, licenses"/>
+		<conf name="source" visibility="public" description="Source code"/>
+ 		<conf name="test" visibility="private" description="Dependencies for test execution. It is not required for normal use of the application, and is only available for the test compilation and execution phases."/>
+	</configurations>
+
+	<publications>
+		<!-- keep this empty if no specific artifact to publish -->
+		<!-- must be here in order to avoid all configurations for the default artifact -->
+	</publications>
+	
+	<dependencies>
+		<!-- 
+			Put MicroEJ API dependencies to the "provided->*" configuration
+			Other regular runtime dependencies are in the "default" configuration  
+		-->
+		<dependency org="ej.api" name="edc" rev="1.3.0" conf="provided->*" />
+		<dependency org="ej.api" name="bon" rev="1.4.0" conf="provided->*" />
+		<dependency org="ej.api" name="net" rev="1.1.1" conf="provided->*" />
+		<dependency org="ej.api" name="ecom-mobile" rev="0.2.0" conf="provided->*" />
+		<dependency org="ej.api" name="ecom-network" rev="2.1.0" conf="provided->*" />
+		<dependency org="ej.api" name="ecom-wifi" rev="2.2.1" conf="provided->*" />
+
+		<dependency org="ej.library.eclasspath" name="httpclient" rev="1.3.0" />
+		<dependency org="ej.library.eclasspath" name="logging" rev="1.1.0" />
+		<dependency org="ej.library.iot" name="net-util" rev="1.3.0" />
+		<dependency org="ej.library.runtime" name="components" rev="3.3.0" />
+	</dependencies>
+</ivy-module>

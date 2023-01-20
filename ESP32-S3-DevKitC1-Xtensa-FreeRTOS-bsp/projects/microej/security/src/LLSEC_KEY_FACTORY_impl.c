@@ -149,7 +149,7 @@ static int32_t LLSEC_KEY_FACTORY_RSA_mbedtls_get_public_key_data(LLSEC_pub_key* 
 static int32_t LLSEC_KEY_FACTORY_EC_mbedtls_get_private_key_data(LLSEC_priv_key* priv_key, uint8_t* encoded_key, int32_t encoded_key_length)
 {
     LLSEC_KEY_FACTORY_DEBUG_TRACE("%s \n", __func__);
-    LLSEC_KEY_FACTORY_DEBUG_TRACE("encLen %d, strlen: %d, enc:%s  \n", encoded_key_length, strlen((char*)encoded_key), encoded_key);
+    LLSEC_KEY_FACTORY_DEBUG_TRACE("encLen %ld, strlen: %d, enc:%s  \n", encoded_key_length, strlen((char*)encoded_key), encoded_key);
 
     int returnCode = 0;
     priv_key->type = TYPE_ECDSA;

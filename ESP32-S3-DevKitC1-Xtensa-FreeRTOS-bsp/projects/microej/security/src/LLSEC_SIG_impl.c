@@ -145,8 +145,8 @@ static int LLSEC_SIG_mbedtls_ec_sign(LLSEC_SIG_algorithm* algorithm, uint8_t* si
     mbedtls_ecdsa_context* ctx = (mbedtls_ecdsa_context*)priv_key->key;
     ret = mbedtls_ecdsa_write_signature(ctx, MBEDTLS_MD_SHA256,
                                          digest, (size_t)digest_length,
-                                         signature, (size_t*)signature_length,
-                                        sizeof(signature_length),
+                                         signature, (size_t)*signature_length,
+                                         (size_t*)signature_length,
                                          mbedtls_ctr_drbg_random, &ctr_drbg);
     if (ret != 0) {
         mbedtls_ctr_drbg_free(&ctr_drbg);

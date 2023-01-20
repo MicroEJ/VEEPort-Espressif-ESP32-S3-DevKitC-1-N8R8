@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2018-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -139,7 +139,7 @@ J_DECRYPT_ERROR
 
 jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 
-	LLNET_SSL_DEBUG_TRACE("%s(SSL_error=%d)\n", __func__, mbedtls_error);
+	LLNET_SSL_DEBUG_TRACE("%s(SSL_error=%ld)\n", __func__, mbedtls_error);
 	switch (mbedtls_error) {
 
 	case 0:

@@ -13,9 +13,13 @@ ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/unit_tests/build/
 # Ignore sdkconfig generated files
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/coremark/sdkconfig
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/coremark/sdkconfig.backup
+ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/coremark/sdkconfig.old
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/sdkconfig
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/sdkconfig.backup
+ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/sdkconfig.old
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/unit_tests/sdkconfig
+ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/unit_tests/sdkconfig.backup
+ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/unit_tests/sdkconfig.old
 
 # Ignore application.out produced when executing the build script from CLI
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/scripts/application.out
