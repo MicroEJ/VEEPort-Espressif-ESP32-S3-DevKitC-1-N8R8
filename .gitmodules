@@ -1,4 +1,6 @@
 [submodule "ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf"]
 	path = ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf
 	url = https://github.com/espressif/esp-idf.git
-
+[submodule "ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/validation/framework/c/CoreMark"]
+	path = ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/validation/framework/c/CoreMark
+	url = https://github.com/eembc/coremark.git

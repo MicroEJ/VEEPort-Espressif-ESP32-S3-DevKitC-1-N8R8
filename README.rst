@@ -1,11 +1,13 @@
+.. image:: https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/sdk_5.6.json
+   :alt: sdk_5.6 badge
+   :align: left
+
+.. image:: https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/arch_7.18.json
+   :alt: arch_7.18 badge
+   :align: left
 ..
     Copyright 2022-2023 MicroEJ Corp. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be found with this software.
-
-![VEE Port ESP32S3 1.0.0 Compatible](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/S3_platform_1.0.0_badges.json)
-![VEE Port ESP32S3 2.1.0 Compatible](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/S3_platform_2.1.0_badges.json)
-![SDK 4.4.1 Compatible](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/S3_sdk_v4.4.1.json)
-![SDK 5.0 Compatible](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/S3_sdk_v5.0.json)
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0

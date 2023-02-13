@@ -1,8 +1,0 @@
-# Copyright 2021 MicroEJ Corp. All rights reserved.
-# This library is provided in source code for use, modification and test, subject to license terms.
-# Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
-
-# Embed the network managers to be used for HTTP communication
-#net.http.download.manager.EthernetNetworkManager
-#net.http.download.manager.MobileNetworkManager
-net.http.download.manager.WifiNetworkManager

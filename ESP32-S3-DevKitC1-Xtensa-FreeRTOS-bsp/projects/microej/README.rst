@@ -105,6 +105,12 @@ The ESP32-S3 module flash and PSRAM sizes can be identified using the documentat
 The supported modes and speeds of the flash and PSRAM can be identified using the documentation `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf>`_.
 and `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/flash_psram_config.html?highlight=psram>`_.
 
+RAM overflow
+------------
+
+- In case you are experiencing ``iram0`` overflow, you can reduce the ``INSTRUCTION_CACHE`` size configured in ``sdkconfig`` from 32kB to 16kB with a slight reduction in PSRAM performance
+- In case you are experiencing ``dram heap`` overflow, you can reduce the ``DATA_CACHE`` size configured in ``sdkconfig`` from 64kB to 32kB with a slight reduction in PSRAM performance
+
 Using Segger SystemView
 -----------------------
 

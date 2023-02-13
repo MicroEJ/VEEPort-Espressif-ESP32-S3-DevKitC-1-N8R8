@@ -7,6 +7,21 @@
 ===========
 
 ----------------------
+ [2.2.0] - 2023-02-07
+----------------------
+
+Updated
+=======
+
+- Change flash mode to QIO
+- Increase instruction cache size from 16kB to 32kB
+- Increase data cache size from 32kB to 64kB
+- Increase data cache line size from 32B to 64B
+- Refactored validation projects
+- Removed net-ssl-2_2-testsuite-openjdk dependency from SSL validation project as it is not applicable for the VEE Port
+- Ignored TestKeystoreManipulation test from SSL validation project due to out of date testsuite configuration
+
+----------------------
  [2.1.0] - 2023-01-19
 ----------------------
 

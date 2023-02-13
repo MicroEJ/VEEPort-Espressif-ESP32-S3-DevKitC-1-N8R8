@@ -5,7 +5,7 @@
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
 .. |PLATFORM_NAME| replace:: ESP32-S3-DevKitC1 Platform
-.. |PLATFORM_VER| replace:: 2.1.0
+.. |PLATFORM_VER| replace:: 2.2.0
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
@@ -133,8 +133,6 @@ Up to 2 files can be opened simultaneously.
 Known issues/limitations
 ========================
 
-- Note that this platform is not fully qualified, qualification for modules: NET, FS, SSL, BLUETOOTH is ongoing at the time of the release. If more
-  details are needed about them, please contact MicroEJ Support.
 - On Windows, the toolchain doesn't support long paths. 
   The build directory, set with the variable ``ESP_BUILD_DIR``, can be moved closer to the root of the filesystem. 
   To override the default value create a copy of this file: ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp\projects\microej\scripts\set_local_env.bat.tpl``. 

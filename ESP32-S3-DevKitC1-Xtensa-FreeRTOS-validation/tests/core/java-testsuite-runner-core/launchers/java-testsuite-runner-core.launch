@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="com.is2t.microEJ.workbench.MicroEJLaunchConfigurationType">
 <booleanAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationCleanExtraFiles" value="true"/>
-<stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationConfigurationScript" value="Build S3 Dynamic Feature"/>
+<stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationConfigurationScript" value="Default"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationConfigurationScriptBoard" value="Build &amp; Deploy"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationExecutionKind" value="board"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.ext.widget.BrowseOption_CENDsp.database.definition" value=""/>
@@ -57,7 +57,6 @@
 <booleanAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.CheckBoxOption_CENDsoar.bytecode.verifier" value="false"/>
 <booleanAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.CheckBoxOption_CENDsoar.generate.classnames" value="true"/>
 <booleanAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.CheckBoxOption_CENDuse.comm.connection" value="false"/>
-<stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.ComboOption_CENDcom.microej.library.microui.pump.priority" value="5"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.ComboOption_CENDej.hal.client.halMockMode" value="HAL Stub"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.ComboOption_CENDs3.mock.uart.com0.mode" value="-1"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.HiddenOption_CENDcore.memory.immortal.memory" value="RAM"/>
@@ -111,8 +110,6 @@
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.TextFieldOption_CENDej.hal.client.host" value=""/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.TextFieldOption_CENDej.hal.client.port" value="8010"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.TextFieldOption_CENDej.hal.client.timeout" value="60000"/>
-<stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.TextFieldOption_CENDej.microui.memory.imagesheap.size" value="131072"/>
-<stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.TextFieldOption_CENDej.microui.memory.queue.size" value="100"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.TextFieldOption_CENDmaximum.active.watchdogs" value="4"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.TextFieldOption_CENDmui.displaypump.size" value="100"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationJPFConfigurationTabCSTART_com.is2t.microej.workbench.std.launch.ext.TextFieldOption_CENDmui.inputs.buffer.size" value="100"/>
