@@ -178,7 +178,8 @@ set(compile_flags
     "-fno-strict-aliasing"
     "-Wno-address"
     "-Wno-unused-variable"
-    "-Wno-cast-function-type")
+    "-Wno-cast-function-type"
+    "-O3")
 
 if(DEFINED ENV{VALIDATION_BUILD})
     # Definition for the number of iterations for coremark validation
