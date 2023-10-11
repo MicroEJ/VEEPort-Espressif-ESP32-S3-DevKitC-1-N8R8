@@ -76,7 +76,6 @@ else()
         "../espressif/src/com_espressif_esp_idf_nvs.c"
 
         "../fs/src/fs_helper_fatfs.c"
-        "../fs/src/LLFS_ESP32_init_sdcard.c"
         "../fs/src/LLFS_ESP32_init_spiflash.c"
         "../fs/src/LLFS_File_impl.c"
         "../fs/src/LLFS_impl.c"
@@ -84,8 +83,6 @@ else()
         "../hal/src/LLHAL_GPIO.c"
 
         "../kf/src/LLKERNEL_SDRAM.c"
-
-        "../microej-util/src/interrupts.c"
 
         "../net/src/async_select_cache.c"
         "../net/src/async_select_osal.c"
@@ -110,6 +107,7 @@ else()
         "../security/src/LLSEC_PRIVATE_KEY_impl.c"
         "../security/src/LLSEC_PUBLIC_KEY_impl.c"
         "../security/src/LLSEC_RANDOM_impl.c"
+        "../security/src/LLSEC_RSA_CIPHER_impl.c"
         "../security/src/LLSEC_SIG_impl.c"
         "../security/src/LLSEC_X509_CERT_impl.c"
 
@@ -120,19 +118,18 @@ else()
         "../ssl/src/LLNET_SSL_verifyCallback.c"
 
         "../uart/src/uart_switch.c"
-        
-        "../ui/src/LLUI_DISPLAY.c"
+
         "../ui/src/LLUI_INPUT.c"
         "../ui/src/LLUI_LED.c"
-        "../ui/src/LED_DRIVER_WS2812.c"
 
         "../util/src/microej_allocator.c"
         "../util/src/microej_async_worker.c"
         "../util/src/osal_FreeRTOS.c"
         "../util/src/microej_pool.c"
-        "../watchdog-timer/src/LLWATCHDOG_TIMER_impl.c"
-        "../watchdog-timer/src/watchdog_timer_checkpoint_freertos.c"
-        "../watchdog-timer/src/watchdog_timer_helper.c"
+
+        "../../../third_party/idf-extra-components/led_strip/src/led_strip_api.c"
+        "../../../third_party/idf-extra-components/led_strip/src/led_strip_rmt_dev.c"
+        "../../../third_party/idf-extra-components/led_strip/src/led_strip_rmt_encoder.c"
         )
 
     set(include_dirs 
@@ -149,10 +146,11 @@ else()
         "../ssl/inc"
         "../trace/inc"
         "../uart/inc"
-        "../ui/inc/"
         "${IDF_PATH}/components/freertos/FreeRTOS-Kernel/include/freertos"
         "../util/inc"
-        "../watchdog-timer/inc")
+        "../../../third_party/idf-extra-components/led_strip/include"
+        "../../../third_party/idf-extra-components/led_strip/interface"
+        )
 
     if(CONFIG_APPTRACE_SV_ENABLE)
         list(APPEND srcs 
@@ -164,27 +162,26 @@ else()
 
 endif()
 
-
-
-set(requires esp_timer esp_wifi esp_ringbuf esp_netif freertos esp_rom spi_flash openthread bootloader app_update bootloader_support cmock)
-set(priv_requires soc mbedtls cmock driver bt vfs fatfs nvs_flash esptool_py partition_table esp_pm esptool_py esp_pm esp_rom esp_hw_support console bootloader_support)
-
-idf_component_register(SRCS "${srcs}"
-                       INCLUDE_DIRS "${include_dirs}"
-                       REQUIRES "${requires}"
-                       PRIV_REQUIRES "${priv_requires}")
-
-set(compile_flags 
-    "-fno-strict-aliasing"
-    "-Wno-address"
-    "-Wno-unused-variable"
-    "-Wno-cast-function-type"
-    "-O3")
+idf_component_register(SRCS ${srcs}
+                       INCLUDE_DIRS ${include_dirs})
 
 if(DEFINED ENV{VALIDATION_BUILD})
     # Definition for the number of iterations for coremark validation
     add_compile_definitions(ITERATIONS=8000)
+
+    # Added to ignore the compilation warnings from third party code.
+    set(compile_flags 
+        "-Wno-maybe-uninitialized"
+        "-fno-strict-aliasing"
+        "-Wno-unused-but-set-variable"
+        "-O3")
 else()
+
+    # Added to ignore the casting between incompatible native function prototypes and SNI_closeFunction prototype.
+    set(compile_flags 
+        "-Wno-cast-function-type"
+        "-O3")
+
     add_custom_command(TARGET ${COMPONENT_LIB} PRE_LINK
                 COMMAND python ${CMAKE_CURRENT_LIST_DIR}/rename-sections.py ${CMAKE_OBJCOPY} ${CMAKE_CURRENT_LIST_DIR}/../platform/lib/microejapp.o)
 

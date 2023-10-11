@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2018-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,11 +9,16 @@
  * @file
  * @brief LLNET_SSL_verifyCallback implementation over mbedtls.
  * @author MicroEJ Developer Team
- * @version 2.1.5
- * @date 20 December 2021
+ * @version 2.1.7
+ * @date 7 April 2023
  */
+
 #define MBEDTLS_ALLOW_PRIVATE_ACCESS
-#include "mbedtls/build_info.h"
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
 #include "mbedtls/debug.h"
 #include "LLNET_SSL_CONTEXT_impl.h"
 #include "LLNET_SSL_CONSTANTS.h"

@@ -1,15 +1,16 @@
 #
 # YAML
 #
-# Copyright 2022 MicroEJ Corp. All rights reserved.
+# Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found with this software.
 #
 
 variables:
-  BUILD_IMAGE: "p0286-docker.forge.microej.com/sdk-idf_v5_0"
+  BUILD_IMAGE: "p0286-docker.forge.microej.com/sdk-idf_v5_0_1"
   MODULE_DIR: "ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration"
   ANT_PROPERTIES: "-Dskip.publish=false -Dcom.microej.platformbuilder.bsp.build.enabled=true"
   APPLY_FIRST_BSP_COMPILE_HOOKS: "true"
+  GIT_SUBMODULE_STRATEGY: "recursive"
 
 include:
   - project: 'I0271_CI/I0271_Gitlab_Templates'

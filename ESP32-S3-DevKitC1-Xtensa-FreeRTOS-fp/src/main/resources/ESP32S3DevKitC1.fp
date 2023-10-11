@@ -8,6 +8,5 @@
 			<ej.fp.widget.LED label="0" x="112" y="296" ledOff="Led_off.png" ledOn="Led_red.png"/>
 			<ej.fp.widget.LED label="1" x="112" y="296" ledOff="Led_off.png" ledOn="Led_green.png"/> 
 			<ej.fp.widget.LED label="2" x="112" y="296" ledOff="Led_off.png" ledOn="Led_blue.png"/>
-			
 	</device>
 </frontpanel>

@@ -2,8 +2,8 @@
    :alt: sdk_5.6 badge
    :align: left
 
-.. image:: https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/arch_7.18.json
-   :alt: arch_7.18 badge
+.. image:: https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/arch_7.20.json
+   :alt: arch_7.20 badge
    :align: left
 ..
     Copyright 2022-2023 MicroEJ Corp. All rights reserved.
@@ -89,23 +89,23 @@ Board Technical Specifications
    * - External flash size
      - 8 MB
    * - External RAM size
-     - 8 MB 
+     - 8 MB
    * - Power supply
      - USB, External 5V
 
 Here is a list of |BOARD_NAME| useful documentation links:
 
-- Board documentation available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#hardware-reference>`__
-- |MANUFACTURER| board Getting Started available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/index.html#introduction>`__
+- Board documentation available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#hardware-reference>`__
+- |MANUFACTURER| board Getting Started available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/get-started/index.html#introduction>`__
 - Board schematics available `here <https://dl.espressif.com/dl/SCH_ESP32-S3-DEVKITC-1_V1_20210312C.pdf>`__
 - MCU Technical Reference Manual available `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf>`__
 - MCU Datasheet available `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf>`__
-
+- MCU Errata available `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_errata_en.pdf>`__
 
 |VEEPORT| Specifications
 =======================
 
-The Architecture version is ``7.18.1``.
+The Architecture version is ``7.20.1``.
 
 This |VEEPORT| provides the following Foundation Libraries:
 
@@ -115,11 +115,13 @@ This |VEEPORT| provides the following Foundation Libraries:
    * - Foundation Library
      - Version
    * - BLUETOOTH
-     - 2.1
+     - 2.2
    * - BON
      - 1.4
    * - DEVICE
      - 1.1
+   * - DRAWING
+     - 1.0
    * - ECOM-NETWORK
      - 2.1
    * - ECOM-WIFI
@@ -132,10 +134,12 @@ This |VEEPORT| provides the following Foundation Libraries:
      - 1.0
    * - KF
      - 1.6
+   * - MICROUI
+     - 3.2
    * - NET
      - 1.1
    * - NLS
-     - 2.0 
+     - 2.0
    * - SECURITY
      - 1.4
    * - SNI
@@ -145,7 +149,7 @@ This |VEEPORT| provides the following Foundation Libraries:
    * - TRACE
      - 1.1
    * - WATCHDOG
-     - 1.0 
+     - 1.0
 
 The |VEEPORT| is derived into:
 
@@ -164,13 +168,13 @@ BSP Setup
 =========
 
 Install the |MANUFACTURER| toolchain by following the section ``Manual Installation`` described `here
-<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/index.html#installation-step-by-step>`__. Use the ``Universal online installer`` and configure it to use an existing |BSP_FULL_NAME| (|BSP_SHORT_NAME|)
+<https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/get-started/index.html#installation-step-by-step>`__. Use the ``Universal online installer`` and configure it to use an existing |BSP_FULL_NAME| (|BSP_SHORT_NAME|)
 directory and point it to ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf``.
 
 Please pay attention on the limitations regarding the installation path (e.g. no white spaces, parentheses ...), 
 described in the above documentation.
 
-Please refer to the |MANUFACTURER| documentation available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/tools/idf-tools.html#list-of-idf-tools>`__
+Please refer to the |MANUFACTURER| documentation available `here <https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/api-guides/tools/idf-tools.html#list-of-idf-tools>`__
 for more details about |MANUFACTURER| tools.
 
 Windows Toolchain
@@ -182,7 +186,7 @@ Windows Toolchain
 - C/C++ toolchain download link for 32-bit Windows: https://github.com/espressif/crosstool-NG/releases/download/esp-2022r1/xtensa-esp32s3-elf-gcc11_2_0-esp-2022r1-win32.zip
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/windows-setup.html>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/get-started/windows-setup.html>`__
 for more details.
 
 Linux Toolchain
@@ -194,7 +198,7 @@ Linux Toolchain
 - C/C++ toolchain download link for 32-bit Linux: https://github.com/espressif/crosstool-NG/releases/download/esp-2022r1/xtensa-esp32s3-elf-gcc11_2_0-esp-2022r1-linux-i686.tar.xz
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/linux-macos-setup.html>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/get-started/linux-macos-setup.html>`__
 for more details.
 
 BSP Compilation
@@ -240,7 +244,7 @@ Board Setup
 ===========
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html>`__
 for more details.
 
 Power Supply
@@ -249,7 +253,7 @@ Power Supply
 The board can be powered by USB cable or external 5V power supply.
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#getting-started>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html#getting-started>`__
 for more details.
 
 Programming
@@ -289,7 +293,7 @@ The firmware is launched. Please wait for the final message:
     Done
 
 |MANUFACTURER| build and flash documentation are also available `here
-<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/index.html#step-8-build-the-project>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/get-started/index.html#step-8-build-the-project>`__
 for more details.
 
 Logs Output
@@ -324,7 +328,7 @@ port.  Please refer to `Test Suite Configuration`_ for a detailed
 explanation.
 
 Please refer to the |MANUFACTURER| documentation available `here
-<https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/get-started/establish-serial-connection.html#>`__
+<https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/get-started/establish-serial-connection.html#>`__
 for more details.
 
 Debugging
@@ -366,7 +370,7 @@ prefixed by the given name:
   and images for the |SIM|. This project is updated once the |VEEPORT|
   is built.
 
-- ``ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}``:
+- ``ESP32S3DevKitC1-Platform-GNUv112_xtensa-esp32s3-{version}``:
   Contains the |RCP| |VEEPORT| project which is empty by default until
   the |VEEPORT| is built.
 
@@ -399,7 +403,7 @@ At the end of the execution the |VEEPORT| is fully built for the
 |BOARD_NAME| board and is ready to be used.
 
 The |VEEPORT| project should be refreshed with no error in the |RCP|
-``ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}``.
+``ESP32S3DevKitC1-Platform-GNUv112_xtensa-esp32s3-{version}``.
 
 Please refer to
 https://docs.microej.com/en/latest/ApplicationDeveloperGuide/standaloneApplication.html
@@ -424,7 +428,7 @@ FTDI USB wire to the pin D4 of the J1 connector and ground.
 
 In ``config.properties``, the property ``target.platform.dir`` must be
 set to the absolute path to the VEE port. For example
-``C:/ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}/source``.
+``C:/ESP32S3DevKitC1-Platform-GNUv112_xtensa-esp32s3-{version}/source``.
 
 Troubleshooting
 ===============

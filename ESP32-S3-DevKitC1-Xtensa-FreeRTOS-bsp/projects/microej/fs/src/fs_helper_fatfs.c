@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2020-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2020-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  *
  */
@@ -27,10 +27,10 @@
 #endif
 
 /** @brief define the amount of file in private pool module */
-#define FS_MAX_NUMBER_OF_FILE_IN_POOL  (_FS_LOCK)
+#define FS_MAX_NUMBER_OF_FILE_IN_POOL  (FF_FS_LOCK)
 
 /** @brief define the amount of dir in private pool module */
-#define FS_MAX_NUMBER_OF_DIR_IN_POOL  (_FS_LOCK)
+#define FS_MAX_NUMBER_OF_DIR_IN_POOL  (FF_FS_LOCK)
 
 /** @ brief private pool file */
 static FIL gpst_pool_file[FS_MAX_NUMBER_OF_FILE_IN_POOL];
@@ -44,14 +44,14 @@ static POOL_ctx_t gst_pool_file_ctx =
 };
 
 /** @brief private pool directory */
-static DIR gpst_pool_dir[FS_MAX_NUMBER_OF_DIR_IN_POOL];
+static FF_DIR gpst_pool_dir[FS_MAX_NUMBER_OF_DIR_IN_POOL];
 static POOL_item_status_t gpst_pool_dir_item_status[FS_MAX_NUMBER_OF_DIR_IN_POOL];
 static POOL_ctx_t gst_pool_dir_ctx =
 {
 	gpst_pool_dir,
 	gpst_pool_dir_item_status,
-	sizeof(DIR),
-	sizeof(gpst_pool_dir)/sizeof(DIR)
+	sizeof(FF_DIR),
+	sizeof(gpst_pool_dir)/sizeof(FF_DIR)
 };
 
 void LLFS_IMPL_get_last_modified_action(MICROEJ_ASYNC_WORKER_job_t* job) {
@@ -138,7 +138,7 @@ void LLFS_IMPL_create_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 void LLFS_IMPL_open_directory_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 
 	FS_path_operation_t* param = (FS_path_operation_t*) job->params;
-	DIR * pdir;
+	FF_DIR * pdir;
 	FRESULT res = FR_OK;
 	POOL_status_t pool_res;
 
@@ -168,10 +168,11 @@ void LLFS_IMPL_read_directory_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 
 	int32_t directory_ID = param->directory_ID;
 	uint8_t* path = (uint8_t*)&param->path;
-	res = f_readdir((DIR*)directory_ID, &fno);
+	res = f_readdir((FF_DIR*)directory_ID, &fno);
 	if ((res != FR_OK) || (fno.fname[0] == 0)) {
 		param->result = LLFS_NOK;
 	} else {
+		// cppcheck-suppress misra-c2012-17.7 // Return value does not require checking.
 		strcpy((char*)path, (char*)(fno.fname));
 		param->result = LLFS_OK;
 	}
@@ -186,13 +187,14 @@ void LLFS_IMPL_close_directory_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 
 	int32_t directory_ID = param->directory_ID;
 
-	res = f_closedir((DIR*)directory_ID);
+	res = f_closedir((FF_DIR*)directory_ID);
 	if (res != FR_OK) {
 		param->result = LLFS_NOK;
 	} else {
 		param->result = LLFS_OK;
 	}
 
+	// cppcheck-suppress misra-c2012-11.6 // directory_ID type is received from SNI.
 	POOL_free_f(&gst_pool_dir_ctx, (void*)directory_ID);
 
 	LLFS_DEBUG_TRACE("[%s:%u] close dir %ld (err %d)\n", __func__, __LINE__, directory_ID, res);
@@ -258,7 +260,7 @@ void LLFS_IMPL_get_space_size_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 	FS_get_space_size* param = (FS_get_space_size*) job->params;
 	FATFS* fs;
 	DWORD dw_free_cluster;
-	WORD ssize = _MAX_SS;
+	WORD ssize = FF_MAX_SS;
 	FRESULT res = FR_OK;
 
 	uint8_t* path = (uint8_t*)&param->path;
@@ -270,7 +272,8 @@ void LLFS_IMPL_get_space_size_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 	} else if (res == FR_NO_PATH) {
 		param->result = 0;
 	} else {
-#if _MAX_SS != _MIN_SS
+// cppcheck-suppress misra-c2012-20.9 // Defined by FatFS.
+#if FF_MAX_SS != FF_MIN_SS
 		if (disk_ioctl(fs->pdrv, GET_SECTOR_SIZE, &ssize) != RES_OK) {
 			param->result = LLFS_NOK;
 		} else {
@@ -288,7 +291,8 @@ void LLFS_IMPL_get_space_size_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 				param->result = LLFS_NOK;
 				break;
 			}
-#if _MAX_SS != _MIN_SS
+// cppcheck-suppress misra-c2012-20.9 // Defined by FatFS.
+#if FF_MAX_SS != FF_MIN_SS
 		}
 #endif
 	}
@@ -325,7 +329,7 @@ void LLFS_IMPL_is_hidden_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 	if (FR_OK != res) {
 		param->result = LLFS_NOK;
 	} else {
-		if (fno.fattrib & AM_HID) {
+		if ((fno.fattrib & AM_HID) != 0x0) {
 			param->result = LLFS_OK;
 		} else {
 			param->result = LLFS_NOK;
@@ -347,7 +351,7 @@ void LLFS_IMPL_is_directory_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 	if (FR_OK != res) {
 		param->result = LLFS_NOK;
 	} else {
-		if (fno.fattrib & AM_DIR) {
+		if ((fno.fattrib & AM_DIR) != 0x0) {
 			param->result = LLFS_OK;
 		} else {
 			param->result = LLFS_NOK;
@@ -369,7 +373,7 @@ void LLFS_IMPL_is_file_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 	if (FR_OK != res) {
 		param->result = LLFS_NOK;
 	} else {
-		if (fno.fattrib & AM_DIR) {
+		if ((fno.fattrib & AM_DIR) != 0x0) {
 			param->result = LLFS_NOK;
 		} else {
 			param->result = LLFS_OK;
@@ -388,8 +392,8 @@ void LLFS_IMPL_set_last_modified_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 	uint8_t* path = (uint8_t*)&param->path;
 	LLFS_date_t* new_date = &param->date;
 
-	fno.fdate = (WORD)((new_date->year - 1980) * 512U | new_date->month * 32U | new_date->day);
-	fno.ftime = (WORD)(new_date->hour * 2048U | new_date->minute * 32U | new_date->second / 2U);
+	fno.fdate = (WORD)(((new_date->year - 1980) * 512U) | (new_date->month * 32U) | new_date->day);
+	fno.ftime = (WORD)((new_date->hour * 2048U) | (new_date->minute * 32U) | (new_date->second / 2U));
 
 	res = f_utime((TCHAR*)path, &fno);
 	if (FR_OK != res) {
@@ -434,7 +438,7 @@ void LLFS_IMPL_is_accessible_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 	} else {
 		switch (checked_access) {
 		case LLFS_ACCESS_WRITE:
-			if (fno.fattrib & AM_RDO) {
+			if ((fno.fattrib & AM_RDO) != 0x0) {
 				param->result = LLFS_NOK;
 			} else {
 				param->result = LLFS_OK;
@@ -591,7 +595,7 @@ void LLFS_File_IMPL_read_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 		param->error_code = res;
 		param->error_message = "f_read failed";
 	} else {
-		if (bytesread == 0) {
+		if (bytesread == (unsigned int)0) {
 			param->result = LLFS_EOF;
 		} else {
 			param->result = (int32_t)bytesread;
@@ -627,8 +631,10 @@ static FRESULT seek(FIL* fd, QWORD n, FSIZE_t *pos) {
 	*pos = n;
 
 	// Check if the conversion from long long int to FSIZE_t is correct
+	// cppcheck-suppress knownConditionTrueFalse // Data types depend on the platform architecture.
 	if (*pos != n) {
 		// An overflow occurs, saturate the value
+// cppcheck-suppress misra-c2012-20.9 // Defined by FatFS.
 #if FF_FS_EXFAT
 		*pos = INT64_MAX;
 #else
@@ -642,7 +648,6 @@ static FRESULT seek(FIL* fd, QWORD n, FSIZE_t *pos) {
 void LLFS_File_IMPL_seek_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 
 	FS_seek_t* param = (FS_seek_t*) job->params;
-	FRESULT res = FR_OK;
 	FIL* fd = (FIL*)param->file_id;
 	FSIZE_t pos = 0;
 
@@ -651,13 +656,14 @@ void LLFS_File_IMPL_seek_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 		param->error_code = FR_INVALID_PARAMETER;
 		param->error_message = "f_lseek failed";
 	} else {
-		res = seek(fd, param->n, &pos);
+		FRESULT res = seek(fd, param->n, &pos);
 		if (res != FR_OK) {
 			param->result = LLFS_NOK;
 			param->error_code = res;
 			param->error_message = "f_lseek failed";
 		}
 	}
+// cppcheck-suppress misra-c2012-20.9 // Defined by FatFS.
 #if FF_FS_EXFAT
 	LLFS_DEBUG_TRACE("[%s:%u] seek to %lld on %ld (status %ld)\n", __func__, __LINE__, pos, (int32_t)fd, param->result);
 #else
@@ -719,6 +725,7 @@ void LLFS_File_IMPL_get_length_with_fd_action(MICROEJ_ASYNC_WORKER_job_t* job) {
 	FS_get_length_with_fd_t* param = (FS_get_length_with_fd_t*) job->params;
 	FIL* fd = (FIL*)param->file_id;
 	param->result = f_size(fd);
+// cppcheck-suppress misra-c2012-20.9 // Defined by FatFS.
 #if FF_FS_EXFAT
 	LLFS_DEBUG_TRACE("[%s:%u] get length with fd on %lld length=%ld \n", __func__, __LINE__, (int32_t)fd, param->result);
 #else

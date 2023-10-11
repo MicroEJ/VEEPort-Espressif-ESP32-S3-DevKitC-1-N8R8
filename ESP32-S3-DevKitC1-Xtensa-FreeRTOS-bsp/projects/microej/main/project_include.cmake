@@ -14,4 +14,3 @@ if (CMAKE_HOST_WIN32)
 else()
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMBEDTLS_USER_CONFIG_FILE='<microej_mbedtls_config.h>'")
 endif()
-

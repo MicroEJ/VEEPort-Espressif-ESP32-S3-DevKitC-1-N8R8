@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2014-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2014-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief LLNET_SOCKETCHANNEL 2.1.0 implementation over BSD-like API.
  * @author MicroEJ Developer Team
- * @version 1.3.1
- * @date 20 April 2021
+ * @version 1.4.3
+ * @date 5 July 2023
  */
 
 #include <LLNET_SOCKETCHANNEL_impl.h>
@@ -20,9 +20,11 @@
 
 #include <sys/socket.h>
 #include <unistd.h>
+#include <netinet/in.h>
 #include "LLNET_Common.h"
 #if LLNET_AF & LLNET_AF_IPV6
 #include <ifaddrs.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <net/if.h>
 #endif
@@ -31,10 +33,14 @@
 #include "LLNET_CONSTANTS.h"
 #include "LLNET_NETWORKADDRESS_impl.h"
 #include "LLNET_ERRORS.h"
+#include "async_select_cache.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* @brief external function used to retrieve currentTime (same as MicroJvm) */
+extern int64_t LLMJVM_IMPL_getCurrentTime__Z(uint8_t system);
 
 static int32_t SocketChanel_Address(int32_t fd, int8_t* name,
 		int32_t nameLength, uint8_t localAddress);
@@ -71,8 +77,42 @@ int32_t LLNET_SOCKETCHANNEL_IMPL_connect(int32_t fd, int8_t* addr,
 			}
 
 		} else {
-			//a timeout expires during the first connect
-			return J_ETIMEDOUT;
+			if(timeout != 0){
+				int64_t absolute_timeout = async_select_get_socket_absolute_timeout_from_cache(fd);
+
+				//The socket has been configured with a timeout
+				//AND the socket has no write fd available
+				//AND this is the second read (retry==true)
+				//THEN most likely the timeout has been reached during the first read
+				//BUT there is a special case where more Java threads were waiting for a notification,
+				//and they were woken up by the async_select, but the
+				//first Java thread which ran consumed the socket event, so we can end up in this case
+				//without the full timeout being passed
+				//SO check that the timeout really passed for the socket, otherwise add a new async_select
+				//request with the remaining timeout
+				if (absolute_timeout != -1) {
+					int64_t current_time = LLMJVM_IMPL_getCurrentTime__Z(1);
+					if (current_time >= absolute_timeout) {
+						return J_ETIMEDOUT;
+					} else {
+						timeout = absolute_timeout - current_time;
+					}
+				} else {
+					//a timeout expires during the first connect
+					return J_ETIMEDOUT;
+				}
+			}
+
+			// A blocking request on write operation is added in the dispatch event queue for completion.
+			int32_t asyncSelectRes = async_select(fd, SELECT_WRITE, timeout, NULL);
+			if (asyncSelectRes == 0) {
+				// request added in the queue
+				LLNET_DEBUG_TRACE("Connect has blocked without result\n");
+				return J_NET_NATIVE_CODE_BLOCKED_WITHOUT_RESULT;
+			}
+			// requests queue limit reached
+			LLNET_DEBUG_TRACE("Blocking Request Queue Limit Reached\n");
+			return J_ASYNC_BLOCKING_REQUEST_QUEUE_LIMIT_REACHED;
 		}
 	} else { // retry == false
 

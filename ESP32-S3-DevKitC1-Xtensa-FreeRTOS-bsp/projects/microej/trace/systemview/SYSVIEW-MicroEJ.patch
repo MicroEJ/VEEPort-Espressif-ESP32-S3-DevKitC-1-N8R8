@@ -1,5 +1,18 @@
+diff --git a/components/app_trace/CMakeLists.txt b/components/app_trace/CMakeLists.txt
+index 9cb36c8f04..b513df3abb 100644
+--- a/components/app_trace/CMakeLists.txt
++++ b/components/app_trace/CMakeLists.txt
+@@ -50,7 +50,7 @@ idf_component_register(SRCS "${srcs}"
+                        INCLUDE_DIRS "${include_dirs}"
+                        PRIV_INCLUDE_DIRS "${priv_include_dirs}"
+                        # Requires "driver" for GPTimer in "SEGGER_SYSVIEW_Config_FreeRTOS.c"
+-                       PRIV_REQUIRES soc driver
++                       PRIV_REQUIRES soc driver main
+                        REQUIRES esp_timer
+                        LDFRAGMENTS linker.lf)
+ 
 diff --git a/components/app_trace/sys_view/SEGGER/SEGGER_SYSVIEW.c b/components/app_trace/sys_view/SEGGER/SEGGER_SYSVIEW.c
-index a6659929eb..044f8d37a0 100644
+index a6659929eb..6fe275d408 100644
 --- a/components/app_trace/sys_view/SEGGER/SEGGER_SYSVIEW.c
 +++ b/components/app_trace/sys_view/SEGGER/SEGGER_SYSVIEW.c
 @@ -9,6 +9,8 @@
@@ -16,8 +29,8 @@ index a6659929eb..044f8d37a0 100644
    const SEGGER_SYSVIEW_OS_API*  pOSAPI;
          SEGGER_SYSVIEW_SEND_SYS_DESC_FUNC*   pfSendSysDesc;
 +        U32                     DisabledEventGroups;
-+    		U32                     MicroJVMTaskId; // MicroJVM TaskId, or 0 if none.
-+    		U32                     CurrentMicroEJTaskId; // Current MicroEJ TaskId, or 0 if none.
++        U32                     MicroJVMTaskId; // MicroJVM TaskId, or 0 if none.
++        U32                     CurrentMicroEJTaskId; // Current MicroEJ TaskId, or 0 if none.
  } SEGGER_SYSVIEW_GLOBALS;
  
  /*********************************************************************
@@ -192,7 +205,7 @@ index a6659929eb..044f8d37a0 100644
 +  U32 CurrentMicroEJTaskId = _SYSVIEW_Globals.CurrentMicroEJTaskId;
 +  if(TaskId == _SYSVIEW_Globals.MicroJVMTaskId && CurrentMicroEJTaskId != 0){
 +    // Any event sent on the MicroJVM OS task is redirected to the latest Java Task
-+    // The MicroJVM task does not appear in Segger SystemView    
++    // The MicroJVM task does not appear in Segger SystemView
 +    return CurrentMicroEJTaskId;
 +  }
 +  else{
@@ -243,7 +256,7 @@ index eb4cfc583f..59e2ee05d7 100644
  *
  *       Application-provided functions
 diff --git a/components/app_trace/sys_view/Sample/Config/SEGGER_SYSVIEW_Config_FreeRTOS.c b/components/app_trace/sys_view/Sample/Config/SEGGER_SYSVIEW_Config_FreeRTOS.c
-index 9e70542d99..1584fe051e 100644
+index 9e70542d99..ed31bb4b75 100644
 --- a/components/app_trace/sys_view/Sample/Config/SEGGER_SYSVIEW_Config_FreeRTOS.c
 +++ b/components/app_trace/sys_view/Sample/Config/SEGGER_SYSVIEW_Config_FreeRTOS.c
 @@ -11,6 +11,8 @@
@@ -255,111 +268,19 @@ index 9e70542d99..1584fe051e 100644
  *                                                                    *
  *       www.segger.com     Support: support@segger.com               *
  *                                                                    *
-@@ -78,6 +80,9 @@ Revision: $Rev: 3734 $
+@@ -78,6 +80,11 @@ Revision: $Rev: 3734 $
  #include "soc/interrupts.h"
  #include "esp_private/esp_clk.h"
  
++#ifndef VALIDATION_BUILD
 +#include "LLMJVM_MONITOR_sysview.h"
 +#include "LLTRACE_sysview_configuration.h"
++#endif
 +
  extern const SEGGER_SYSVIEW_OS_API SYSVIEW_X_OS_TraceAPI;
  
  /*********************************************************************
-@@ -157,6 +162,78 @@ gptimer_handle_t s_sv_gptimer;
- 
- static esp_apptrace_lock_t s_sys_view_lock = {.mux = portMUX_INITIALIZER_UNLOCKED, .int_state = 0};
- 
-+static const char * const s_isr_names[] = {
-+    [0] = "WIFI_MAC",
-+    [1] = "WIFI_NMI",
-+    [2] = "WIFI_BB",
-+    [3] = "BT_MAC",
-+    [4] = "BT_BB",
-+    [5] = "BT_BB_NMI",
-+    [6] = "RWBT",
-+    [7] = "RWBLE",
-+    [8] = "RWBT_NMI",
-+    [9] = "RWBLE_NMI",
-+    [10] = "SLC0",
-+    [11] = "SLC1",
-+    [12] = "UHCI0",
-+    [13] = "UHCI1",
-+    [14] = "TG0_T0_LEVEL",
-+    [15] = "TG0_T1_LEVEL",
-+    [16] = "TG0_WDT_LEVEL",
-+    [17] = "TG0_LACT_LEVEL",
-+    [18] = "TG1_T0_LEVEL",
-+    [19] = "TG1_T1_LEVEL",
-+    [20] = "TG1_WDT_LEVEL",
-+    [21] = "TG1_LACT_LEVEL",
-+    [22] = "GPIO",
-+    [23] = "GPIO_NMI",
-+    [24] = "FROM_CPU0",
-+    [25] = "FROM_CPU1",
-+    [26] = "FROM_CPU2",
-+    [27] = "FROM_CPU3",
-+    [28] = "SPI0",
-+    [29] = "SPI1",
-+    [30] = "SPI2",
-+    [31] = "SPI3",
-+    [32] = "I2S0",
-+    [33] = "I2S1",
-+    [34] = "UART0",
-+    [35] = "UART1",
-+    [36] = "UART2",
-+    [37] = "SDIO_HOST",
-+    [38] = "ETH_MAC",
-+    [39] = "PWM0",
-+    [40] = "PWM1",
-+    [41] = "PWM2",
-+    [42] = "PWM3",
-+    [43] = "LEDC",
-+    [44] = "EFUSE",
-+    [45] = "CAN",
-+    [46] = "RTC_CORE",
-+    [47] = "RMT",
-+    [48] = "PCNT",
-+    [49] = "I2C_EXT0",
-+    [50] = "I2C_EXT1",
-+    [51] = "RSA",
-+    [52] = "SPI1_DMA",
-+    [53] = "SPI2_DMA",
-+    [54] = "SPI3_DMA",
-+    [55] = "WDT",
-+    [56] = "TIMER1",
-+    [57] = "TIMER2",
-+    [58] = "TG0_T0_EDGE",
-+    [59] = "TG0_T1_EDGE",
-+    [60] = "TG0_WDT_EDGE",
-+    [61] = "TG0_LACT_EDGE",
-+    [62] = "TG1_T0_EDGE",
-+    [63] = "TG1_T1_EDGE",
-+    [64] = "TG1_WDT_EDGE",
-+    [65] = "TG1_LACT_EDGE",
-+    [66] = "MMU_IA",
-+    [67] = "MPU_IA",
-+    [68] = "CACHE_IA",
-+};
-+
- /*********************************************************************
- *
- *       _cbSendSystemDesc()
-@@ -169,11 +246,11 @@ static void _cbSendSystemDesc(void) {
-     SEGGER_SYSVIEW_SendSysDesc("N="SYSVIEW_APP_NAME",D="SYSVIEW_DEVICE_NAME",C="SYSVIEW_CORE_NAME",O=FreeRTOS");
-     snprintf(irq_str, sizeof(irq_str), "I#%d=SysTick", SYSTICK_INTR_ID);
-     SEGGER_SYSVIEW_SendSysDesc(irq_str);
--    size_t isr_count = sizeof(esp_isr_names)/sizeof(esp_isr_names[0]);
-+    size_t isr_count = sizeof(s_isr_names)/sizeof(s_isr_names[0]);
-     for (size_t i = 0; i < isr_count; ++i) {
--        if (esp_isr_names[i] == NULL || (ETS_INTERNAL_INTR_SOURCE_OFF + i) == SYSTICK_INTR_ID)
-+        if (s_isr_names[i] == NULL || (ETS_INTERNAL_INTR_SOURCE_OFF + i) == SYSTICK_INTR_ID)
-             continue;
--        snprintf(irq_str, sizeof(irq_str), "I#%d=%s", ETS_INTERNAL_INTR_SOURCE_OFF + i, esp_isr_names[i]);
-+        snprintf(irq_str, sizeof(irq_str), "I#%d=%s", ETS_INTERNAL_INTR_SOURCE_OFF + i, s_isr_names[i])
-         SEGGER_SYSVIEW_SendSysDesc(irq_str);
-     }
- }
-@@ -203,12 +280,22 @@ static void SEGGER_SYSVIEW_TS_Init(void)
+@@ -203,12 +210,24 @@ static void SEGGER_SYSVIEW_TS_Init(void)
  #endif // TS_USE_TIMERGROUP
  }
  
@@ -367,14 +288,16 @@ index 9e70542d99..1584fe051e 100644
 +
 +static void SYSVIEW_MICROEJ_X_OS_SendTaskList(void){
 +  SYSVIEW_X_OS_TraceAPI.pfSendTaskList();
++#ifndef VALIDATION_BUILD
 +  LLMJVM_MONITOR_SYSTEMVIEW_send_task_list();
++#endif
 +}
 +
  void SEGGER_SYSVIEW_Conf(void) {
      U32 disable_evts = 0;
  
-+  	SYSVIEW_MICROEJ_X_OS_TraceAPI.pfGetTime = SYSVIEW_X_OS_TraceAPI.pfGetTime;
-+  	SYSVIEW_MICROEJ_X_OS_TraceAPI.pfSendTaskList = SYSVIEW_MICROEJ_X_OS_SendTaskList;
++    SYSVIEW_MICROEJ_X_OS_TraceAPI.pfGetTime = SYSVIEW_X_OS_TraceAPI.pfGetTime;
++    SYSVIEW_MICROEJ_X_OS_TraceAPI.pfSendTaskList = SYSVIEW_MICROEJ_X_OS_SendTaskList;
 +
      SEGGER_SYSVIEW_TS_Init();
      SEGGER_SYSVIEW_Init(SYSVIEW_TIMESTAMP_FREQ, SYSVIEW_CPU_FREQ,
@@ -384,7 +307,7 @@ index 9e70542d99..1584fe051e 100644
  
  #if !CONFIG_APPTRACE_SV_EVT_OVERFLOW_ENABLE
 diff --git a/components/app_trace/sys_view/Sample/OS/SEGGER_SYSVIEW_FreeRTOS.h b/components/app_trace/sys_view/Sample/OS/SEGGER_SYSVIEW_FreeRTOS.h
-index 3fd508bfde..9a7f51937b 100644
+index 82e6859a59..ad77caa32a 100644
 --- a/components/app_trace/sys_view/Sample/OS/SEGGER_SYSVIEW_FreeRTOS.h
 +++ b/components/app_trace/sys_view/Sample/OS/SEGGER_SYSVIEW_FreeRTOS.h
 @@ -9,6 +9,8 @@
@@ -415,18 +338,5 @@ index 3fd508bfde..9a7f51937b 100644
 +	)
 +
  #ifdef CONFIG_FREERTOS_SMP
- /*
- FreeRTOS SMP has diverged from ESP-IDF FreeRTOS source quite a bit, thus Sysview is out of sync. For now, we just
-diff --git a/components/freertos/esp_additions/include/freertos/FreeRTOSConfig.h b/components/freertos/esp_additions/include/freertos/FreeRTOSConfig.h
-index c9651b0b18..e4ac29a572 100644
---- a/components/freertos/esp_additions/include/freertos/FreeRTOSConfig.h
-+++ b/components/freertos/esp_additions/include/freertos/FreeRTOSConfig.h
-@@ -217,7 +217,7 @@ For trace macros.
- Note: Include trace macros here and not above as trace macros are dependent on some of the FreeRTOS configs
- */
- #ifndef __ASSEMBLER__
--#if CONFIG_SYSVIEW_ENABLE
-+#if CONFIG_APPTRACE_SV_ENABLE
- #include "SEGGER_SYSVIEW_FreeRTOS.h"
- #undef INLINE // to avoid redefinition
- #endif //CONFIG_SYSVIEW_ENABLE
+ 
+ #define traceQUEUE_SEND( pxQueue )                  SYSVIEW_RecordU32x4(apiFastID_OFFSET + apiID_XQUEUEGENERICSEND, SEGGER_SYSVIEW_ShrinkId((U32)pxQueue), 0, 0, 0)

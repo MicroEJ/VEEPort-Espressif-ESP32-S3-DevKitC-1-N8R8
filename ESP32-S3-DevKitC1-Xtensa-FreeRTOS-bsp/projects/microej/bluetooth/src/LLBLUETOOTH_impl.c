@@ -1,8 +1,16 @@
 /*
  * C
  *
- * Copyright 2019-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2019-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
+ */
+
+/**
+ * @file
+ * @brief LLBLUETOOTH implementation over esp-idf.
+ * @author MicroEJ Developer Team
+ * @version 1.0.0
+ * @date 2 May 2023
  */
 
 #include <stdio.h>
@@ -12,7 +20,15 @@
 #include "bt_manager.h"
 #include "bt_pump.h"
 
+#ifdef __cplusplus
+	extern "C" {
+#endif
+
+/** @brief True if the underlying Bluetooth stack was already enabled, false otherwise. */
 static bool enable_done = false;
+
+/** @brief True if enabling Bluetooth stack was done with success, false otherwise. */
+// cppcheck-suppress misra-c2012-8.9 // Variable used to return the LLBLUETOOTH_IMPL_enable result across multiple calls.
 static bool enable_result;
 
 uint8_t LLBLUETOOTH_IMPL_enable(void)
@@ -65,6 +81,7 @@ uint8_t LLBLUETOOTH_IMPL_stopAdvertising(void)
 
 uint8_t LLBLUETOOTH_IMPL_connect(const LLBLUETOOTH_address_t *addr)
 {
+	// cppcheck-suppress misra-c2012-18.8 // ESP_BD_ADDR_LEN defined in the Bluetooth stack.
 	uint8_t peer_addr[ESP_BD_ADDR_LEN];
 	esp_ble_addr_type_t addr_type;
 	BT_HELPER_read_addr(addr, peer_addr, &addr_type);
@@ -79,17 +96,20 @@ uint8_t LLBLUETOOTH_IMPL_disconnect(uint16_t conn_handle)
 
 uint8_t LLBLUETOOTH_IMPL_sendPairRequest(uint16_t conn_handle)
 {
-	return BT_MANAGER_send_pair_request(conn_handle);
+	(void)conn_handle;
+	return BT_MANAGER_send_pair_request();
 }
 
 uint8_t LLBLUETOOTH_IMPL_sendPairResponse(uint16_t conn_handle, uint8_t accept)
 {
-	return BT_MANAGER_send_pair_response(conn_handle, accept);
+	(void)conn_handle;
+	return BT_MANAGER_send_pair_response(accept);
 }
 
 uint8_t LLBLUETOOTH_IMPL_sendPasskeyResponse(uint16_t conn_handle, uint8_t accept, uint32_t passkey)
 {
-	return BT_MANAGER_send_passkey_response(conn_handle, accept, passkey);
+	(void)conn_handle;
+	return BT_MANAGER_send_passkey_response(accept, passkey);
 }
 
 uint8_t LLBLUETOOTH_IMPL_discoverServices(uint16_t conn_handle, const LLBLUETOOTH_uuid_t *uuid)
@@ -110,7 +130,8 @@ uint8_t LLBLUETOOTH_IMPL_addService(const LLBLUETOOTH_gatts_service_t *llservice
 	}
 
 	int h = 0;
-	handles[h++] = service.handle;
+	handles[h] = service.handle;
+	h++;
 
 	int num_attributes = service.num_char + service.num_desc;
 	const LLBLUETOOTH_gatts_attribute_t *llattributes = (LLBLUETOOTH_gatts_attribute_t *) (llservice+1);
@@ -121,14 +142,17 @@ uint8_t LLBLUETOOTH_IMPL_addService(const LLBLUETOOTH_gatts_service_t *llservice
 			if (!BT_MANAGER_add_characteristic(service.handle, &characteristic)) {
 				return false;
 			}
-			handles[h++] = characteristic.value_handle;
+			handles[h] = characteristic.value_handle;
 		} else if (llattribute->type == ATTRIBUTE_TYPE_DESCRIPTOR) {
 			BT_DATA_descriptor_t descriptor = BT_HELPER_read_descriptor(llattribute);
 			if (!BT_MANAGER_add_descriptor(service.handle, &descriptor)) {
 				return false;
 			}
-			handles[h++] = descriptor.handle;
+			handles[h] = descriptor.handle;
+		} else {
+			return false;
 		}
+		h++;
 	}
 
 	return BT_MANAGER_start_service(service.handle);
@@ -156,8 +180,23 @@ uint8_t LLBLUETOOTH_IMPL_sendWriteResponse(uint16_t conn_handle, uint16_t attr_h
 	return BT_MANAGER_send_write_response(conn_handle, attr_handle, status);
 }
 
+uint8_t LLBLUETOOTH_IMPL_sendPrepareWriteResponse(uint16_t conn_handle, uint16_t attr_handle, uint8_t status,
+		const uint8_t *value, uint32_t value_size, uint32_t offset)
+{
+	return BT_MANAGER_send_prepare_write_response(conn_handle, attr_handle, status, value_size, value, offset);
+}
+
+uint8_t LLBLUETOOTH_IMPL_sendExecuteWriteResponse(uint16_t conn_handle, uint16_t attr_handle, uint8_t status)
+{
+	return BT_MANAGER_send_execute_write_response(conn_handle, attr_handle, status);
+}
+
 uint8_t LLBLUETOOTH_IMPL_sendNotification(uint16_t conn_handle, uint16_t attr_handle, const uint8_t *value,
 	uint32_t value_size, uint8_t confirm)
 {
 	return BT_MANAGER_send_notification(conn_handle, attr_handle, value_size, value, confirm);
 }
+
+#ifdef __cplusplus
+	}
+#endif

@@ -8,7 +8,7 @@ REM Use of this source code is governed by a BSD-style license that can be found
 REM 'build.bat' implementation for Espressif IDF.
 
 REM 'build.bat' is responsible for producing the executable file. It will build the whole project
-REM according to the sdkconfig_ota_no_systemview configuration file. 
+REM according to the sdkconfig_ota_systemview configuration file. 
 REM Output will be in %PROJECT_DIR%\Build directory.
 
 REM Reset ERRORLEVEL between multiple run in the same shell
@@ -30,7 +30,7 @@ IF DEFINED APPLY_FIRST_BSP_COMPILE_HOOKS (
 )
 
 REM Set sdkconfig file 
-SET ENV_SDKCONFIG="sdkconfig_ota_no_systemview"
+SET ENV_SDKCONFIG="sdkconfig_ota_systemview"
 
 REM If sdkconfig exists
 CD "%ESP_PROJECT_DIR%"
@@ -77,5 +77,3 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 REM Clean exit.
-
-

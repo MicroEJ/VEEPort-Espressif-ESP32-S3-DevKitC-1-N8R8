@@ -9,13 +9,17 @@
  * @file
  * @brief LLNET_SSL_CONTEXT implementation over mbedtls.
  * @author MicroEJ Developer Team
- * @version 2.1.5
- * @date 20 December 2021
+ * @version 2.1.7
+ * @date 7 April 2023
  */
+
 #define MBEDTLS_ALLOW_PRIVATE_ACCESS
-#include "mbedtls/build_info.h"
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
 #include "mbedtls/debug.h"
-#include "mbedtls/net_sockets.h"
 #include "mbedtls/ssl.h"
 #include "ssl_misc.h"
 #include "mbedtls/error.h"
@@ -91,22 +95,18 @@ int32_t LLNET_SSL_CONTEXT_IMPL_createContext(int32_t protocol, uint8_t isClientC
 						endpoint,
 						MBEDTLS_SSL_TRANSPORT_STREAM,
 						MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
+			(void)ret;
 			LLNET_SSL_DEBUG_MBEDTLS_TRACE("mbedtls_ssl_config_defaults", ret);
 		}
 
 		switch (protocol) {
+
 			case TLSv1_2_PROTOCOL:
 				mbedtls_ssl_conf_min_tls_version(conf, MBEDTLS_SSL_VERSION_TLS1_2 );
 				mbedtls_ssl_conf_max_tls_version(conf, MBEDTLS_SSL_VERSION_TLS1_2 );
 				break;
-			case TLSv1_3_PROTOCOL:
-				mbedtls_ssl_conf_min_tls_version(conf, MBEDTLS_SSL_VERSION_TLS1_3 );
-				mbedtls_ssl_conf_max_tls_version(conf, MBEDTLS_SSL_VERSION_TLS1_3 );
-				break;
 			default:
-				mbedtls_ssl_config_free(conf);
-				mbedtls_free(conf);
-				return J_CREATE_SSL_CONTEXT_ERROR;
+				break;
 		}
 
 #if defined(MBEDTLS_ENTROPY_C) && defined(MBEDTLS_CTR_DRBG_C)
@@ -167,7 +167,7 @@ int32_t LLNET_SSL_CONTEXT_IMPL_createContext(int32_t protocol, uint8_t isClientC
 #endif
 #endif
 
-		LLNET_SSL_DEBUG_TRACE("%s(method=%ld) return ctx=%p\n", __func__, protocol,conf);
+		LLNET_SSL_DEBUG_TRACE("%s(method=%d) return ctx=%p\n", __func__, protocol,conf);
 
 		return (int32_t)conf;
 	}
@@ -272,13 +272,13 @@ int32_t LLNET_SSL_CONTEXT_IMPL_clearKeyStore(int32_t contextID, uint8_t retry){
 			}
 		}
 	}
+
 	return J_SSL_NO_ERROR;
 }
 
 int32_t LLNET_SSL_CONTEXT_IMPL_setCertificate(int32_t contextID, uint8_t* cert, int32_t offset, int32_t len, int32_t format, uint8_t retry){
 	LLNET_SSL_DEBUG_TRACE("%s(context=%d, retry=%d)\n", __func__, (int)contextID, retry);
 	mbedtls_ssl_config* conf = (mbedtls_ssl_config*)(contextID);
-	mbedtls_ssl_key_cert *keycert = conf->MBEDTLS_PRIVATE(key_cert);
 	mbedtls_x509_crt *clicert;
 	int ret;
 
@@ -338,7 +338,6 @@ int32_t LLNET_SSL_CONTEXT_IMPL_setPrivateKey(int32_t contextID, uint8_t* private
 	LLNET_SSL_DEBUG_TRACE("%s(context=%d, retry=%d)\n", __func__, (int)contextID, retry);
 	mbedtls_ssl_config* conf = (mbedtls_ssl_config*)(contextID);
 	mbedtls_pk_context *key;
-	mbedtls_ctr_drbg_context ctr_drbg;
 	uint8_t * pwd = NULL;
 
 	/* Check parameters */
@@ -382,7 +381,6 @@ int32_t LLNET_SSL_CONTEXT_IMPL_setPrivateKey(int32_t contextID, uint8_t* private
 		print_mbedtls_error(__func__, mbed_err);
 		/* Free the private key */
 		mbedtls_pk_free(key);
-		mbedtls_ctr_drbg_free(&ctr_drbg);
 		mbedtls_free(key);
 
 		return J_NO_PRIVATE_KEY;

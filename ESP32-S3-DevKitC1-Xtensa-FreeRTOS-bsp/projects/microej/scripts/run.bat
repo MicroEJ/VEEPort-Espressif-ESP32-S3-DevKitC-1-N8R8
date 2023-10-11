@@ -2,7 +2,7 @@
 SETLOCAL ENABLEEXTENSIONS
 
 REM BAT
-REM Copyright 2022 MicroEJ Corp. All rights reserved.
+REM Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 REM Use of this source code is governed by a BSD-style license that can be found with this software.
 
 REM 'run.bat' implementation for Espressif IDF.
@@ -35,7 +35,7 @@ IF %ERRORLEVEL% NEQ 0 (
 	EXIT /B %ERRORLEVEL%
 )
 
-python "%ESP_IDF_PATH%\tools\idf.py" -B "%ESP_BUILD_DIR%" -p "%ESPPORT%" flash && (
+python "%ESP_IDF_PATH%\tools\idf.py" -B "%ESP_BUILD_DIR%" -b 921600 -p "%ESPPORT%" flash && (
 	SET ERRORLEVEL=0
 	) || (
 	SET ERRORLEVEL=1

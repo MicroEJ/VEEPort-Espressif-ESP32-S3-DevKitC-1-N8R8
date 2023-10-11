@@ -3,10 +3,10 @@ ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/platform/lib/microejrunti
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/build/module/module-dropins/scripts/deployToolBSPRunExtension.jar
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/build/module/module-dropins/tools/license-checker.jar
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/build/module/module-dropins/workbenchExtension_launchScriptFramework.jar
+ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/build/module/license-checker.jar
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/dropins/javaAPIs/wadapps-1.0-api.jar
-ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/dropins/javaLibs/esp_idf-1.1.jar
+ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/dropins/javaLibs/kf-1.6.jar
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/dropins/javaLibs/wadapps-1.0.jar
-ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/dropins/tools/firmwareLinker.jar
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-fp/src/main/resources/Board.jpg
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-fp/src/main/resources/Led_blue.png
 ESP32-S3-DevKitC1-Xtensa-FreeRTOS-fp/src/main/resources/Led_green.png

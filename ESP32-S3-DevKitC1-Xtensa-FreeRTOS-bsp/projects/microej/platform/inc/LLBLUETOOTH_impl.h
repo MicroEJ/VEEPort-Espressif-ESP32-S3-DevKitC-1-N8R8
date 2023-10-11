@@ -1,17 +1,16 @@
 /*
  * C
  *
- * Copyright 2018-2020 MicroEJ Corp. All rights reserved.
- * This library is provided in source code for use, modification and test, subject to license terms.
- * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+ * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
 /**
  * @file
  * @brief MicroEJ BLUETOOTH low level API
  * @author MicroEJ Developer Team
- * @version 2.0.2
- * @date 8 July 2021
+ * @version 2.1.0
+ * @date 28 April 2023
  */
 
 #ifndef _LLBLUETOOTH_IMPL
@@ -236,6 +235,38 @@ uint8_t LLBLUETOOTH_IMPL_sendReadResponse(uint16_t conn_handle, uint16_t attr_ha
  * @return true if the write response was sent successfully.
  */
 uint8_t LLBLUETOOTH_IMPL_sendWriteResponse(uint16_t conn_handle, uint16_t attr_handle, uint8_t status);
+
+/**
+ * Sends the response to a prepare write request sent by the given device on an attribute.
+ *
+ * @param conn_handle
+ *            the connection handle of the device.
+ * @param attr_handle
+ *            the attribute handle.
+ * @param status
+ *            the status to send back.
+ * @param value
+ *            the value of the prepare write request.
+ * @param value_size
+ *            the size of the value of the prepare write request.
+ * @param offset
+ *            the offset of the prepare write request.
+ * @return true if the write response was sent successfully.
+ */
+uint8_t LLBLUETOOTH_IMPL_sendPrepareWriteResponse(uint16_t conn_handle, uint16_t attr_handle, uint8_t status,
+		const uint8_t *value, uint32_t value_size, uint32_t offset);
+/**
+ * Sends the response to an execute write request sent by the given device on an attribute.
+ *
+ * @param conn_handle
+ *            the connection handle of the device.
+ * @param attr_handle
+ *            the attribute handle.
+ * @param status
+ *            the status to send back.
+ * @return true if the write response was sent successfully.
+ */
+uint8_t LLBLUETOOTH_IMPL_sendExecuteWriteResponse(uint16_t conn_handle, uint16_t attr_handle, uint8_t status);
 
 /**
  * Sends a notification or indication on a characteristic to the given device.

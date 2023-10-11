@@ -1,5 +1,5 @@
 .. 
-    Copyright 2022 MicroEJ Corp. All rights reserved.
+    Copyright 2022-2023 MicroEJ Corp. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be found with this software.
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
@@ -43,16 +43,10 @@ Build & Run Scripts 脚本
 
 - ``build*`` 脚本用来编译、链接 BSP 和 MicroEJ 应用以生成可以烧写到设备的 MicroEJ 固件（ ``application.out`` ）。
 
-  这个脚本使用 Mono-Sandbox 固件配置，使用 ``sdkconfig_ota_no_systemview`` 创建 ``sdkconfig`` 配置文件。
+  这个脚本使用 Mono-Sandbox 固件配置，使用 ``sdkconfig_ota_systemview`` 创建 ``sdkconfig`` 配置文件。
 
 - ``run*`` 脚本用来烧写MicroEJ固件(``application.out``)到设备。为保证脚本正常工作，必须正确设置
   ``set_project_env*`` 文件里的变量 ``ESPPORT`` 。
-
-- ``build_ota_systemview*`` 脚本用来编译和链接BSP与MicroEJ应用, 并生成可以烧写的
-  MicroEJ固件(``application.out``) 。
-
-  脚本使用 ``sdkconfig_ota_systemview`` 生成 ``sdkconfig`` 配置文件，
-  并使用这个配置文件生成 Mono-Sandbox 固件。在当前配置中，使用FS库的应用程序不能在激活SystemView的情况下工作。
 
 - ``build_no_ota_no_systemview*`` 脚本用来编译和链接BSP与MicroEJ应用, 并生成可以烧写的
   MicroEJ固件(``application.out``) 。

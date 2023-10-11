@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2015-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2015-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief LLFS_File implementation with async worker.
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 17 June 2022
+ * @version 2.1.1
+ * @date 26 April 2023
  */
 
 /* Includes ------------------------------------------------------------------*/
@@ -88,7 +88,7 @@ int32_t LLFS_File_IMPL_write(int32_t file_id, uint8_t* data, int32_t offset, int
 }
 
 void LLFS_File_IMPL_write_byte(int32_t file_id, int32_t data){
-	LLFS_async_exec_write_read_byte_job(file_id, data, true, (SNI_callback)LLFS_File_IMPL_write_byte, LLFS_File_IMPL_write_action, (SNI_callback)LLFS_File_IMPL_write_byte_on_done);
+	(void)LLFS_async_exec_write_read_byte_job(file_id, data, true, (SNI_callback)LLFS_File_IMPL_write_byte, LLFS_File_IMPL_write_action, (SNI_callback)LLFS_File_IMPL_write_byte_on_done);
 }
 
 int32_t LLFS_File_IMPL_read(int32_t file_id, uint8_t* data, int32_t offset, int32_t length){
@@ -431,6 +431,8 @@ static int32_t LLFS_File_IMPL_read_on_done(int32_t file_id, uint8_t* data, int32
 		if(release_result != SNI_OK){
 			SNI_throwNativeIOException(release_result, "SNI_flushArrayElements: Internal error");
 		}
+	}else{
+		// Successful: result hold the number of read bytes.
 	}
 	MICROEJ_ASYNC_WORKER_free_job(&fs_worker, job);
 
@@ -485,6 +487,9 @@ static int32_t LLFS_File_IMPL_read_byte_on_done(int32_t file_id){
 	else if(result != LLFS_EOF) {
 		// Invalid value returned by the read_byte action
 		SNI_throwNativeIOException(result, "Internal error");
+	}
+	else{
+		// Successful: result hold the number of read bytes.
 	}
 	// else: result==LLFS_EOF: just return LLFS_EOF
 	

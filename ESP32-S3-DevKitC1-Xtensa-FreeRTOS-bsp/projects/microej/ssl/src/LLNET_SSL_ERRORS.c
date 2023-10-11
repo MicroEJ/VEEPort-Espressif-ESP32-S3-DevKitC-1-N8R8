@@ -9,11 +9,15 @@
  * @file
  * @brief LLNET_SSL_ERRORS implementation over mbedtls.
  * @author MicroEJ Developer Team
- * @version 2.1.5
- * @date 20 December 2021
+ * @version 2.1.7
+ * @date 7 April 2023
  */
 
-#include "mbedtls/build_info.h"
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
 #include "mbedtls/aes.h"
 #include "mbedtls/asn1.h"
 #include "mbedtls/base64.h"
@@ -139,7 +143,7 @@ J_DECRYPT_ERROR
 
 jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 
-	LLNET_SSL_DEBUG_TRACE("%s(SSL_error=%ld)\n", __func__, mbedtls_error);
+	LLNET_SSL_DEBUG_TRACE("%s(SSL_error=%d)\n", __func__, mbedtls_error);
 	switch (mbedtls_error) {
 
 	case 0:
@@ -248,6 +252,7 @@ jint LLNET_SSL_TranslateReturnCode(int32_t mbedtls_error) {
 	case MBEDTLS_ERR_DES_INVALID_INPUT_LENGTH:
 	case MBEDTLS_ERR_HMAC_DRBG_INPUT_TOO_BIG:
 	case MBEDTLS_ERR_X509_BAD_INPUT_DATA:
+		return J_INPUT_CASE_ERROR;
 
 	case MBEDTLS_ERR_AES_INVALID_KEY_LENGTH:
 

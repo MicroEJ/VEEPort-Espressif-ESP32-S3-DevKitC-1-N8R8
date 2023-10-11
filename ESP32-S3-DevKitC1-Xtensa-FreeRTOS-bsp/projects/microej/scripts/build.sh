@@ -2,7 +2,7 @@
 #
 # BASH
 #
-# Copyright 2022 MicroEJ Corp. All rights reserved.
+# Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found with this software.
 
 # 'build.sh' implementation for Espressif IDF.
@@ -25,7 +25,7 @@ fi
 cd $ESP_PROJECT_DIR
 
 # Use sdkconfig.default
-ENV_SDKCONFIG="sdkconfig_ota_no_systemview"
+ENV_SDKCONFIG="sdkconfig_ota_systemview"
 # If sdkconfig exists
 if [ -e "sdkconfig" ]; then
     cmp -s "sdkconfig" "sdkconfig.backup" || (echo "Backup sdkconfig to sdkconfig.backup" ; cp "sdkconfig" "sdkconfig.backup")
@@ -36,8 +36,11 @@ else
     cp "$ENV_SDKCONFIG" "sdkconfig"
 fi
 
+# Make sure that Espressif IDF is rightly configured
+python $IDF_PATH/tools/idf_tools.py --non-interactive install required --targets=$IDF_INSTALL_TARGETS
+
 . $IDF_PATH/export.sh
-idf.py -B $ESP_BUILD_DIR all && cp $ESP_BUILD_DIR/microej.elf $CURRENT_DIRECTORY/application.out
+python $IDF_PATH/tools/idf.py -B $ESP_BUILD_DIR all && cp $ESP_BUILD_DIR/microej.elf $CURRENT_DIRECTORY/application.out
 if [ $? -ne 0 ]; then
   exit 1
 fi

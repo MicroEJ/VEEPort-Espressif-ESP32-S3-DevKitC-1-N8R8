@@ -1,9 +1,8 @@
 /*
  * C
  *
- * Copyright 2018-2020 MicroEJ Corp. All rights reserved.
- * This library is provided in source code for use, modification and test, subject to license terms.
- * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+ * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
 #define LLBLUETOOTH_IMPL_enable Java_ej_bluetooth_BluetoothNatives_enable
@@ -24,4 +23,6 @@
 #define LLBLUETOOTH_IMPL_sendWriteRequest Java_ej_bluetooth_BluetoothNatives_sendWriteRequest
 #define LLBLUETOOTH_IMPL_sendReadResponse Java_ej_bluetooth_BluetoothNatives_sendReadResponse
 #define LLBLUETOOTH_IMPL_sendWriteResponse Java_ej_bluetooth_BluetoothNatives_sendWriteResponse
+#define LLBLUETOOTH_IMPL_sendPrepareWriteResponse Java_ej_bluetooth_BluetoothNatives_sendPrepareWriteResponse
+#define LLBLUETOOTH_IMPL_sendExecuteWriteResponse Java_ej_bluetooth_BluetoothNatives_sendExecuteWriteResponse
 #define LLBLUETOOTH_IMPL_sendNotification Java_ej_bluetooth_BluetoothNatives_sendNotification

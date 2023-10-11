@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2015-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2015-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief LLFS implementation with async worker.
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 17 June 2022
+ * @version 2.1.1
+ * @date 26 April 2023
  */
 
 /* Includes ------------------------------------------------------------------*/
@@ -64,11 +64,14 @@ static int32_t LLFS_async_exec_path_result(void);
 
 void LLFS_IMPL_initialize(void){
 #ifndef FS_CUSTOM_WORKER
+	// cppcheck-suppress misra-c2012-11.8 // String casts conform to MICROEJ_ASYNC_WORKER_initialize function definitions.
 	MICROEJ_ASYNC_WORKER_status_t status = MICROEJ_ASYNC_WORKER_initialize(&fs_worker, (uint8_t*)"MicroEJ FS", fs_worker_stack, FS_WORKER_PRIORITY);
 	if(status == MICROEJ_ASYNC_WORKER_INVALID_ARGS){
 		SNI_throwNativeException(status, "Invalid argument for FS async worker");
 	}else if (status == MICROEJ_ASYNC_WORKER_ERROR){
 		SNI_throwNativeException(status, "Error while initializing FS async worker");
+	}else{
+		// Default case: MICROEJ_ASYNC_WORKER_OK
 	}
 #endif
 
@@ -139,7 +142,7 @@ int32_t LLFS_IMPL_rename_to(uint8_t* path, uint8_t* new_path){
 	}
 
 	FS_rename_to_t* params = (FS_rename_to_t*)job->params;
-	if(LLFS_set_path_param(path, (uint8_t*)&params->path) == LLFS_OK && LLFS_set_path_param(new_path, (uint8_t*)&params->new_path) == LLFS_OK){
+	if((LLFS_set_path_param(path, (uint8_t*)&params->path) == LLFS_OK) && (LLFS_set_path_param(new_path, (uint8_t*)&params->new_path) == LLFS_OK)){
 		MICROEJ_ASYNC_WORKER_status_t status = MICROEJ_ASYNC_WORKER_async_exec(&fs_worker, job, LLFS_IMPL_rename_to_action, (SNI_callback)LLFS_IMPL_rename_to_on_done);
 		if(status == MICROEJ_ASYNC_WORKER_OK){
 			// Wait for the action to be done
@@ -289,7 +292,7 @@ int32_t LLFS_set_path_param(uint8_t* path, uint8_t* path_param){
 		SNI_throwNativeException(LLFS_NOK, "Path length is too long");
 		return LLFS_NOK;
 	}
-
+	// cppcheck-suppress misra-c2012-17.7 // Return value does not require checking.
 	memcpy(path_param, path, path_length);
 	return LLFS_OK;
 }
@@ -496,9 +499,10 @@ static int32_t LLFS_IMPL_read_directory_on_done(int32_t directory_ID, uint8_t* p
 	if(result == LLFS_OK){
 		// Copy back the read path
 		int32_t java_path_length = SNI_getArrayLength(path);
-		int32_t path_length = strlen((char *)params->path)+1;//add 1 for the terminating null byte ('\0').
+		int32_t path_length = strlen((char *)params->path) + (size_t)1;//add 1 for the terminating null byte ('\0').
 		if(java_path_length >= path_length){
 			// Buffer large enough for the path
+			// cppcheck-suppress misra-c2012-17.7 // Return value does not require checking.
 			memcpy(path, params->path, path_length);
 		}
 		else {

@@ -1,17 +1,16 @@
 /*
  * C
  *
- * Copyright 2018-2020 MicroEJ Corp. All rights reserved.
- * This library is provided in source code for use, modification and test, subject to license terms.
- * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
+ * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
 /**
  * @file
  * @brief MicroEJ BLUETOOTH low level API
  * @author MicroEJ Developer Team
- * @version 2.0.2
- * @date 8 July 2021
+ * @version 2.1.0
+ * @date 28 April 2023
  */
 
 #ifndef _LLBLUETOOTH_DEFINES
@@ -65,6 +64,7 @@ extern "C" {
 #define EVENT_GATTS_READ_REQUEST			(16)
 #define EVENT_GATTS_WRITE_REQUEST			(17)
 #define EVENT_GATTS_NOTIFICATION_SENT		(18)
+#define EVENT_GATTS_EXECUTE_WRITE_REQUEST	(19)
 
 /** Address */
 typedef struct {
@@ -243,17 +243,27 @@ typedef struct {
 	uint8_t _padding;
 	uint16_t conn_handle;
 	uint16_t attr_handle;
+	uint16_t offset;
 } LLBLUETOOTH_event_gatts_read_request_t;
 
 /** EVENT_GATTS_WRITE_REQUEST */
 typedef struct {
 	uint8_t event_type;
-	uint8_t _padding;
+	uint8_t prepare;
 	uint16_t conn_handle;
 	uint16_t attr_handle;
+	uint16_t offset;
 	uint16_t value_size;
 	// followed by: uint8_t value[value_size];
 } LLBLUETOOTH_event_gatts_write_request_t;
+
+/** EVENT_GATTS_EXECUTE_WRITE_REQUEST */
+typedef struct {
+	uint8_t event_type;
+	uint8_t execute;
+	uint16_t conn_handle;
+	uint16_t attr_handle;
+} LLBLUETOOTH_event_gatts_execute_write_request_t;
 
 /** EVENT_GATTS_NOTIFICATION_SENT */
 typedef struct {

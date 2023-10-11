@@ -1,8 +1,16 @@
 /*
  * C
  *
- * Copyright 2019-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2019-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
+ */
+
+/**
+ * @file
+ * @brief Bluetooth pump implementation.
+ * @author MicroEJ Developer Team
+ * @version 1.0.0
+ * @date 2 May 2023
  */
 
 #include <stdio.h>
@@ -19,32 +27,57 @@
 #include "bt_manager.h"
 #include "bt_pump.h"
 
-#define PUMP_QUEUE_SIZE 10
-#define MAX_SCAN_FILTER_DATA_SIZE 32
+#ifdef __cplusplus
+	extern "C" {
+#endif
 
+/** @brief Bluetooth pump queue size (in number of elements). */
+#define PUMP_QUEUE_SIZE           (10U)
+
+/** @brief Maximum size of the scan filter. */
+#define MAX_SCAN_FILTER_DATA_SIZE (32U)
+
+/** @brief Allocate event using dynamic memory. */
+// cppcheck-suppress misra-c2012-20.7 // type macro parameter is a data type, therefore it cannot be enclosed in parentheses.
 #define ALLOC_EVENT(type, extra)\
-	uint32_t out_size = sizeof(type) + extra;\
+	uint32_t out_size = sizeof(type) + (extra);\
 	type *out = (type *) pvPortMalloc(out_size);\
 	event_info_t out_info = {(LLBLUETOOTH_event_t *) out, out_size};
 
+/** @brief Free the dynamic memory that holds an event. */
 #define FREE_EVENT(event) vPortFree(event)
 
+/** @brief Structure describing an event passing through the queue. */
 typedef struct {
 	LLBLUETOOTH_event_t *event;
 	uint32_t size;
 } event_info_t;
 
+/** @brief Semaphore used for application registration asynchronous notification. */
 static SemaphoreHandle_t register_lock = NULL;
+
+/** @brief Status of the most recent registered application. */
 static bool register_success;
 
+/** @brief Event queue handle. */
 static QueueHandle_t event_queue = NULL;
+
+/** @brief Java thread id when suspended. */
 static int32_t suspended_thread_id = SNI_ERROR;
 
+/** @brief Scan filter action. */
 static uint8_t scan_filter_action = SCAN_FILTER_ACTION_NONE;
+
+/** @brief Scan filter type. */
 static uint8_t scan_filter_type;
+
+/** @brief Scan filter data. */
 static uint8_t scan_filter_data[MAX_SCAN_FILTER_DATA_SIZE];
+
+/** @brief Scan filter data size. */
 static uint32_t scan_filter_data_size;
 
+/** @brief Private functions. */
 static int32_t poll_event(LLBLUETOOTH_event_t *llevent, uint32_t max_event_size);
 static void handle_event_gap(esp_gap_ble_cb_event_t type, esp_ble_gap_cb_param_t *event);
 static void handle_event_gatts(esp_gatts_cb_event_t type, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *event);
@@ -53,9 +86,9 @@ static void handle_event_scan_result(const struct ble_scan_result_evt_param *eve
 static void handle_event_scan_stop_complete(const struct ble_scan_stop_cmpl_evt_param *event);
 static void handle_event_adv_stop_complete(const struct ble_adv_stop_cmpl_evt_param *event);
 static void handle_event_auth_complete(const esp_ble_auth_cmpl_t *event);
-static void handle_event_security_request(const esp_ble_sec_req_t *event);
+static void handle_event_security_request(void);
 static void handle_event_passkey_notification(const esp_ble_sec_key_notif_t *event);
-static void handle_event_passkey_request(const esp_ble_sec_req_t *event);
+static void handle_event_passkey_request(void);
 static void handle_event_gatts_register(const struct gatts_reg_evt_param *event, esp_gatt_if_t gattc_if);
 static void handle_event_gatts_unregister(void);
 static void handle_event_create_service(const struct gatts_create_evt_param *event);
@@ -65,6 +98,7 @@ static void handle_event_start_service(const struct gatts_start_evt_param *event
 static void handle_event_read_request(const struct gatts_read_evt_param *event);
 static void handle_event_write_request(const struct gatts_write_evt_param *event);
 static void handle_event_notification_confirm(const struct gatts_conf_evt_param *event);
+static void handle_event_execute_write_request(const struct gatts_exec_write_evt_param *event);
 static void handle_event_gattc_register(const struct gattc_reg_evt_param *event, esp_gatt_if_t gattc_if);
 static void handle_event_gattc_unregister(void);
 static void handle_event_connect(const struct gattc_connect_evt_param *event);
@@ -94,26 +128,26 @@ bool BT_PUMP_start(void)
 
 	int32_t status = esp_ble_gap_register_callback(handle_event_gap);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_register_callback status=%ld\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gap_register_callback status=%d\n", (int)status);
 		return false;
 	}
 
 	status = esp_ble_gatts_register_callback(handle_event_gatts);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_register_callback status=%ld\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_register_callback status=%d\n", (int)status);
 		return false;
 	}
 
 	status = esp_ble_gattc_register_callback(handle_event_gattc);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_register_callback status=%ld\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_register_callback status=%d\n", (int)status);
 		return false;
 	}
 
 	// register app for GATTS
 	status = esp_ble_gatts_app_register(0);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_app_register status=%ld\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_app_register status=%d\n", (int)status);
 		return false;
 	}
 
@@ -127,7 +161,7 @@ bool BT_PUMP_start(void)
 	// register app for GATTC
 	status = esp_ble_gattc_app_register(0);
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_app_register status=%ld\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_app_register status=%d\n", (int)status);
 		return false;
 	}
 
@@ -141,11 +175,11 @@ bool BT_PUMP_start(void)
 	return true;
 }
 
-void BT_PUMP_stop() {
+void BT_PUMP_stop(void) {
 	// unregister app for GATTS
 	int32_t status = esp_ble_gatts_app_unregister(BT_MANAGER_get_gatts_if());
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_app_unregister status=%ld\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gatts_app_unregister status=%d\n", (int)status);
 	}
 
 	// wait for register_lock to be given
@@ -154,7 +188,7 @@ void BT_PUMP_stop() {
 	// unregister app for GATTC
 	status = esp_ble_gattc_app_unregister(BT_MANAGER_get_gattc_if());
 	if (status != ESP_OK) {
-		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_app_unregister status=%ld\n", status);
+		LLBLUETOOTH_DEBUG_TRACE("esp_ble_gattc_app_unregister status=%d\n", (int)status);
 	}
 
 	// wait for register_lock to be given
@@ -185,6 +219,29 @@ int32_t BT_PUMP_wait_event(LLBLUETOOTH_event_t *event, uint32_t max_event_size)
 	return 0;
 }
 
+void BT_PUMP_set_scan_filter(uint8_t filter_action, uint8_t filter_type, const uint8_t *filter_data,
+		uint32_t filter_data_size)
+{
+	uint32_t size = filter_data_size;
+
+	if (size > MAX_SCAN_FILTER_DATA_SIZE) {
+		size = MAX_SCAN_FILTER_DATA_SIZE;
+	}
+
+	scan_filter_action = filter_action;
+	scan_filter_type = filter_type;
+	(void)memcpy(scan_filter_data, filter_data, size);
+	scan_filter_data_size = size;
+}
+
+/**
+ * @brief Gets the next Bluetooth event from the event queue in a non-blocking way.
+ *
+ * @param[in] llevent        the buffer where to store the LLBLUETOOTH event.
+ * @param[in] max_event_size the maximum event size that can be stored in the event buffer.
+ *
+ * @return event size in bytes, 0 if no event can be retrieved.
+ */
 static int32_t poll_event(LLBLUETOOTH_event_t *llevent, uint32_t max_event_size)
 {
 	while (1) {
@@ -199,31 +256,24 @@ static int32_t poll_event(LLBLUETOOTH_event_t *llevent, uint32_t max_event_size)
 			// discard this event and get an other one
 			LLBLUETOOTH_DEBUG_TRACE("Warning: buffer it not big enough to hold the event\n");
 			FREE_EVENT(event_info.event);
-		} else if (event_info.size == 0) {
+		} else if (event_info.size == 0U) {
 			// discard this event and get an other one
 			FREE_EVENT(event_info.event);
 		} else {
 			// return this event
-			memcpy(llevent, event_info.event, event_info.size);
+			(void)memcpy(llevent, event_info.event, event_info.size);
 			FREE_EVENT(event_info.event);
 			return event_info.size;
 		}
 	}
 }
 
-void BT_PUMP_set_scan_filter(uint8_t filter_action, uint8_t filter_type, const uint8_t *filter_data,
-		uint32_t filter_data_size)
-{
-	if (filter_data_size > MAX_SCAN_FILTER_DATA_SIZE) {
-		filter_data_size = MAX_SCAN_FILTER_DATA_SIZE;
-	}
-
-	scan_filter_action = filter_action;
-	scan_filter_type = filter_type;
-	memcpy(scan_filter_data, filter_data, filter_data_size);
-	scan_filter_data_size = filter_data_size;
-}
-
+/**
+ * @brief Handle the GAP events received from the underlying Bluetooth stack.
+ *
+ * @param[in] type  the event type.
+ * @param[in] event the event data.
+ */
 static void handle_event_gap(esp_gap_ble_cb_event_t type, esp_ble_gap_cb_param_t *event)
 {
 	switch (type) {
@@ -236,16 +286,23 @@ static void handle_event_gap(esp_gap_ble_cb_event_t type, esp_ble_gap_cb_param_t
 	case ESP_GAP_BLE_AUTH_CMPL_EVT:
 		return handle_event_auth_complete(&event->ble_security.auth_cmpl);
 	case ESP_GAP_BLE_SEC_REQ_EVT:
-		return handle_event_security_request(&event->ble_security.ble_req);
+		return handle_event_security_request();
 	case ESP_GAP_BLE_PASSKEY_NOTIF_EVT:
 		return handle_event_passkey_notification(&event->ble_security.key_notif);
 	case ESP_GAP_BLE_PASSKEY_REQ_EVT:
-		return handle_event_passkey_request(&event->ble_security.ble_req);
+		return handle_event_passkey_request();
 	default:
 		break; // ignore this event
 	}
 }
 
+/**
+ * @brief Handle the GATTS events received from the underlying Bluetooth stack.
+ *
+ * @param[in] type     the event type.
+ * @param[in] gatts_if the GATTS interface on which the event is received.
+ * @param[in] event    the event data.
+ */
 static void handle_event_gatts(esp_gatts_cb_event_t type, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *event)
 {
 	switch (type) {
@@ -267,11 +324,21 @@ static void handle_event_gatts(esp_gatts_cb_event_t type, esp_gatt_if_t gatts_if
 		return handle_event_write_request(&event->write);
 	case ESP_GATTS_CONF_EVT:
 		return handle_event_notification_confirm(&event->conf);
+	case ESP_GATTS_EXEC_WRITE_EVT:
+		return handle_event_execute_write_request(&event->exec_write);
+		break;
 	default:
 		break; // ignore this event
 	}
 }
 
+/**
+ * @brief Handle the GATTC events received from the underlying Bluetooth stack.
+ *
+ * @param[in] type     the event type.
+ * @param[in] gattc_if the GATTC interface on which the event is received.
+ * @param[in] event    the event data.
+ */
 static void handle_event_gattc(esp_gattc_cb_event_t type, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *event)
 {
 	switch (type) {
@@ -300,9 +367,14 @@ static void handle_event_gattc(esp_gattc_cb_event_t type, esp_gatt_if_t gattc_if
 	}
 }
 
+/**
+ * @brief Handle the ESP_GAP_BLE_SCAN_RESULT_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_scan_result(const struct ble_scan_result_evt_param *event)
 {
-	if (event->search_evt == ESP_GAP_SEARCH_INQ_RES_EVT && check_scan_result_filter(event->ble_adv)) {
+	if ((event->search_evt == ESP_GAP_SEARCH_INQ_RES_EVT) && check_scan_result_filter(event->ble_adv)) {
 		uint8_t adv_data_size = event->adv_data_len + event->scan_rsp_len;
 
 		ALLOC_EVENT(LLBLUETOOTH_event_gap_scan_result_t, adv_data_size);
@@ -310,34 +382,49 @@ static void handle_event_scan_result(const struct ble_scan_result_evt_param *eve
 		out->addr = BT_HELPER_write_addr(event->bda, event->ble_addr_type);
 		out->rssi = event->rssi;
 		out->adv_data_size = adv_data_size;
-		memcpy(out+1, event->ble_adv, adv_data_size);
+		(void)memcpy(out+1, event->ble_adv, adv_data_size);
 		send_event(&out_info);
 	}
 }
 
+/**
+ * @brief Handle the ESP_GAP_BLE_SCAN_STOP_COMPLETE_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_scan_stop_complete(const struct ble_scan_stop_cmpl_evt_param *event)
 {
 	if (event->status == ESP_BT_STATUS_SUCCESS) {
-		ALLOC_EVENT(LLBLUETOOTH_event_gap_scan_completed_t, 0);
+		ALLOC_EVENT(LLBLUETOOTH_event_gap_scan_completed_t, 0U);
 		out->event_type = EVENT_GAP_SCAN_COMPLETED;
 		send_event(&out_info);
 	}
 }
 
+/**
+ * @brief Handle the ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_adv_stop_complete(const struct ble_adv_stop_cmpl_evt_param *event)
 {
 	if (event->status == ESP_BT_STATUS_SUCCESS) {
-		ALLOC_EVENT(LLBLUETOOTH_event_gap_advertisement_completed_t, 0);
+		ALLOC_EVENT(LLBLUETOOTH_event_gap_advertisement_completed_t, 0U);
 		out->event_type = EVENT_GAP_ADVERTISEMENT_COMPLETED;
 		send_event(&out_info);
 	}
 }
 
+/**
+ * @brief Handle the ESP_GAP_BLE_AUTH_CMPL_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_auth_complete(const esp_ble_auth_cmpl_t *event)
 {
 	uint16_t conn_id;
 	if (BT_MANAGER_get_connected_conn_id(&conn_id)) {
-		ALLOC_EVENT(LLBLUETOOTH_event_gap_pair_completed_t, 0);
+		ALLOC_EVENT(LLBLUETOOTH_event_gap_pair_completed_t, 0U);
 		out->event_type = EVENT_GAP_PAIR_COMPLETED;
 		out->success = (event->success ? 1 : 0);
 		out->conn_handle = conn_id;
@@ -345,22 +432,30 @@ static void handle_event_auth_complete(const esp_ble_auth_cmpl_t *event)
 	}
 }
 
-static void handle_event_security_request(const esp_ble_sec_req_t *event)
+/**
+ * @brief Handle the ESP_GAP_BLE_SEC_REQ_EVT event received from the underlying Bluetooth stack.
+ */
+static void handle_event_security_request(void)
 {
 	uint16_t conn_id;
 	if (BT_MANAGER_get_connected_conn_id(&conn_id)) {
-		ALLOC_EVENT(LLBLUETOOTH_event_gap_pair_request_t, 0);
+		ALLOC_EVENT(LLBLUETOOTH_event_gap_pair_request_t, 0U);
 		out->event_type = EVENT_GAP_PAIR_REQUEST;
 		out->conn_handle = conn_id;
 		send_event(&out_info);
 	}
 }
 
+/**
+ * @brief Handle the ESP_GAP_BLE_PASSKEY_NOTIF_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_passkey_notification(const esp_ble_sec_key_notif_t *event)
 {
 	uint16_t conn_id;
 	if (BT_MANAGER_get_connected_conn_id(&conn_id)) {
-		ALLOC_EVENT(LLBLUETOOTH_event_gap_passkey_generated_t, 0);
+		ALLOC_EVENT(LLBLUETOOTH_event_gap_passkey_generated_t, 0U);
 		out->event_type = EVENT_GAP_PASSKEY_GENERATED;
 		out->conn_handle = conn_id;
 		out->passkey = event->passkey;
@@ -368,17 +463,26 @@ static void handle_event_passkey_notification(const esp_ble_sec_key_notif_t *eve
 	}
 }
 
-static void handle_event_passkey_request(const esp_ble_sec_req_t *event)
+/**
+ * @brief Handle the ESP_GAP_BLE_PASSKEY_REQ_EVT event received from the underlying Bluetooth stack.
+ */
+static void handle_event_passkey_request(void)
 {
 	uint16_t conn_id;
 	if (BT_MANAGER_get_connected_conn_id(&conn_id)) {
-		ALLOC_EVENT(LLBLUETOOTH_event_gap_passkey_request_t, 0);
+		ALLOC_EVENT(LLBLUETOOTH_event_gap_passkey_request_t, 0U);
 		out->event_type = EVENT_GAP_PASSKEY_REQUEST;
 		out->conn_handle = conn_id;
 		send_event(&out_info);
 	}
 }
 
+/**
+ * @brief Handle the ESP_GATTS_REG_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ * @param[in] gatts_if the GATTS interface on which the event is received.
+ */
 static void handle_event_gatts_register(const struct gatts_reg_evt_param *event, esp_gatt_if_t gatts_if)
 {
 	BT_MANAGER_set_gatts_if(gatts_if);
@@ -386,56 +490,101 @@ static void handle_event_gatts_register(const struct gatts_reg_evt_param *event,
 	xSemaphoreGive(register_lock);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_UNREG_EVT event received from the underlying Bluetooth stack.
+ */
 static void handle_event_gatts_unregister(void)
 {
 	BT_MANAGER_set_gatts_if(ESP_GATT_IF_NONE);
 	xSemaphoreGive(register_lock);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_CREATE_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_create_service(const struct gatts_create_evt_param *event)
 {
 	BT_MANAGER_on_attribute_created(event->status, event->service_handle);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_ADD_CHAR_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_add_characteristic(const struct gatts_add_char_evt_param *event)
 {
 	BT_MANAGER_on_attribute_created(event->status, event->attr_handle);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_ADD_CHAR_DESCR_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_add_descriptor(const struct gatts_add_char_descr_evt_param *event)
 {
 	BT_MANAGER_on_attribute_created(event->status, event->attr_handle);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_START_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_start_service(const struct gatts_start_evt_param *event)
 {
 	BT_MANAGER_on_attribute_created(event->status, event->service_handle);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_READ_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_read_request(const struct gatts_read_evt_param *event)
 {
 	BT_MANAGER_on_attribute_request(event->handle, event->trans_id);
 
-	ALLOC_EVENT(LLBLUETOOTH_event_gatts_read_request_t, 0);
+	ALLOC_EVENT(LLBLUETOOTH_event_gatts_read_request_t, 0U);
 	out->event_type = EVENT_GATTS_READ_REQUEST;
 	out->conn_handle = event->conn_id;
 	out->attr_handle = event->handle;
+	out->offset = event->offset;
 	send_event(&out_info);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_WRITE_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_write_request(const struct gatts_write_evt_param *event)
 {
 	BT_MANAGER_on_attribute_request(event->handle, event->trans_id);
 
+	if (event->is_prep != 0) {
+		BT_MANAGER_set_prepare_write_attr_handle(event->handle);
+	}
+
 	ALLOC_EVENT(LLBLUETOOTH_event_gatts_write_request_t, event->len);
 	out->event_type = EVENT_GATTS_WRITE_REQUEST;
+	out->prepare = event->is_prep;
 	out->conn_handle = event->conn_id;
 	out->attr_handle = event->handle;
+	out->offset = event->offset;
 	out->value_size = event->len;
-	memcpy(out+1, event->value, event->len);
+	(void)memcpy(out+1, event->value, event->len);
 	send_event(&out_info);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_CONF_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_notification_confirm(const struct gatts_conf_evt_param *event)
 {
 	uint16_t handle;
@@ -444,14 +593,43 @@ static void handle_event_notification_confirm(const struct gatts_conf_evt_param 
 		return;
 	}
 
-	ALLOC_EVENT(LLBLUETOOTH_event_gatts_notification_sent_t, 0);
+	ALLOC_EVENT(LLBLUETOOTH_event_gatts_notification_sent_t, 0U);
 	out->event_type = EVENT_GATTS_NOTIFICATION_SENT;
-	out->success = (event->status == ESP_GATT_OK ? 1 : 0);
+	out->success = (event->status == ESP_GATT_OK) ? 1 : 0;
 	out->conn_handle = event->conn_id;
 	out->attr_handle = handle;
 	send_event(&out_info);
 }
 
+/**
+ * @brief Handle the ESP_GATTS_EXEC_WRITE_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
+static void handle_event_execute_write_request(const struct gatts_exec_write_evt_param *event)
+{
+	uint16_t handle;
+	if (!BT_MANAGER_get_prepare_write_attr_handle(&handle)) {
+		LLBLUETOOTH_DEBUG_TRACE("Execute write received but no prepare write received before\n");
+		return;
+	}
+
+	BT_MANAGER_set_prepare_write_trans_id(event->trans_id);
+
+	ALLOC_EVENT(LLBLUETOOTH_event_gatts_execute_write_request_t, 0U);
+	out->event_type = EVENT_GATTS_EXECUTE_WRITE_REQUEST;
+	out->execute = event->exec_write_flag;
+	out->conn_handle = event->conn_id;
+	out->attr_handle = handle;
+	send_event(&out_info);
+}
+
+/**
+ * @brief Handle the ESP_GATTC_REG_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ * @param[in] gattc_if the GATTC interface on which the event is received.
+ */
 static void handle_event_gattc_register(const struct gattc_reg_evt_param *event, esp_gatt_if_t gattc_if)
 {
 	BT_MANAGER_set_gattc_if(gattc_if);
@@ -459,26 +637,40 @@ static void handle_event_gattc_register(const struct gattc_reg_evt_param *event,
 	xSemaphoreGive(register_lock);
 }
 
+/**
+ * @brief Handle the ESP_GATTC_UNREG_EVT event received from the underlying Bluetooth stack.
+ */
 static void handle_event_gattc_unregister(void)
 {
 	BT_MANAGER_set_gattc_if(ESP_GATT_IF_NONE);
 	xSemaphoreGive(register_lock);
 }
 
+/**
+ * @brief Handle the ESP_GATTC_CONNECT_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_connect(const struct gattc_connect_evt_param *event)
 {
 	esp_ble_addr_type_t addr_type;
 	BT_MANAGER_on_connected(event->conn_id, event->remote_bda, &addr_type);
 
-	ALLOC_EVENT(LLBLUETOOTH_event_gap_connected_t, 0);
+	ALLOC_EVENT(LLBLUETOOTH_event_gap_connected_t, 0U);
 	out->event_type = EVENT_GAP_CONNECTED;
 	out->addr = BT_HELPER_write_addr(event->remote_bda, addr_type);
 	out->conn_handle = event->conn_id;
 	send_event(&out_info);
 }
 
+/**
+ * @brief Handle the ESP_GATTC_DISCONNECT_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_disconnect(const struct gattc_disconnect_evt_param *event)
 {
+	// cppcheck-suppress misra-c2012-18.8 // ESP_BD_ADDR_LEN defined in the Bluetooth stack.
 	uint8_t connected_addr[ESP_BD_ADDR_LEN];
 	esp_ble_addr_type_t connected_addr_type;
 	bool connected = BT_MANAGER_get_connected_device(connected_addr, &connected_addr_type);
@@ -486,12 +678,13 @@ static void handle_event_disconnect(const struct gattc_disconnect_evt_param *eve
 	if (connected && memcmp(connected_addr, event->remote_bda, ESP_BD_ADDR_LEN) == 0) {
 		BT_MANAGER_on_disconnected();
 
-		ALLOC_EVENT(LLBLUETOOTH_event_gap_disconnected_t, 0);
+		ALLOC_EVENT(LLBLUETOOTH_event_gap_disconnected_t, 0U);
 		out->event_type = EVENT_GAP_DISCONNECTED;
 		out->conn_handle = event->conn_id;
 		send_event(&out_info);
 	}
 
+	// cppcheck-suppress misra-c2012-18.8 // ESP_BD_ADDR_LEN defined in the Bluetooth stack.
 	uint8_t connecting_addr[ESP_BD_ADDR_LEN];
 	esp_ble_addr_type_t connecting_addr_type;
 	bool connecting = BT_MANAGER_get_connecting_device(connecting_addr, &connecting_addr_type);
@@ -499,13 +692,18 @@ static void handle_event_disconnect(const struct gattc_disconnect_evt_param *eve
 	if (connecting && memcmp(connecting_addr, event->remote_bda, ESP_BD_ADDR_LEN) == 0) {
 		BT_MANAGER_on_connect_failed();
 
-		ALLOC_EVENT(LLBLUETOOTH_event_gap_connect_failed_t, 0);
+		ALLOC_EVENT(LLBLUETOOTH_event_gap_connect_failed_t, 0U);
 		out->event_type = EVENT_GAP_CONNECT_FAILED;
 		out->addr = BT_HELPER_write_addr(connecting_addr, connecting_addr_type);
 		send_event(&out_info);
 	}
 }
 
+/**
+ * @brief Handle the ESP_GATTC_SEARCH_RES_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_search_result(const struct gattc_search_res_evt_param *event)
 {
 	// get the number of attributes in the service
@@ -515,7 +713,7 @@ static void handle_event_search_result(const struct gattc_search_res_evt_param *
 	}
 
 	// create the event and fill the service info
-	ALLOC_EVENT(LLBLUETOOTH_event_gattc_discovery_result_t, num_attributes * sizeof(LLBLUETOOTH_gattc_attribute_t));
+	ALLOC_EVENT(LLBLUETOOTH_event_gattc_discovery_result_t, (num_attributes * sizeof(LLBLUETOOTH_gattc_attribute_t)));
 	out->event_type = EVENT_GATTC_DISCOVERY_RESULT;
 	out->conn_handle = event->conn_id;
 	out->service_handle = event->start_handle;
@@ -526,6 +724,7 @@ static void handle_event_search_result(const struct gattc_search_res_evt_param *
 	uint16_t attribute_index = 0;
 
 	uint16_t characteristic_offset = 0;
+	// cppcheck-suppress misra-c2012-15.4 // Multiple break conditions are allowed for code readability.
 	while (1) {
 		// get next characteristic
 		esp_gattc_char_elem_t characteristic;
@@ -544,13 +743,15 @@ static void handle_event_search_result(const struct gattc_search_res_evt_param *
 		BT_MANAGER_on_characteristic_discovered(characteristic.char_handle);
 
 		// fill characteristic info
-		LLBLUETOOTH_gattc_attribute_t *attribute = &attributes[attribute_index++];
+		LLBLUETOOTH_gattc_attribute_t *attribute = &attributes[attribute_index];
 		attribute->type = ATTRIBUTE_TYPE_CHARACTERISTIC;
 		attribute->uuid = BT_HELPER_write_uuid(&characteristic.uuid);
 		attribute->characteristic.value_handle = characteristic.char_handle;
 		attribute->characteristic.properties = characteristic.properties;
+		attribute_index++;
 
 		uint16_t descriptor_offset = 0;
+		// cppcheck-suppress misra-c2012-15.4 // Multiple break conditions are allowed for code readability.
 		while (1) {
 			// get next descriptor
 			esp_gattc_descr_elem_t descriptor;
@@ -566,10 +767,11 @@ static void handle_event_search_result(const struct gattc_search_res_evt_param *
 			}
 
 			// fill descriptor info
-			attribute = &attributes[attribute_index++];
+			attribute = &attributes[attribute_index];
 			attribute->type = ATTRIBUTE_TYPE_DESCRIPTOR;
 			attribute->uuid = BT_HELPER_write_uuid(&descriptor.uuid);
 			attribute->descriptor.handle = descriptor.handle;
+			attribute_index++;
 		}
 	}
 
@@ -580,14 +782,24 @@ static void handle_event_search_result(const struct gattc_search_res_evt_param *
 	send_event(&out_info);
 }
 
+/**
+ * @brief Handle the ESP_GATTC_SEARCH_CMPL_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_search_complete(const struct gattc_search_cmpl_evt_param *event)
 {
-	ALLOC_EVENT(LLBLUETOOTH_event_gattc_discovery_completed_t, 0);
+	ALLOC_EVENT(LLBLUETOOTH_event_gattc_discovery_completed_t, 0U);
 	out->event_type = EVENT_GATTC_DISCOVERY_COMPLETED;
 	out->conn_handle = event->conn_id;
 	send_event(&out_info);
 }
 
+/**
+ * @brief Handle the ESP_GATTC_READ_CHAR_EVT and ESP_GATTC_READ_DESCR_EVT events received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_read_completed(const struct gattc_read_char_evt_param *event)
 {
 	ALLOC_EVENT(LLBLUETOOTH_event_gattc_read_completed_t, event->value_len);
@@ -596,13 +808,18 @@ static void handle_event_read_completed(const struct gattc_read_char_evt_param *
 	out->conn_handle = event->conn_id;
 	out->attr_handle = event->handle;
 	out->value_size = event->value_len;
-	memcpy(out+1, event->value, event->value_len);
+	(void)memcpy(out+1, event->value, event->value_len);
 	send_event(&out_info);
 }
 
+/**
+ * @brief Handle the ESP_GATTC_WRITE_CHAR_EVT and ESP_GATTC_WRITE_DESCR_EVT events received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_write_completed(const struct gattc_write_evt_param *event)
 {
-	ALLOC_EVENT(LLBLUETOOTH_event_gattc_write_completed_t, 0);
+	ALLOC_EVENT(LLBLUETOOTH_event_gattc_write_completed_t, 0U);
 	out->event_type = EVENT_GATTC_WRITE_COMPLETED;
 	out->status = (uint8_t) event->status;
 	out->conn_handle = event->conn_id;
@@ -610,6 +827,11 @@ static void handle_event_write_completed(const struct gattc_write_evt_param *eve
 	send_event(&out_info);
 }
 
+/**
+ * @brief Handle the ESP_GATTC_NOTIFY_EVT event received from the underlying Bluetooth stack.
+ *
+ * @param[in] event the event data.
+ */
 static void handle_event_notification_received(const struct gattc_notify_evt_param *event)
 {
 	ALLOC_EVENT(LLBLUETOOTH_event_gattc_notification_received_t, event->value_len);
@@ -617,10 +839,15 @@ static void handle_event_notification_received(const struct gattc_notify_evt_par
 	out->conn_handle = event->conn_id;
 	out->attr_handle = event->handle;
 	out->value_size = event->value_len;
-	memcpy(out+1, event->value, event->value_len);
+	(void)memcpy(out+1, event->value, event->value_len);
 	send_event(&out_info);
 }
 
+/**
+ * @brief Sends a generic event into the queue. If the Java thread is suspended, it will be resumed.
+ *
+ * @param[in] event_info the event info.
+ */
 static void send_event(event_info_t *event_info)
 {
 	int32_t result = xQueueSend(event_queue, event_info, 0);
@@ -637,6 +864,13 @@ static void send_event(event_info_t *event_info)
 	}
 }
 
+/**
+ * @brief Filters the advertising data of a device by using the configured scan filter.
+ *
+ * @param[in] adv_data the advertising data of a nearby device.
+ *
+ * @return true if the device is accepted through the filter, false otherwise.
+ */
 static bool check_scan_result_filter(const uint8_t *adv_data)
 {
 	if (scan_filter_action == SCAN_FILTER_ACTION_NONE) {
@@ -644,6 +878,7 @@ static bool check_scan_result_filter(const uint8_t *adv_data)
 	}
 
 	uint8_t value_size;
+	// cppcheck-suppress misra-c2012-11.8 // const qualification removed to match esp_ble_resolve_adv_data prototype.
 	const uint8_t *value = esp_ble_resolve_adv_data((uint8_t *) adv_data, scan_filter_type, &value_size);
 
 	if (value == NULL) {
@@ -653,11 +888,15 @@ static bool check_scan_result_filter(const uint8_t *adv_data)
 	if (scan_filter_action == SCAN_FILTER_ACTION_FIELD_EXISTS) {
 		return true;
 	} else if (scan_filter_action == SCAN_FILTER_ACTION_FIELD_EQUALS) {
-		return (value_size == scan_filter_data_size && memcmp(value, scan_filter_data, scan_filter_data_size) == 0);
+		return ((value_size == scan_filter_data_size) && (memcmp(value, scan_filter_data, scan_filter_data_size) == 0));
 	} else if (scan_filter_action == SCAN_FILTER_ACTION_FIELD_STARTS_WITH) {
-		return (value_size >= scan_filter_data_size && memcmp(value, scan_filter_data, scan_filter_data_size) == 0);
+		return ((value_size >= scan_filter_data_size) && (memcmp(value, scan_filter_data, scan_filter_data_size) == 0));
 	} else {
 		LLBLUETOOTH_DEBUG_TRACE("Warning: unknown scan filter type\n");
 		return false;
 	}
 }
+
+#ifdef __cplusplus
+	}
+#endif

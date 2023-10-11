@@ -1,5 +1,5 @@
 .. 
-    Copyright 2022 MicroEJ Corp. All rights reserved.
+    Copyright 2022-2023 MicroEJ Corp. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be found with this software.
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
@@ -62,20 +62,11 @@ scripts are meant to run in a Windows and Linux environment respectively.
   (``application.out``) that can be flashed on a device.
 
   This script uses a configuration for the Mono-Sandbox firmware, and creates the 
-  the ``sdkconfig`` configuration file using ``sdkconfig_ota_no_systemview``.
+  the ``sdkconfig`` configuration file using ``sdkconfig_ota_systemview``.
 
 - The ``run*`` scripts are used to flash a MicroEJ Firmware
   (``application.out``) on a device. The variable ``ESPPORT`` must be set in 
   the ``set_project_env*`` for the script to work properly.
-
-- The ``build_ota_systemview*`` script is used to compile and link the BSP with a MicroEJ 
-  application to produce a MicroEJ Firmware (``application.out``) that can be
-  flashed on a device.
-
-  This script uses a configuration for the Mono-Sandbox firmware, and creates the 
-  the ``sdkconfig`` configuration file using ``sdkconfig_ota_systemview``.
-  In current configuration, applications that use the FS library
-  do not work with SystemView activated.
 
 - The ``build_no_ota_no_systemview*`` script is used to compile and link the BSP with a MicroEJ 
   application to produce a MicroEJ Firmware (``application.out``) that can be
@@ -89,12 +80,12 @@ scripts are meant to run in a Windows and Linux environment respectively.
 - The ``SysView`` script is used to start the application, tracing and logging
   to files, (start the Segger SystemView tracing). More information about this feature
   can be found on `MicroEJ SystemView README`_ and also on the |MANUFACTURER| `official 
-  documentation <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/app_trace.html#system-behavior-analysis-with-segger-systemview>`_.
+  documentation <https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/api-guides/app_trace.html#system-behavior-analysis-with-segger-systemview>`_.
 
 Debugging with |BOARD_NAME|
 ---------------------------
 
-The entire process of debugging a |BOARD_NAME| is described `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/jtag-debugging/using-debugger.html>`_.
+The entire process of debugging a |BOARD_NAME| is described `here <https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/api-guides/jtag-debugging/using-debugger.html>`_.
 
 Enable PSRAM
 ------------
@@ -103,7 +94,7 @@ This |VEEPORT| is configured for PSRAM chip ESP32-S3-Wroom-1/M0N8R8, if your har
 
 The ESP32-S3 module flash and PSRAM sizes can be identified using the documentation `here <https://www.espressif.com/sites/default/files/documentation/espressif_module_packaging_information_en.pdf>`_.
 The supported modes and speeds of the flash and PSRAM can be identified using the documentation `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf>`_.
-and `here <https://docs.espressif.com/projects/esp-idf/en/v5.0/esp32s3/api-guides/flash_psram_config.html?highlight=psram>`_.
+and `here <https://docs.espressif.com/projects/esp-idf/en/v5.0.1/esp32s3/api-guides/flash_psram_config.html?highlight=psram>`_.
 
 RAM overflow
 ------------

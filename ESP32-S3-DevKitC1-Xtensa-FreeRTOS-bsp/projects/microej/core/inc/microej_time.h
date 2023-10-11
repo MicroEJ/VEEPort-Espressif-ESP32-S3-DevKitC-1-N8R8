@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2018-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -12,7 +12,10 @@
  * 
  * There are 2 types of time in MicroEJ:
  * - The platform time: an arbitrary time that is only relevant to measure elapsed time
- * - The application time: the time elapsed since midnight, January 1, 1970 UTC, this time should be set by the MicroEJ application.
+ * - The application time: the time elapsed since midnight, January 1, 1970 UTC, this time should be set by the MicroEJ application
+ * 
+ * An implementation example is available on Espressif WROVER: https://github.com/MicroEJ/Platform-Espressif-ESP-WROVER-KIT-V4.1/blob/master/ESP32-WROVER-Xtensa-FreeRTOS-bsp/projects/microej/core/src/microej_time.c
+ * 
  */
 
 #ifndef MICROEJ_TIME_H

@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2020-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2020-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief esp-idf low level API implementation
  * @author MicroEJ Developer Team
- * @version 1.1.1
- * @date 13 November 2020
+ * @version 1.2.0
+ * @date 23 June 2022
  */
 
 #include "com_espressif_esp_idf_nvs.h"

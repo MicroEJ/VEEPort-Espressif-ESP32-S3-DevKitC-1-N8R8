@@ -2,7 +2,7 @@
 #
 # BASH
 #
-# Copyright 2022 MicroEJ Corp. All rights reserved.
+# Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found with this software.
 
 # 'set_project_env.sh' implementation for Espressif IDF.
@@ -21,15 +21,13 @@ fi
 
 export ESP_BUILD_DIR=$(realpath $SCRIPT_PATH/../build)
 export ESP_PROJECT_DIR=$(realpath $SCRIPT_PATH/..)
-
-if [ -z "$IDF_PATH" ]; then
-  IDF_PATH=$(realpath "$SCRIPT_PATH"/../../../sdk/esp-idf)
-  export IDF_PATH
-fi
+export IDF_PATH=$(realpath "$SCRIPT_PATH"/../../../sdk/esp-idf)
+export IDF_INSTALL_TARGETS=esp32-s3
 
 echo "ESP_BUILD_DIR is $ESP_BUILD_DIR"
 echo "ESP_PROJECT_DIR is $ESP_PROJECT_DIR"
 echo "IDF_PATH is $IDF_PATH"
+echo "IDF_INSTALL_TARGETS is $IDF_INSTALL_TARGETS"
 
 # Set offsets for combined binary
 BOOTLOADER_BIN_OFFSET=0x1000

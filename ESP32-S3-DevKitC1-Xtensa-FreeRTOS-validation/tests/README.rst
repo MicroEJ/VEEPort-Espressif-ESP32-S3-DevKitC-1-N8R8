@@ -10,7 +10,7 @@ Requirements
 The Platform Test Suites require a minimal configuration:
 
 - MicroEJ SDK version ``5.1.1`` or higher.
-- A MicroEJ Platform imported in the workspace, which has been built using `Platform Configuration Additions <framework/platform/README.rst>`_ version ``1.0.0`` or higher.
+- A MicroEJ Platform imported in the workspace, which has been built using `Platform Configuration Additions <../framework/platform/README.rst>`_ version ``1.0.0`` or higher.
 - A device connected to the PC both for programming and to get output traces. See Platform specific documentation for setup. 
 - If the Platform requires output traces redirection (e.g. when your device dumps the standard output on a serial port), use the
   `Serial to Socket Transmitter <https://docs.microej.com/en/latest/ApplicationDeveloperGuide/serialToSocketTransmitter.html>`_ tool.

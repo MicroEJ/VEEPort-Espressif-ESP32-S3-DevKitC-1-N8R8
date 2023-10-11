@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2014-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2014-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -12,10 +12,11 @@
  * @file
  * @brief LLFS configuration.
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 17 June 2022
+ * @version 2.1.1
+ * @date 26 April 2023
  */
 
+#include <stdio.h>
 #include "microej_async_worker.h"
 
 #ifdef __cplusplus
@@ -33,20 +34,7 @@
 #define FS_CONFIGURATION_VERSION (1)
 
 /**
- * @brief By default, use the SD card initialization. Comment this to enable use of SPI flash.
- * 
- */
-//#define LLFS_ESP32_USE_SD_CARD
-
-/**
- * @brief Initialization function for ESP32 SD card.
- * 
- */
-void LLFS_ESP32_init_sdcard(void);
-
-/**
  * @brief Initialization function for ESP32 SPI flash.
- * 
  */
 void LLFS_ESP32_init_spiflash(void);
 
@@ -55,11 +43,7 @@ void LLFS_ESP32_init_spiflash(void);
  * Called from LLFS_IMPL_initialize().
  * By default this macro does nothing.
  */
-#if defined(LLFS_ESP32_USE_SD_CARD)
-#define llfs_init	LLFS_ESP32_init_sdcard
-#else
-#define llfs_init	LLFS_ESP32_init_spiflash
-#endif // defined(LLFS_ESP32_USE_SD_CARD)
+#define llfs_init()	(LLFS_ESP32_init_spiflash())
 
 /**
  * @brief Set this define to use a custom worker to handle FS asynchronous jobs.
@@ -73,6 +57,7 @@ void LLFS_ESP32_init_spiflash(void);
 extern MICROEJ_ASYNC_WORKER_handle_t my_custom_worker;
 #define fs_worker my_custom_worker
 #else
+// cppcheck-suppress misra-c2012-5.5 // Macro name same as the global variable name for simplicity of implementation.
 extern MICROEJ_ASYNC_WORKER_handle_t fs_worker;
 #endif
 
@@ -89,7 +74,7 @@ extern MICROEJ_ASYNC_WORKER_handle_t fs_worker;
 /**
  * @brief Size of the FS stack in bytes.
  */
-#define FS_WORKER_STACK_SIZE (1024 * 6)
+#define FS_WORKER_STACK_SIZE (1024*6)
 
 /**
  * @brief FS worker stack size must be calibrated, unless using a custom worker defined in another module.
@@ -130,19 +115,10 @@ int32_t LLFS_set_path_param(uint8_t* path, uint8_t* path_param);
 //#define LLFS_DEBUG
 
 #ifdef LLFS_DEBUG
-#include <stdio.h>
 #define LLFS_DEBUG_TRACE printf("[DEBUG] ");printf
 #else
 #define LLFS_DEBUG_TRACE(...) ((void) 0)
 #endif
-
-#define _FS_LOCK FF_FS_LOCK
-
-#define _MAX_SS FF_MAX_SS
-
-#define _MIN_SS FF_MIN_SS
-
-#define DIR FF_DIR
 
 #ifdef __cplusplus
 	}

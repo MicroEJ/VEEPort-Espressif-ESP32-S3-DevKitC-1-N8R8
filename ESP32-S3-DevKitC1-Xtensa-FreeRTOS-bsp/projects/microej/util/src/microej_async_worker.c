@@ -2,15 +2,15 @@
  * C
  *
  * Copyright 2018-2023 MicroEJ Corp. All rights reserved.
- * Use of this source code is governed by a BSD-style license that can be found with this software.
+ * Use of this source code is governed by a BSD-style license that can be found with this software..
  */
 
 /**
  * @file
  * @brief Asynchronous Worker implementation
  * @author MicroEJ Developer Team
- * @version 0.3.0
- * @date 17 March 2021
+ * @version 0.4.0
+ * @date 17 June 2022
  */
 
 #include "microej_async_worker.h"

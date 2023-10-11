@@ -2,7 +2,7 @@
 SETLOCAL ENABLEEXTENSIONS
 
 REM BAT
-REM Copyright 2022 MicroEJ Corp. All rights reserved.
+REM Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 REM Use of this source code is governed by a BSD-style license that can be found with this software.
 
 REM Init. the echosystem afther the repository cloning of the working branch.
@@ -42,10 +42,9 @@ DEL  /F /Q SYSVIEW-MicroEJ.patch
 
 IF %ERRORLEVEL% NEQ 0 (
 	EXIT /B %ERRORLEVEL%
+)
 
 REM Restore current directory
 CD %CURRENT_DIR%
-
-)
 
 exit /B 0

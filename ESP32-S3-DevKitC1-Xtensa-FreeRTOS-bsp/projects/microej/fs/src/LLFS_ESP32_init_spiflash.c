@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2021-2022 MicroEJ Corp. All rights reserved.
+ * Copyright 2021-2023 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -22,6 +22,7 @@ void LLFS_ESP32_init_spiflash(void) {
 	esp_vfs_fat_mount_config_t mount_config;
 	mount_config.format_if_mount_failed = true;
 	mount_config.max_files = 30;
+	mount_config.allocation_unit_size = 0;
 
 	ESP_ERROR_CHECK(esp_vfs_fat_spiflash_mount_rw_wl(base_path, NULL, &mount_config, &wl_handle));
 }

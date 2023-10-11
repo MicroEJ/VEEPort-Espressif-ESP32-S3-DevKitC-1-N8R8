@@ -20,9 +20,9 @@
 .. |BSP_FULL_NAME| replace:: Espressif IoT Development Framework 
 .. |BSP_SHORT_NAME| replace:: ESP-IDF
 
-.. _README BSP: ../../ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/README.rst
-.. _RELEASE NOTES: ../../RELEASE_NOTES.rst
-.. _CHANGELOG: ../../CHANGELOG.rst
+.. _README BSP: ./../../ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/docs/zn_CH/README.rst
+.. _RELEASE NOTES: ./../../RELEASE_NOTES.rst
+.. _CHANGELOG: ./../../CHANGELOG.rst
 
 ==========================================
 |MANUFACTURER| |BOARD_NAME| 的 |VEEPORT|
@@ -96,12 +96,12 @@
 - 开发板原理图 `here <https://dl.espressif.com/dl/SCH_ESP32-S3-DEVKITC-1_V1_20210312C.pdf>`__
 - 处理器技术参考手册 `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf>`__
 - 处理器数据手册 `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf>`__
-
+- 处理器勘误表 `here <https://www.espressif.com/sites/default/files/documentation/esp32-s3_errata_en.pdf>`__
 
 |VEEPORT| 规格
 =======================
 
-Architecture 版本号 ``7.18.1``.
+Architecture 版本号 ``7.20.1``.
 
 |VEEPORT| 提供下面的基础库:
 
@@ -111,11 +111,13 @@ Architecture 版本号 ``7.18.1``.
    * - Foundation Library
      - Version
    * - BLUETOOTH
-     - 2.1
+     - 2.2
    * - BON
      - 1.4
    * - DEVICE
      - 1.1
+   * - DRAWING
+     - 1.0
    * - ECOM-NETWORK
      - 2.1
    * - ECOM-WIFI
@@ -128,6 +130,8 @@ Architecture 版本号 ``7.18.1``.
      - 1.0
    * - KF
      - 1.6
+   * - MICROUI
+     - 3.2
    * - NET
      - 1.1
    * - NLS
@@ -353,7 +357,7 @@ Debugging 调试
 - ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-fp``: 包含用于 |SIM| 的开发板配置。
   这个工程在每次 |VEEPORT| 重新生成的时候更新。
 
-- ``ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}``: |VEEPORT| 重新生成后，这个目录会产生 |RCP| |VEEPORT| 工程文件。
+- ``ESP32S3DevKitC1-Platform-GNUv112_xtensa-esp32s3-{version}``: |VEEPORT| 重新生成后，这个目录会产生 |RCP| |VEEPORT| 工程文件。
 
 默认情况, |VEEPORT| 配置为 Mono-Sandbox 评估模式。如果需要配置使用
 Multi-Sandbox, 需要使用 ``build_no_ota_no_systemview`` 脚本 (请参考 `RELEASE
@@ -381,7 +385,7 @@ Repository下载相关模块。你可以在 |RCP| console里看到生成过程�
 
 最终 |BOARD_NAME| 开发板的 |VEEPORT| 会全部生成以供使用。
 
-|RCP| 里的 ``ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}`` |VEEPORT| 工程不应该有任何报错。
+|RCP| 里的 ``ESP32S3DevKitC1-Platform-GNUv112_xtensa-esp32s3-{version}`` |VEEPORT| 工程不应该有任何报错。
 
 请参考
 https://docs.microej.com/en/latest/ApplicationDeveloperGuide/standaloneApplication.html
@@ -403,7 +407,7 @@ Test Suite Configuration 测试集配置
 
 在 ``config.properties`` 文件里, 属性 ``target.platform.dir`` 必须设置成VEE port的绝对路径。
 比如
-``C:/ESP32S3DevKitC1-Platform-GNUv82_xtensa-esp32s2-{version}/source``。
+``C:/ESP32S3DevKitC1-Platform-GNUv112_xtensa-esp32s3-{version}/source``。
 
 Troubleshooting 故障排除
 =======================
