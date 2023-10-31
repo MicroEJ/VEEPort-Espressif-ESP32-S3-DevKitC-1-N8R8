@@ -5,7 +5,7 @@
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
 .. |PLATFORM_NAME| replace:: ESP32-S3-DevKitC1 Platform
-.. |PLATFORM_VER| replace:: 2.3.0
+.. |PLATFORM_VER| replace:: 2.3.1
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
