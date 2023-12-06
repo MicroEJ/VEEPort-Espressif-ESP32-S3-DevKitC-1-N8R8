@@ -35,7 +35,9 @@ Do not forget to enable the execution traces for the java task from ``MicroEJ SD
 Applying patch with MicroEJ implementation of Segger SystemView
 ---------------------------------------------------------------
 
-After all the submodules (components from the ``sdk/esp-idf`` folder) are updated (``git submodule update --init --recursive``), the patch ``SYSVIEW-MicroEJ.patch`` should be applyied to this folder via the ``git apply SYSVIEW-MicroEJ.patch``. 
+After all the submodules (components from the ``sdk/esp-idf`` folder) are updated (``git submodule update --init --recursive``),
+the patch ``SYSVIEW-MicroEJ_windows.patch`` should be applyied to this folder via the ``git apply SYSVIEW-MicroEJ_windows.patch`` if Windows is the running environment, otherwise
+the patch ``SYSVIEW-MicroEJ_linux.patch`` should be applyied to this folder via the ``patch -p0 < SYSVIEW-MicroEJ_linux.patch`` if Linux is the running environment.
 
 The same operation is achieved running the script ``RunAtFirstBSPCompile`` from the folder ``projects/microej/scripts/``.
 
@@ -101,7 +103,8 @@ Related resources to the SystemView implementation
 
 This is a short review of the resources needed for the MicroEJ implementation of the Segger SystemView tracing feature:
 
-- ``SYSVIEW-MicroEJ.patch`` git patch that must be applied on the ``/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf/``, after the submodules update. This file can be found in the ``xxx/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/trace/systemview`` folder.
+- ``SYSVIEW-MicroEJ_windows.patch`` git patch that must be applied on the ``/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf/``, after the submodules update (Windows environment). This file can be found in the ``xxx/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/trace/systemview`` folder.
+- ``SYSVIEW-MicroEJ_linux.patch`` patch that must be applied on the ``/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/sdk/esp-idf/``, after the submodules update (Linux environment). This file can be found in the ``xxx/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/trace/systemview`` folder.
 - ``RunAtFirstBSPCompile`` script file that update git submodules and apply the above patch (optional to use, user can make the manual operations). This script can be found in the ``xxx/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/scripts`` folder.
 - ``build`` and ``run`` scripts. The build script will create an application with MicroEJ SystemView configuration active. These scripts can be found in the ``/ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp/projects/microej/scripts`` folder.
 - ``gdbinit`` is a file with commands that start the systemview logging.

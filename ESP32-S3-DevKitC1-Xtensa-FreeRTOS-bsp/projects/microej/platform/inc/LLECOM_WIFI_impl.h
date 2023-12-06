@@ -12,7 +12,7 @@
  * @file
  * @brief MicroEJ ECOM-WIFI low level API
  * @author MicroEJ Developer Team
- * @version 1.3.1
+ * @version 1.3.2
  */
 
 #include <sni.h>
@@ -34,10 +34,10 @@
 #define SECURITY_MODE_WPA1							(9)
 #define SECURITY_MODE_WPA2							(10)
 #define SECURITY_MODE_WPA3							(11)
-#define SECURITY_MODE_ENTERPRISE_WPA3				(12)
-#define SECURITY_MODE_WPA2_WPA3_MIXED				(13)  /* Mixed WPA2 / WPA3 */
+#define SECURITY_MODE_WPA2_WPA3_MIXED				(12)  /* Mixed WPA2 / WPA3 */
+#define SECURITY_MODE_ENTERPRISE_WPA3				(13)
 #define SECURITY_MODE_ENTERPRISE_WPA2_WPA3_MIXED	(14)  /* Mixed WPA2 / WPA3 */
-#define SECURITY_MODE_UNKNOWN						(255) /* Unknown (for unsupported protocols) */
+#define SECURITY_MODE_UNKNOWN						(15)  /* Unknown (for unsupported protocols) */
 
 /** @brief list of WPS Modes constants */
 #define WPS_MODE_NONE								(0)   /* No method */

@@ -27,7 +27,7 @@ REM Set MicroEJ top level folder.
 CD "..\..\.."
 
 REM Copy the patch file to the submodule directory (esp-idf)
-COPY /Y /Z /B "projects\microej\trace\systemview\SYSVIEW-MicroEJ.patch" "%ESP_IDF_PATH%\SYSVIEW-MicroEJ.patch"
+COPY /Y /Z /B "projects\microej\trace\systemview\SYSVIEW-MicroEJ_windows.patch" "%ESP_IDF_PATH%\SYSVIEW-MicroEJ_windows.patch"
 IF %ERRORLEVEL% NEQ 0 (
 	EXIT /B %ERRORLEVEL%
 )
@@ -35,10 +35,10 @@ IF %ERRORLEVEL% NEQ 0 (
 REM Apply patch
 CD %ESP_IDF_PATH%
 
-CMD /C git apply SYSVIEW-MicroEJ.patch
+CMD /C git apply SYSVIEW-MicroEJ_windows.patch
 
 REM Delete patch file.
-DEL  /F /Q SYSVIEW-MicroEJ.patch
+DEL  /F /Q SYSVIEW-MicroEJ_windows.patch
 
 IF %ERRORLEVEL% NEQ 0 (
 	EXIT /B %ERRORLEVEL%

@@ -37,7 +37,7 @@ Build & Run Scripts 脚本
 
 - ``RunAtFirstBSPCompile`` 脚本用来应用MicroEJ system view补丁。
 
-  ``projects/microej/trace/systemview/`` 路径下的补丁文件 ``SYSVIEW-MicroEJ.patch`` 将会被安装到目录 |BSP_FULL_NAME| （`\sdk\esp-idf`）。这将给 Segger System View 日志系统添加 MicroEJ 自定义的实现。
+  ``projects/microej/trace/systemview/`` 路径下的补丁文件 ``SYSVIEW-MicroEJ_windows.patch`` 或者 ``SYSVIEW-MicroEJ_linux.patch`` 将会被安装到目录 |BSP_FULL_NAME| （`\sdk\esp-idf`）。这将给 Segger System View 日志系统添加 MicroEJ 自定义的实现。
 
   用户也可以手动执行上述操作，并且仅在第一次编译BSP之前需要。
 

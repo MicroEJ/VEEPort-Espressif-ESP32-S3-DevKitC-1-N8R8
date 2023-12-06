@@ -5,7 +5,7 @@
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
 .. |PLATFORM_NAME| replace:: ESP32-S3-DevKitC1 Platform
-.. |PLATFORM_VER| replace:: 2.3.1
+.. |PLATFORM_VER| replace:: 2.4.0
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
@@ -51,13 +51,13 @@ This |PLATFORM| contains the following dependencies:
    * - Architecture (simikou7)
      - 7.20.1
    * - UI Pack (simikou7UI)
-     - 13.5.1
+     - 13.7.0
    * - NET Pack
-     - 10.5.0
+     - 10.6.0
    * - HAL Pack
      - 2.0.2
    * - BLUETOOTH Pack
-     - 2.3.0
+     - 2.3.1
    * - FS Pack
      - 6.0.4
    * - DEVICE Pack
@@ -65,7 +65,7 @@ This |PLATFORM| contains the following dependencies:
    * - ECOM-NETWORK Pack
      - 1.0.0
    * - ECOM-WIFI Pack
-     - 1.0.0
+     - 1.0.1
 
 Please refer to the |PLATFORM| `module description file <./ESP32-S3-DevKitC1-Xtensa-FreeRTOS-configuration/module.ivy>`_ 
 for more details.
@@ -161,6 +161,8 @@ Known issues/limitations
   The build directory, set with the variable ``ESP_BUILD_DIR``, can be moved closer to the root of the filesystem. 
   To override the default value create a copy of this file: ``ESP32-S3-DevKitC1-Xtensa-FreeRTOS-bsp\projects\microej\scripts\set_local_env.bat.tpl``. 
   Remove the ``.tpl`` at the end of the file name and set the variable ``ESP_BUILD_DIR``, for example with ``C:\tmp``, to prevent toolchain errors.
+- Due to esp-idf limitation that doesn't provide valid cipher type for WEP networks, all WEP networks will be scanned as WEP128, regardless of their
+  cipher type.
 
 Platform Memory Layout
 ======================

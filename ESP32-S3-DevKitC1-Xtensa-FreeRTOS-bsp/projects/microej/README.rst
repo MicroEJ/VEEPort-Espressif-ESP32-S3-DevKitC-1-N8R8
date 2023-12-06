@@ -49,7 +49,7 @@ scripts are meant to run in a Windows and Linux environment respectively.
 - The ``RunAtFirstBSPCompile`` script is used to apply MicroEJ system view implementation
   patch. 
 
-  The patch file ``SYSVIEW-MicroEJ.patch``, from the 
+  The patch file ``SYSVIEW-MicroEJ_windows.patch`` or ``SYSVIEW-MicroEJ_linux.patch``, from the 
   ``projects/microej/trace/systemview/`` directory will be applied to the |BSP_FULL_NAME|
   directory (`\sdk\esp-idf`). This will add the MicroEJ custom 
   implementation for the Segger System View tracing system.

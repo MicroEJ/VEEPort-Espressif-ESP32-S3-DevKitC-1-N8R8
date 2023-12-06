@@ -7,7 +7,29 @@
 ===========
 
 ----------------------
- [2.3.1] - Unreleased
+ [2.4.0] - 2023-11-29
+----------------------
+
+Updated
+=======
+
+- Update bluetooth-pack to version 2.3.1.
+- Update ui-pack to version 13.7.0.
+- Update ecom-wifi-pack to version 1.0.1.
+- Update the sizes of `factory`, `ota_0` and `ota_1` partitions to 2480K to maximum utilize the flash memory and to fit bigger applications.
+- Update net pack to version 10.6.0.
+- Update security-mbedtls CCO to version 1.4.0.
+- Update mjvm-freertos CCO to version 1.4.1.
+- Moved LLECOM_NETWORK initialization to LLNET configuration header file.
+
+Fixed
+=====
+
+- Fix scanning Access Points with WPA3 security mode.
+- Fix joining a WPA1 or WEP Access Point.
+- Fix SystemView patch application on Linux.
+
+ [2.3.1] - 2023-10-31
 ----------------------
 
 Added

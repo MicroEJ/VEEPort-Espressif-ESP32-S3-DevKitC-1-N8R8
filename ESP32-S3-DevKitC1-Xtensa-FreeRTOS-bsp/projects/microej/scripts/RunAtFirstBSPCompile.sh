@@ -2,7 +2,7 @@
 #
 # bash
 #
-# Copyright 2022 MicroEJ Corp. All rights reserved.
+# Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found with this software.
 
 # Init. the echosystem afther the repository cloning of the working branch.
@@ -20,15 +20,15 @@ cd $(dirname $(realpath $0))
 cd ../../..
 
 # Copy the patch file to the submodule directory (esp-idf)
-cp projects/microej/trace/systemview/SYSVIEW-MicroEJ.patch $IDF_PATH/SYSVIEW-MicroEJ.patch
+cp projects/microej/trace/systemview/SYSVIEW-MicroEJ_linux.patch $IDF_PATH/SYSVIEW-MicroEJ_linux.patch
 
 # Apply patch
 cd $IDF_PATH
 
-git apply SYSVIEW-MicroEJ.patch
+patch -p0 < SYSVIEW-MicroEJ_linux.patch
 
 # Delete patch file.
-rm SYSVIEW-MicroEJ.patch
+rm SYSVIEW-MicroEJ_linux.patch
 
 # Restore current directory
 cd $CURRENT_DIR

@@ -9,9 +9,10 @@
  * @file
  * @brief MicroEJ Security low level API implementation for MbedTLS Library.
  * @author MicroEJ Developer Team
- * @version 1.2.0
+ * @version 1.4.0
+ * @date 15 November 2023
  */
-#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+
 #include <LLSEC_ERRORS.h>
 #include <LLSEC_PRIVATE_KEY_impl.h>
 #include <LLSEC_mbedtls.h>
@@ -21,18 +22,32 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mbedtls/platform.h"
-
-
-//#define LLSEC_PRIVATE_KEY_DEBUG
-
-#ifdef LLSEC_PRIVATE_KEY_DEBUG
-// cppcheck-suppress misra-c2012-21.6 // Include only in debug
-#include <stdio.h>
-#define LLSEC_PRIVATE_KEY_DEBUG_TRACE(...) (void)printf(__VA_ARGS__)
+#include "mbedtls/version.h"
+#if (MBEDTLS_VERSION_MAJOR == 2)
+#include "mbedtls/pk_internal.h"
+#elif (MBEDTLS_VERSION_MAJOR == 3)
+#include "pk_wrap.h"
 #else
-#define LLSEC_PRIVATE_KEY_DEBUG_TRACE(...) ((void)0)
+#error "Unsupported mbedTLS major version"
 #endif
+#include "mbedtls/platform.h"
+#include "mbedtls/pk.h"
+
+/**
+ * @brief Private pk context.
+ * Received as input by the LLSEC_PRIVATE native functions, contains an initialized private key context
+ * that will be used by the private pk context.
+ */
+static void* priv_pk_ctx;
+
+static void *priv_ctx_alloc_func(void) {
+    return priv_pk_ctx;
+}
+
+static void priv_ctx_free_func(void *ctx) {
+    // nothing to do, context is received as input to the native function, so it must not be freed here
+    LLSEC_UNUSED_PARAM(ctx);
+}
 
 /**
  * @brief return the max size of the encoded key.
@@ -43,73 +58,102 @@
  *
  * @note Throws NativeException on error.
  */
-int32_t LLSEC_PRIVATE_KEY_IMPL_get_encoded_max_size(int32_t native_id)
-{
+int32_t LLSEC_PRIVATE_KEY_IMPL_get_encoded_max_size(int32_t native_id) {
     LLSEC_PRIVATE_KEY_DEBUG_TRACE("%s \n", __func__);
 
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_priv_key* key = (LLSEC_priv_key*)native_id;
+
+    int return_code = LLSEC_ERROR;
+    int mbedtls_rc = LLSEC_MBEDTLS_SUCCESS;
+
     mbedtls_pk_context pk;
     mbedtls_pk_type_t pk_type;
 
-    if (key->type == TYPE_RSA) {
+    if (TYPE_RSA == key->type) {
         pk_type = MBEDTLS_PK_RSA;
     } else {
         pk_type = MBEDTLS_PK_ECKEY;
     }
 
     mbedtls_pk_init(&pk);
-    mbedtls_pk_setup(&pk, mbedtls_pk_info_from_type(pk_type));
-    pk.pk_ctx = (void*)key->key;
 
-    char buf_local[LLSEC_PRIVATE_KEY_LOCAL_BUFFER_SIZE]; 
-    int length = mbedtls_pk_write_key_der(&pk, (unsigned char*)(&buf_local), sizeof(buf_local));
+    mbedtls_pk_info_t info;
+    (void)memcpy(&info, mbedtls_pk_info_from_type(pk_type), sizeof(mbedtls_pk_info_t));
+    info.ctx_alloc_func = priv_ctx_alloc_func;
+    info.ctx_free_func = priv_ctx_free_func;
 
-    if (length < 0) {
-        SNI_throwNativeException(-length, "Encoded max size get failed");
+    priv_pk_ctx = (void*)key->key;
+
+    mbedtls_rc = mbedtls_pk_setup(&pk, &info);
+    if(LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
+        (void)SNI_throwNativeException(mbedtls_rc, "Private key context setup failed");
+    } else {
+        char buf_local[LLSEC_PRIVATE_KEY_LOCAL_BUFFER_SIZE];
+        /*
+         * Write a private key to a PKCS#1 or SEC1 DER structure.
+         * mbedtls_pk_write_key_der() API will write data at the end of the buffer, not at the beginning, so instead of getting the encoded max size (mbedTLS v3.x has macros, mbedTLS v2.x doesn't), get the encoded fixed size.
+         * LLSEC_PRIVATE_KEY_IMPL_get_encode() will then work straightforward with a fixed size and not a max size.
+         */
+        int length = mbedtls_pk_write_key_der(&pk, (unsigned char*)(&buf_local), sizeof(buf_local));
+        if (0 > length) {
+            (void)SNI_throwNativeException(-length, "Encoded key max size get failed");
+        } else {
+            return_code = length;
+        }
     }
 
-    return length;
+    return return_code;
 }
 
 /**
  * @brief encode the private key into DER format.
  *
- * @param[in] native_id the C structure pointer holding the key data
- * @param[out] output a byte array to hold the encoded key data
- * @pram[in] outputLength the length of the output array
+ * @param[in]  native_id                   the C structure pointer holding the key data
+ * @param[out] output                      a byte array to hold the encoded key data
+ * @pram[in]   outputLength                the length of the output array
  *
  * @return the reel size of the encoded key.
  *
  * @note Throws NativeException on error.
  */
-int32_t LLSEC_PRIVATE_KEY_IMPL_get_encode(int32_t native_id, uint8_t* output, int32_t outputLength)
-{
+int32_t LLSEC_PRIVATE_KEY_IMPL_get_encode(int32_t native_id, uint8_t* output, int32_t outputLength) {
     LLSEC_PRIVATE_KEY_DEBUG_TRACE("%s \n", __func__);
+    int return_code = LLSEC_ERROR;
+    int mbedtls_rc = LLSEC_MBEDTLS_SUCCESS;
 
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_priv_key* key = (LLSEC_priv_key*)native_id;
     mbedtls_pk_context pk;
     mbedtls_pk_type_t pk_type;
 
-    if (key->type == TYPE_RSA) {
+    if (TYPE_RSA == key->type) {
         pk_type = MBEDTLS_PK_RSA;
     } else {
         pk_type = MBEDTLS_PK_ECKEY;
     }
 
     mbedtls_pk_init(&pk);
-    mbedtls_pk_setup(&pk, mbedtls_pk_info_from_type(pk_type));
-    pk.pk_ctx = (void*)key->key;
 
-    //Write a private key to a PKCS#1 or SEC1 DER structure
-    int length = mbedtls_pk_write_key_der(&pk, output, outputLength);
+    mbedtls_pk_info_t info;
+    (void)memcpy(&info, mbedtls_pk_info_from_type(pk_type), sizeof(mbedtls_pk_info_t));
+    info.ctx_alloc_func = priv_ctx_alloc_func;
+    info.ctx_free_func = priv_ctx_free_func;
 
-    if (length < 0) {
-        SNI_throwNativeException(-1, "DER encoding failed");
+    priv_pk_ctx = (void*)key->key;
+
+    mbedtls_rc = mbedtls_pk_setup(&pk, &info);
+    if(LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
+        (void)SNI_throwNativeException(mbedtls_rc, "Private key context setup failed");
+    } else {
+        /* Write a private key to a PKCS#1 or SEC1 DER structure */
+        int length = mbedtls_pk_write_key_der(&pk, output, outputLength);
+        if (0 > length) {
+            (void)SNI_throwNativeException(-length, "Private key encoding failed");
+        } else {
+            return_code = length;
+        }
     }
 
-    return length;
+    return return_code;
 }
 
 /**
@@ -122,20 +166,36 @@ int32_t LLSEC_PRIVATE_KEY_IMPL_get_encode(int32_t native_id, uint8_t* output, in
  *
  * @note Throws NativeException on error.
  */
-int32_t LLSEC_PRIVATE_KEY_IMPL_get_output_size(int32_t native_id)
-{
+int32_t LLSEC_PRIVATE_KEY_IMPL_get_output_size(int32_t native_id) {
     LLSEC_PRIVATE_KEY_DEBUG_TRACE("%s \n", __func__);
+    int return_code = LLSEC_ERROR;
+    int mbedtls_rc = LLSEC_MBEDTLS_SUCCESS;
 
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_priv_key* key = (LLSEC_priv_key*)native_id;
-    int32_t ret = 0;
+    mbedtls_pk_context pk;
+    mbedtls_pk_type_t pk_type;
 
-    if (key->type == TYPE_RSA) {
-        ret = mbedtls_rsa_get_len((mbedtls_rsa_context*)key->key);
+    if (TYPE_RSA == key->type) {
+        pk_type = MBEDTLS_PK_RSA;
     } else {
-        //No limit from EC point of view, return a big enough buffer
-        ret = LLSEC_PRIVATE_KEY_LOCAL_BUFFER_SIZE;
+        pk_type = MBEDTLS_PK_ECKEY;
     }
 
-    return ret;
+    mbedtls_pk_init(&pk);
+
+    mbedtls_pk_info_t info;
+    (void)memcpy(&info, mbedtls_pk_info_from_type(pk_type), sizeof(mbedtls_pk_info_t));
+    info.ctx_alloc_func = priv_ctx_alloc_func;
+    info.ctx_free_func = priv_ctx_free_func;
+
+    priv_pk_ctx = (void*)key->key;
+
+    mbedtls_rc = mbedtls_pk_setup(&pk, &info);
+    if(LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
+        (void)SNI_throwNativeException(mbedtls_rc, "Private key context setup failed");
+    } else {
+        return_code = mbedtls_pk_get_bitlen(&pk) / 8;
+    }
+
+    return return_code;
 }

@@ -9,7 +9,7 @@
  * @file
  * @brief LLMJVM implementation over FreeRTOS.
  * @author MicroEJ Developer Team
- * @version 1.4.0
+ * @version 1.4.1
  */
 
 /*
@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "LLMJVM_FreeRTOS_configuration.h"
 #include FREERTOS_HEADER
@@ -75,7 +76,8 @@ static void wake_up_timer_callback(TimerHandle_t timer) {
 	uint32_t id = (uint32_t) pvTimerGetTimerID(timer);
 	if (id == (uint32_t)WAKE_UP_TIMER_ID) {
 		LLMJVM_FREERTOS_timer_expired = true;
-		LLMJVM_schedule();
+		int32_t result = LLMJVM_schedule();
+		assert(LLMJVM_OK == result);
 	}
 }
 

@@ -35,8 +35,6 @@
 #include <net/if.h>
 #endif
 
-#include "LLECOM_NETWORK.h"
-
 #ifdef LLNET_IGNORE_SIGPIPE
 #include <signal.h>
 #endif
@@ -69,9 +67,7 @@ int32_t LLNET_CHANNEL_IMPL_initialize(void)
 {
 	LLNET_DEBUG_TRACE("%s\n", __func__);
 	int32_t res;
-
-	LLECOM_NETWORK_initialize();
-
+	
 #ifdef LLNET_IGNORE_SIGPIPE
 	// Ignore SIGPIPE signal that is sent when a connection is closed by the remote host.
 	signal(SIGPIPE, SIG_IGN);

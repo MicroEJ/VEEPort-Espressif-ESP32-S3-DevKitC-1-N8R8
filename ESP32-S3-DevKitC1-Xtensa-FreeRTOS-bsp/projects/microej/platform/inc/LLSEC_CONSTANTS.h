@@ -1,19 +1,19 @@
 /*
  * C
  *
- * Copyright 2014-2021 MicroEJ Corp. All rights reserved.
+ * Copyright 2014-2023 MicroEJ Corp. All rights reserved.
  * This library is provided in source code for use, modification and test, subject to license terms.
  * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
  */
-#ifndef __LLSEC_CONSTANTS__
-#define __LLSEC_CONSTANTS__
+#ifndef LLSEC_CONSTANTS_H
+#define LLSEC_CONSTANTS_H
 
 /**
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 11 April 2023
+ * @version 2.3.0
+ * @date 9 November 2023
  */
 
 #include <sni.h>
@@ -41,4 +41,4 @@
 #define LLSEC_DEBUG_DEBUG_ASSERT(...) ((void) 0)
 #endif
 
-#endif //__LLSEC_CONSTANTS__
+#endif //LLSEC_CONSTANTS_H

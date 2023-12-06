@@ -1,19 +1,19 @@
 /*
  * C
  *
- * Copyright 2015-2021 MicroEJ Corp. All rights reserved.
+ * Copyright 2015-2023 MicroEJ Corp. All rights reserved.
  * This library is provided in source code for use, modification and test, subject to license terms.
  * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
  */
-#ifndef __LLSEC_X509_CERT_IMPL__
-#define __LLSEC_X509_CERT_IMPL__
+#ifndef LLSEC_X509_CERT_IMPL_H
+#define LLSEC_X509_CERT_IMPL_H
 
 /**
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 11 April 2023
+ * @version 2.3.0
+ * @date 9 November 2023
  */
 
 #include <intern/LLSEC_X509_CERT_impl.h>
@@ -70,6 +70,19 @@ int32_t LLSEC_X509_CERT_IMPL_get_key(int8_t* cert_data, int32_t cert_data_length
 int32_t LLSEC_X509_CERT_IMPL_verify(int8_t* cert_data, int32_t cert_data_length, int32_t public_key_id);
 
 /**
+ * @brief Checks that the certificate is currently valid, i.e. the current time is within the specified validity period.
+ *
+ * @param[in] cert_data						The X509 certificate.
+ * @param[in] cert_data_length				The certificate length.
+ *
+ * @return {@link J_SEC_NO_ERROR} on success, {@link J_X509_CERT_EXPIRED_ERROR} if certificate expired,
+ * {@link J_X509_CERT_NOT_YET_VALID_ERROR} if certificate is not yet valid.
+ *
+ * @throws NativeException on error.
+ */
+int32_t LLSEC_X509_CERT_IMPL_check_validity(int8_t* cert_data, int32_t cert_data_length);
+
+/**
  * @brief Extracts the subject or issuer X500Principal from an X509Certificate.
  *
  * @param[in] cert_data						The certificate.
@@ -97,4 +110,4 @@ int32_t LLSEC_X509_CERT_IMPL_get_close_key();
 	}
 #endif
 
-#endif //__LLSEC_X509_CERT_IMPL__
+#endif //LLSEC_X509_CERT_IMPL_H

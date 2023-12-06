@@ -6,8 +6,8 @@
  * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
  */
 
-#ifndef __LLSEC_RSA_CIPHER_IMPL__
-#define __LLSEC_RSA_CIPHER_IMPL__
+#ifndef LLSEC_RSA_CIPHER_IMPL_H
+#define LLSEC_RSA_CIPHER_IMPL_H
 
 #include <intern/LLSEC_RSA_CIPHER_impl.h>
 #include <sni.h>
@@ -17,8 +17,8 @@
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 11 April 2023
+ * @version 2.3.0
+ * @date 9 November 2023
  */
 
 typedef enum
@@ -133,4 +133,4 @@ void LLSEC_RSA_CIPHER_IMPL_close(int32_t transformation_id, int32_t native_id);
  */
 int32_t LLSEC_RSA_CIPHER_IMPL_get_close_id(int32_t transformation_id);
 
-#endif //__LLSEC_RSA_CIPHER_IMPL__
+#endif //LLSEC_RSA_CIPHER_IMPL_H

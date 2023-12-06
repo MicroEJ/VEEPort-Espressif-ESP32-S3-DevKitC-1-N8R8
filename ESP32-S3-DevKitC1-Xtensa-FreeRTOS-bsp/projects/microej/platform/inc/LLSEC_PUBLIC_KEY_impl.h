@@ -6,8 +6,8 @@
  * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
  */
 
-#ifndef __LLSEC_PUBLIC_KEY_IMPL__
-#define __LLSEC_PUBLIC_KEY_IMPL__
+#ifndef LLSEC_PUBLIC_KEY_IMPL_H
+#define LLSEC_PUBLIC_KEY_IMPL_H
 
 #include <intern/LLSEC_PUBLIC_KEY_impl.h>
 #include <sni.h>
@@ -17,8 +17,8 @@
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 11 April 2023
+ * @version 2.3.0
+ * @date 9 November 2023
  */
 
 /**
@@ -57,4 +57,4 @@ int32_t LLSEC_PUBLIC_KEY_IMPL_get_encode(int32_t native_id, uint8_t* output, int
  */
 int32_t LLSEC_PUBLIC_KEY_IMPL_get_output_size(int32_t native_id);
 
-#endif //__LLSEC_PUBLIC_KEY_IMPL__
+#endif //LLSEC_PUBLIC_KEY_IMPL_H

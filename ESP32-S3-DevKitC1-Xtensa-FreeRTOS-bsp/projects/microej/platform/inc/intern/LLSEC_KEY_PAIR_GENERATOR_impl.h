@@ -10,8 +10,8 @@
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 11 April 2023
+ * @version 2.3.0
+ * @date 9 November 2023
  */
 
 #define LLSEC_KEY_PAIR_GENERATOR_IMPL_get_algorithm 					Java_com_microej_support_security_keypairgen_NativeKeyPairGeneratorSpi_nativeGetAlgorithm

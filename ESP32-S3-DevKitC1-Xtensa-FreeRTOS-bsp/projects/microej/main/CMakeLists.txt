@@ -108,6 +108,8 @@ else()
         "../security/src/LLSEC_PUBLIC_KEY_impl.c"
         "../security/src/LLSEC_RANDOM_impl.c"
         "../security/src/LLSEC_RSA_CIPHER_impl.c"
+        "../security/src/LLSEC_SECRET_KEY_FACTORY_impl.c"
+        "../security/src/LLSEC_SECRET_KEY_impl.c"
         "../security/src/LLSEC_SIG_impl.c"
         "../security/src/LLSEC_X509_CERT_impl.c"
 

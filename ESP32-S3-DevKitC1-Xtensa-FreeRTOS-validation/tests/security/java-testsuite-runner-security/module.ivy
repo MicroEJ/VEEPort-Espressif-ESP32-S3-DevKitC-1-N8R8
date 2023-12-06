@@ -28,6 +28,6 @@
     		The last module version is automatically fetched by default.
     		To freeze the module version, add the following attribute: ej:match="perfect"    	
     	-->
-		<dependency org="com.microej.pack.net" name="security-1_4-testsuite" rev="1.4.1" conf="test->default;provided->provided"/>
+		<dependency org="com.microej.pack.net" name="security-1_6-testsuite" rev="1.6.0" conf="test->default;provided->provided"/>
     </dependencies>
 </ivy-module>

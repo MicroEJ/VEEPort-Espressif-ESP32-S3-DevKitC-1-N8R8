@@ -123,7 +123,7 @@
 
 /** @brief Timeouts */
 #define DISCONNECT_TIMEOUT_MS 5000
-#define CONNECT_TIMEOUT_MS 5000
+#define CONNECT_TIMEOUT_MS 10000
 #define START_TIMEOUT_MS 5000
 #define STOP_TIMEOUT_MS 5000
 #define SCAN_TIMEOUT_MS 15000
@@ -200,8 +200,10 @@ static const wifi_config_t g_wifi_sta_default_config = {
         .mbo_enabled = 0,
         .ft_enabled = 0,
         .owe_enabled = 0,
+        .transition_disable = 0,
         .reserved = 0,
-        .sae_pwe_h2e = WPA3_SAE_PWE_UNSPECIFIED}};
+        .sae_pwe_h2e = WPA3_SAE_PWE_UNSPECIFIED,
+        .failure_retry_cnt = 0}};
 
 /** @brief Default WiFi access point configuration */
 static const wifi_config_t g_wifi_ap_default_config = {
@@ -228,6 +230,16 @@ static esp_netif_t *ap_netif;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////Functions Prototypes////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief this function selects the appropriate authentication mode threshold for a certain Access Point
+ *
+ * @param[in]  _pc_ssid the ssid of the Access Point for which the function needs to select the authentication mode threshold
+ * @param[in] authmode  the authentication mode desired by the application
+ *
+ * @return the ESP32 security mode to be used as authentication threshold
+ */
+static wifi_auth_mode_t select_authmode_threshold(const char *_pc_ssid, wifi_auth_mode_t authmode);
 
 /**
  * @brief this function translates the security mode from LLNET mode to ESP32 mode
@@ -371,6 +383,90 @@ static bool apply_configuration_f(esp_netif_t *netif, bool is_static, ip4_addr_t
 ///////////////////////////////////////////////////////////////////Private Functions//////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+static wifi_auth_mode_t select_authmode_threshold(const char *_pc_ssid, wifi_auth_mode_t authmode)
+{
+    if (authmode != WIFI_AUTH_WPA2_PSK) {
+        /* The application requests a known security mode */
+        return authmode;
+    } else {
+        /*
+         * The application either requests the known WPA2 security mode or doesn't request any security mode and it just defaults to WPA2.
+         * Unfortunately at this level, the distinction can't be made. The default WPA2 will be removed from the ecom-wifi foundation library, but until then this function is needed.
+         * So, in case the WPA2 is present as a default value, without being explicitly set by the application, the Access Point can be a deprecated one, like WEP or WPA1.
+         * The deprecated security modes are not joined by the underlying Espressif wifi stack even if the threshold is set to the weakest mode, which is OPEN (OPEN < WEP < WPA_PSK).
+         * Extract from esp-idf:
+         * - Incase this value is not set and password is set as per WPA2 standards(password len >= 8), it will be defaulted to WPA2 and device won't connect to deprecated WEP/WPA networks.
+         *   Please set authmode threshold as WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK to connect to WEP/WPA networks.
+         * To properly join an Access Point with a legacy security mode but when the application doesn't request it, the function will attempt to parse the scanned list to find the real
+         * security mode of the Access Point to be joined.
+         */
+        for (uint16_t idx = 0; idx < g_available_ap_count; idx++) {
+            if (strcmp((char *)gpst_available_ap_list[idx].ssid, _pc_ssid) == 0) {
+                wifi_auth_mode_t scanned_authmode = gpst_available_ap_list[idx].authmode;
+                if (scanned_authmode == WIFI_AUTH_WEP) {
+                    /* Attempt to join an Access Point with deprecated WEP security mode */
+                    return WIFI_AUTH_WEP;
+                } else if (scanned_authmode == WIFI_AUTH_WPA_PSK) {
+                    /* Attempt to join an Access Point with deprecated WPA1 security mode */
+                    return WIFI_AUTH_WPA_PSK;
+                } else {
+                    /* Non-legacy authmode, set the weakest one as threshold to ensure joining will succeed regardless of it */
+                    return WIFI_AUTH_OPEN;
+                }
+            }
+        }
+
+        /*
+         * Attempt to join an Access Point not scanned previously, most likely a hidden Access Point or a saved Access Point that doesn't need to be scanned previously by the application.
+         * Scan it explicitly with the hidden option enabled.
+         */
+        wifi_scan_config_t scan_config = {
+          .ssid = (uint8_t*)_pc_ssid,
+          .bssid = NULL,
+          .channel = 0,
+          .show_hidden = true,
+          .scan_type = WIFI_SCAN_TYPE_ACTIVE,
+          .scan_time.active.min = 0,
+          .scan_time.active.max = 0,
+          .scan_time.passive = 0};
+        esp_err_t status = esp_wifi_scan_start(&scan_config, false);
+        if (status != ESP_OK) {
+            /* Error scanning for explicit Access Point, set the weakest one as threshold */
+            return WIFI_AUTH_OPEN;
+        }
+
+        EventBits_t uxBits = xEventGroupWaitBits(gst_wifi_event_group, SCAN_BIT, pdTRUE, pdTRUE, SCAN_TIMEOUT_MS / portTICK_PERIOD_MS);
+        if (!(uxBits & SCAN_BIT)) {
+            /* Scan timeout, set the weakest one as threshold */
+            return WIFI_AUTH_OPEN;
+        }
+
+        uint16_t num_scan = 1;
+        wifi_ap_record_t ap_record = {0};
+        status = esp_wifi_scan_get_ap_records(&num_scan, &ap_record);
+        if (status != ESP_OK) {
+            /* Failure to retrieve the AP records, set the weakest one as threshold */
+            return WIFI_AUTH_OPEN;
+        }
+
+        if (num_scan == 0) {
+            /* Access Point not found in the scan list, set the weakest one as threshold */
+            return WIFI_AUTH_OPEN;
+        }
+
+        if (ap_record.authmode == WIFI_AUTH_WEP) {
+            /* Attempt to join an Access Point with deprecated WEP security mode */
+            return WIFI_AUTH_WEP;
+        } else if (ap_record.authmode == WIFI_AUTH_WPA_PSK) {
+            /* Attempt to join an Access Point with deprecated WPA1 security mode */
+            return WIFI_AUTH_WPA_PSK;
+        } else {
+            /* Non-legacy authmode, set the weakest one as threshold to ensure joining will succeed regardless of it */
+            return WIFI_AUTH_OPEN;
+        }
+    }
+}
+
 static wifi_auth_mode_t convert_llnet_to_esp32_security_mode_f(int _i_llnet_security_mode)
 {
     wifi_auth_mode_t authmode;
@@ -400,21 +496,17 @@ static wifi_auth_mode_t convert_llnet_to_esp32_security_mode_f(int _i_llnet_secu
     case SECURITY_MODE_ENTERPRISE_WPA2:
         authmode = WIFI_AUTH_WPA2_ENTERPRISE;
         break;
+
     case SECURITY_MODE_WPA3:
         authmode = WIFI_AUTH_WPA3_PSK;
         break;
+
     case SECURITY_MODE_WPA2_WPA3_MIXED:
         authmode = WIFI_AUTH_WPA2_WPA3_PSK;
         break;
-    case SECURITY_MODE_ENTERPRISE_NO_SECURITY:
-    case SECURITY_MODE_ENTERPRISE_WPA_MIXED:
-    case SECURITY_MODE_ENTERPRISE_WPA1:
-    case SECURITY_MODE_ENTERPRISE_WEP:
-    case SECURITY_MODE_ENTERPRISE_WPA3:
-    case SECURITY_MODE_ENTERPRISE_WPA2_WPA3_MIXED:
-    case SECURITY_MODE_UNKNOWN:
+
     default:
-        authmode = (wifi_auth_mode_t)-1;
+        authmode = WIFI_AUTH_MAX;
         break;
     }
 
@@ -438,6 +530,8 @@ static int convert_esp32_to_llnet_security_mode_f(wifi_auth_mode_t _esp32_securi
             _pi_llnet_security_mode = SECURITY_MODE_WEP64;
             break;
         case WIFI_CIPHER_TYPE_WEP104:
+            _pi_llnet_security_mode = SECURITY_MODE_WEP128;
+            break;
         case WIFI_CIPHER_TYPE_NONE: // Workaround for esp-idf bug, need to have a valid information for WEP AP
             _pi_llnet_security_mode = SECURITY_MODE_WEP128;
             break;
@@ -461,6 +555,14 @@ static int convert_esp32_to_llnet_security_mode_f(wifi_auth_mode_t _esp32_securi
 
     case WIFI_AUTH_WPA2_ENTERPRISE:
         _pi_llnet_security_mode = SECURITY_MODE_ENTERPRISE_WPA2;
+        break;
+
+    case WIFI_AUTH_WPA3_PSK:
+        _pi_llnet_security_mode = SECURITY_MODE_WPA3;
+        break;
+
+    case WIFI_AUTH_WPA2_WPA3_PSK:
+        _pi_llnet_security_mode = SECURITY_MODE_WPA2_WPA3_MIXED;
         break;
 
     default:
@@ -934,54 +1036,41 @@ static bool join_ap_or_softap_f(const char *_pc_ssid, int _i_ssid_length, const 
     int ssid_len;
     void *ssid;
 
+    /* Convert security mode, return if not supported */
+    wifi_auth_mode_t authmode = convert_llnet_to_esp32_security_mode_f(_i_security_mode);
+    if (WIFI_AUTH_MAX == authmode)
+    {
+        return false;
+    }
+
     /* Check WiFi mode */
     if (_mode == WIFI_MODE_STA)
     {
         /* Initialize WiFi configuration */
-        memset(&wifi_config.sta.ssid, 0x00, sizeof(wifi_config.sta.ssid));
-        memset(&wifi_config.sta.password, 0x00, sizeof(wifi_config.sta.password));
-        wifi_config.sta.scan_method = WIFI_ALL_CHANNEL_SCAN;
-        wifi_config.sta.bssid_set = false;
-        memset(&wifi_config.sta.bssid, 0x00, sizeof(wifi_config.sta.bssid));
-        wifi_config.sta.channel = 0;
-        wifi_config.sta.listen_interval = 0;
-        wifi_config.sta.sort_method = WIFI_CONNECT_AP_BY_SIGNAL;
-        wifi_config.sta.threshold.rssi = WIFI_MIN_RSSI_THRESHOLD;
-        wifi_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
-        wifi_config.sta.pmf_cfg.capable = false;
-        wifi_config.sta.pmf_cfg.required = false;
+        memcpy(&wifi_config, &g_wifi_sta_default_config, sizeof(wifi_config));
 
         /* Get specific fields */
         ssid = (void *)wifi_config.sta.ssid;
         ssid_len = sizeof(wifi_config.sta.ssid);
         password = (void *)wifi_config.sta.password;
         password_len = sizeof(wifi_config.sta.password);
+
+        /* Set authentication mode */
+        wifi_config.sta.threshold.authmode = select_authmode_threshold(_pc_ssid, authmode);
     }
     else if (_mode == WIFI_MODE_AP || _mode == WIFI_MODE_APSTA)
     {
-        /* Convert security mode */
-        wifi_auth_mode_t authmode = convert_llnet_to_esp32_security_mode_f(_i_security_mode);
-
-        if (0 > authmode)
-        {
-            return false;
-        }
-
         /* Initialize WiFi configuration */
-        memset(&wifi_config.ap.ssid, 0x00, sizeof(wifi_config.ap.ssid));
-        memset(&wifi_config.ap.password, 0x00, sizeof(wifi_config.ap.password));
-        wifi_config.ap.ssid_len = 0;
-        wifi_config.ap.channel = 0;
-        wifi_config.ap.authmode = authmode;
-        wifi_config.ap.ssid_hidden = 0;
-        wifi_config.ap.max_connection = WIFI_SOFT_AP_MAX_CONNECTIONS;
-        wifi_config.ap.beacon_interval = WIFI_SOFT_AP_BEACON_INTERVAL;
+        memcpy(&wifi_config, &g_wifi_ap_default_config, sizeof(wifi_config));
 
         /* Get specific fields */
         ssid = (void *)wifi_config.ap.ssid;
         ssid_len = sizeof(wifi_config.ap.ssid);
         password = (void *)wifi_config.ap.password;
         password_len = sizeof(wifi_config.ap.password);
+
+        /* Set authentication mode */
+        wifi_config.ap.authmode = authmode;
     }
     else
     {
@@ -1624,10 +1713,6 @@ bool WIFI_ESP32_get_security_mode_f(short *_ps_mode)
 
     /* Translate the security mode */
     security_mode = convert_esp32_to_llnet_security_mode_f(ap_info.authmode, ap_info.group_cipher);
-    if (0 > security_mode)
-    {
-        return false;
-    }
 
     *_ps_mode = (short)(security_mode & 0xFFFF);
     
@@ -1732,7 +1817,8 @@ bool WIFI_ESP32_get_ap_count_f(short *const _ps_ap_count)
         .show_hidden = false,
         .scan_type = WIFI_SCAN_TYPE_ACTIVE,
         .scan_time.active.min = 0,
-        .scan_time.active.max = 0};
+        .scan_time.active.max = 0,
+        .scan_time.passive = 0};
     EventBits_t uxBits;
     uint16_t num_scan;
     esp_err_t status;
@@ -1966,11 +2052,8 @@ bool WIFI_ESP32_get_ap_security_mode_f(unsigned int _ui_index, int *_pi_mode)
     if (_ui_index < g_available_ap_count)
     {
         int security_mode = convert_esp32_to_llnet_security_mode_f(gpst_available_ap_list[_ui_index].authmode, gpst_available_ap_list[_ui_index].group_cipher);
-        b_return = 0 <= security_mode;
-        if (false != b_return)
-        {
-            *_pi_mode = security_mode;
-        }
+        b_return = true;
+        *_pi_mode = security_mode;
         WIFI_ESP32_DEBUG_TRACE("(%s) AP security: %d; mode=%d\n", __func__, b_return, *_pi_mode);
     }
     else

@@ -3,8 +3,8 @@
 nvs,		data,	nvs,     	0x10000,  	0x10000,
 otadata,	data,	ota,     	0x20000,  	0x2000,
 phy_init,	data,	phy,     	0x22000,  	0xE000,
-factory,	app,	factory,	0x30000,	1536K,
-ota_0,		app,	ota_0,		,			1536K,
-ota_1,		app, 	ota_1,		,			1536K,
+factory,	app,	factory,	0x30000,	2480K,
+ota_0,		app,	ota_0,		,			2480K,
+ota_1,		app, 	ota_1,		,			2480K,
 storage,	data,	fat,		,			528K,
 

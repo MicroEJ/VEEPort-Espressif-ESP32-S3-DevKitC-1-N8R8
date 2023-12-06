@@ -9,7 +9,8 @@
  * @file
  * @brief MicroEJ Security low level API implementation for MbedTLS Library.
  * @author MicroEJ Developer Team
- * @version 1.2.0
+ * @version 1.4.0
+ * @date 15 November 2023
  */
 
 #include <LLSEC_ERRORS.h>
@@ -22,19 +23,6 @@
 
 #include "mbedtls/platform.h"
 #include "mbedtls/md.h"
-
-#define LLSEC_MAC_SUCCESS  0
-#define LLSEC_MAC_ERROR   -1
-
-//#define LLSEC_MAC_DEBUG
-
-#ifdef LLSEC_MAC_DEBUG
-// cppcheck-suppress misra-c2012-21.6 // Include only in debug
-#include <stdio.h>
-#define LLSEC_MAC_DEBUG_TRACE(...) (void)printf(__VA_ARGS__)
-#else
-#define LLSEC_MAC_DEBUG_TRACE(...) ((void)0)
-#endif
 
 typedef int (*LLSEC_MAC_init)(void** native_id, uint8_t* key, int32_t key_length);
 typedef int (*LLSEC_MAC_update)(void* native_id, uint8_t* buffer, int32_t buffer_length);
@@ -58,6 +46,7 @@ static int mbedtls_mac_do_final(void* native_id, uint8_t* out, int32_t out_lengt
 static int mbedtls_mac_reset(void* native_id);
 static void mbedtls_mac_close(void* native_id);
 
+// cppcheck-suppress misra-c2012-8.9 // Define here for code readability even if it called once in this file.
 static LLSEC_MAC_algorithm available_mac_algorithms[1] = {
 
     {
@@ -73,63 +62,59 @@ static LLSEC_MAC_algorithm available_mac_algorithms[1] = {
     }
 };
 
-static int mbedtls_mac_HmacSha256_init(void** native_id, uint8_t* key, int32_t key_length)
-{
+static int mbedtls_mac_HmacSha256_init(void** native_id, uint8_t* key, int32_t key_length) {
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
-    int return_code = LLSEC_MAC_SUCCESS;
+    int return_code = LLSEC_SUCCESS;
     mbedtls_md_context_t* md_ctx = LLSEC_calloc(1, sizeof(mbedtls_md_context_t));
-    if (md_ctx == NULL) {
-        return_code = LLSEC_MAC_ERROR;
+    if (NULL == md_ctx) {
+        return_code = LLSEC_ERROR;
     }
 
-    if (return_code == LLSEC_MAC_SUCCESS) {
+    if (LLSEC_SUCCESS == return_code) {
         mbedtls_md_init(md_ctx);
-        return_code = mbedtls_md_setup(md_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
-        if (return_code != LLSEC_MAC_SUCCESS) {
-            LLSEC_free(md_ctx);
-            return_code = LLSEC_MAC_ERROR;
+        int mbedtls_rc = mbedtls_md_setup(md_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
+        if(LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
+            return_code = LLSEC_ERROR;
         }
     }
-
-    if (return_code == LLSEC_MAC_SUCCESS) {
-        return_code = mbedtls_md_hmac_starts(md_ctx, key, key_length);
-        if (return_code != LLSEC_MAC_SUCCESS) {
-            LLSEC_free(md_ctx);
-            return_code = LLSEC_MAC_ERROR;
-        } else {
-            *native_id = md_ctx;
+    if (LLSEC_SUCCESS == return_code) {
+        int mbedtls_rc = mbedtls_md_hmac_starts(md_ctx, key, key_length);
+        if(LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
+            return_code = LLSEC_ERROR;
         }
+    }
+    if (LLSEC_SUCCESS != return_code) {
+        LLSEC_free(md_ctx);
+        return_code = LLSEC_ERROR;
+    } else {
+        *native_id = md_ctx;
     }
 
     return return_code;
 }
 
-static int mbedtls_mac_update(void* native_id, uint8_t* buffer, int32_t buffer_length)
-{
+static int mbedtls_mac_update(void* native_id, uint8_t* buffer, int32_t buffer_length) {
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
     mbedtls_md_context_t* md_ctx = (mbedtls_md_context_t*)native_id;
     return mbedtls_md_hmac_update(md_ctx, buffer, buffer_length);
 }
 
-static int mbedtls_mac_do_final(void* native_id, uint8_t* out, int32_t out_length)
-{
-    (void) native_id; // Unused input parameter
-    (void) out_length; // Unused input parameter
+static int mbedtls_mac_do_final(void* native_id, uint8_t* out, int32_t out_length) {
+    LLSEC_UNUSED_PARAM(native_id);
+    LLSEC_UNUSED_PARAM(out_length);
 
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
     mbedtls_md_context_t* md_ctx = (mbedtls_md_context_t*)native_id;
     return mbedtls_md_hmac_finish(md_ctx, out);
 }
 
-static int mbedtls_mac_reset(void* native_id)
-{
+static int mbedtls_mac_reset(void* native_id) {
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
     mbedtls_md_context_t* md_ctx = (mbedtls_md_context_t*)native_id;
-   return mbedtls_md_hmac_reset(md_ctx);
+    return mbedtls_md_hmac_reset(md_ctx);
 }
 
-static void mbedtls_mac_close(void* native_id)
-{
+static void mbedtls_mac_close(void* native_id) {
     LLSEC_MAC_DEBUG_TRACE("%s native_id:%p\n", __func__, native_id);
     LLSEC_free(native_id);
 }
@@ -137,16 +122,15 @@ static void mbedtls_mac_close(void* native_id)
 /**
  * @brief Gets for the given algorithm the message digest description.
  *
- * @param[in] algorithm_name			Null terminated string that describes the algorithm.
- * @param[out] algorithm_desc			Description of the MAC algorithm.
+ * @param[in] algorithm_name               Null terminated string that describes the algorithm.
+ * @param[out] algorithm_desc              Description of the MAC algorithm.
  *
  * @return The algorithm ID on success or -1 on error.
  *
  * @warning <code>algorithm_name</code> must not be used outside of the VM task or saved.
  */
-int32_t LLSEC_MAC_IMPL_get_algorithm_description(uint8_t* algorithm_name, LLSEC_MAC_algorithm_desc* algorithm_desc)
-{
-    int32_t return_code;
+int32_t LLSEC_MAC_IMPL_get_algorithm_description(uint8_t* algorithm_name, LLSEC_MAC_algorithm_desc* algorithm_desc) {
+    int32_t return_code = LLSEC_ERROR;
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
 
     int32_t nb_algorithms = sizeof(available_mac_algorithms) / sizeof(LLSEC_MAC_algorithm);
@@ -160,12 +144,8 @@ int32_t LLSEC_MAC_IMPL_get_algorithm_description(uint8_t* algorithm_name, LLSEC_
         algorithm++;
     }
 
-    if (nb_algorithms >= 0)
-    {
-        // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
+    if (0 <= nb_algorithms) {
         return_code = (int32_t)algorithm;
-    } else {
-        return_code = LLSEC_MAC_ERROR;
     }
     return return_code;
 }
@@ -173,9 +153,9 @@ int32_t LLSEC_MAC_IMPL_get_algorithm_description(uint8_t* algorithm_name, LLSEC_
 /**
  * @brief Initializes a Mac resource.
  *
- * @param[in] algorithm_id				The algorithm ID.
- * @param[in] key						The MAC key.
- * @param[in] key_length				The key length.
+ * @param[in] algorithm_id                 The algorithm ID.
+ * @param[in] key                          The MAC key.
+ * @param[in] key_length                   The key length.
  *
  * @return The native ID of the resource.
  *
@@ -183,27 +163,25 @@ int32_t LLSEC_MAC_IMPL_get_algorithm_description(uint8_t* algorithm_name, LLSEC_
  *
  * @warning <code>key</code> must not be used outside of the VM task or saved.
  */
-int32_t LLSEC_MAC_IMPL_init(int32_t algorithm_id, uint8_t* key, int32_t key_length)
-{
-    int32_t return_code;
+int32_t LLSEC_MAC_IMPL_init(int32_t algorithm_id, uint8_t* key, int32_t key_length) {
+    int32_t return_code = LLSEC_SUCCESS;
 
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
 
     void* native_id = NULL;
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_MAC_algorithm* algorithm = (LLSEC_MAC_algorithm*)algorithm_id;
 
     return_code = algorithm->init(&native_id, key, key_length);
 
-    if (return_code != LLSEC_MAC_SUCCESS) {
-        SNI_throwNativeException(return_code, "LLSEC_MAC_IMPL_init failed\n");
+    if (LLSEC_SUCCESS != return_code) {
+        (void)SNI_throwNativeException(return_code, "LLSEC_MAC_IMPL_init failed\n");
     }
 
     // register SNI native resource
     if (SNI_registerResource(native_id, algorithm->close, NULL) != SNI_OK) {
-        SNI_throwNativeException(-1, "Can't register SNI native resource");
+        (void)SNI_throwNativeException(-1, "Can't register SNI native resource");
         algorithm->close(native_id);
-        return_code = LLSEC_MAC_ERROR;
+        return_code = LLSEC_ERROR;
     } else {
         // cppcheck-suppress misra-c2012-11.6 // Abstract data type for SNI usage
         return_code = (int32_t)native_id;
@@ -214,95 +192,84 @@ int32_t LLSEC_MAC_IMPL_init(int32_t algorithm_id, uint8_t* key, int32_t key_leng
 /**
  * @brief Processes the provided data to update the MAC resource.
  *
- * @param[in] algorithm_id				The algorithm ID.
- * @param[in] native_id					The native ID.
- * @param[in] buffer					The buffer containing the data to be processed.
- * @param[in] buffer_offset				The buffer offset.
- * @param[in] buffer_length				The buffer length.
+ * @param[in] algorithm_id                 The algorithm ID.
+ * @param[in] native_id                    The native ID.
+ * @param[in] buffer                       The buffer containing the data to be processed.
+ * @param[in] buffer_offset                The buffer offset.
+ * @param[in] buffer_length                The buffer length.
  *
  * @note Throws NativeException on error.
  *
  * @warning <code>buffer</code> must not be used outside of the VM task or saved.
  */
-void LLSEC_MAC_IMPL_update(int32_t algorithm_id, int32_t native_id, uint8_t* buffer, int32_t buffer_offset, int32_t buffer_length)
-{
+void LLSEC_MAC_IMPL_update(int32_t algorithm_id, int32_t native_id, uint8_t* buffer, int32_t buffer_offset, int32_t buffer_length) {
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
 
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_MAC_algorithm* algorithm = (LLSEC_MAC_algorithm*)algorithm_id;
 
     // cppcheck-suppress misra-c2012-11.6 // Abstract data type for SNI usage
-    int returnCode = algorithm->update((void*)native_id, &buffer[buffer_offset], buffer_length);
-
-    if (returnCode != LLSEC_MAC_SUCCESS) {
-        SNI_throwNativeException(returnCode, "LLSEC_MAC_IMPL_update failed");
+    int return_code = algorithm->update((void*)native_id, &buffer[buffer_offset], buffer_length);
+    if (return_code != LLSEC_SUCCESS) {
+        (void)SNI_throwNativeException(return_code, "LLSEC_MAC_IMPL_update failed");
     }
 }
 
 /**
  * @brief Finishes the MAC operation.
  *
- * @param[in] algorithm_id				The algorithm ID.
- * @param[in] native_id					The native ID.
- * @param[out] out						The MAC result.
- * @param[in] out_offset				The offset of the out buffer.
- * @param[in] out_length				The length of the out buffer.
+ * @param[in] algorithm_id                 The algorithm ID.
+ * @param[in] native_id                    The native ID.
+ * @param[out] out                         The MAC result.
+ * @param[in] out_offset                   The offset of the out buffer.
+ * @param[in] out_length                   The length of the out buffer.
  *
  * @note Throws NativeException on error.
  *
  * @warning <code>out</code> must not be used outside of the VM task or saved.
  */
-void LLSEC_MAC_IMPL_do_final(int32_t algorithm_id, int32_t native_id, uint8_t* out, int32_t out_offset, int32_t out_length)
-{
+void LLSEC_MAC_IMPL_do_final(int32_t algorithm_id, int32_t native_id, uint8_t* out, int32_t out_offset, int32_t out_length) {
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
 
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_MAC_algorithm* algorithm = (LLSEC_MAC_algorithm*)algorithm_id;
 
     // cppcheck-suppress misra-c2012-11.6 // Abstract data type for SNI usage
-    int returnCode = algorithm->do_final((void*)native_id, &out[out_offset], out_length);
-
-    if (returnCode != LLSEC_MAC_SUCCESS) {
-        SNI_throwNativeException(returnCode, "LLSEC_MAC_IMPL_do_final failed");
+    int return_code = algorithm->do_final((void*)native_id, &out[out_offset], out_length);
+    if (return_code != LLSEC_SUCCESS) {
+        (void)SNI_throwNativeException(return_code, "LLSEC_MAC_IMPL_do_final failed");
     }
 }
 
 /**
  * @brief Resets the MAC resource.
  *
- * @param[in] algorithm_id				The algorithm ID.
- * @param[in] native_id					The native ID.
+ * @param[in] algorithm_id                 The algorithm ID.
+ * @param[in] native_id                    The native ID.
  *
  * @note Throws NativeException on error.
  */
-void LLSEC_MAC_IMPL_reset(int32_t algorithm_id, int32_t native_id)
-{
+void LLSEC_MAC_IMPL_reset(int32_t algorithm_id, int32_t native_id) {
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
 
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_MAC_algorithm* algorithm = (LLSEC_MAC_algorithm*)algorithm_id;
 
     // cppcheck-suppress misra-c2012-11.6 // Abstract data type for SNI usage
-    int returnCode = algorithm->reset((void*)native_id);
-
-    if (returnCode != LLSEC_MAC_SUCCESS) {
-        SNI_throwNativeException(returnCode, "LLSEC_MAC_IMPL_reset failed");
+    int return_code = algorithm->reset((void*)native_id);
+    if (return_code != LLSEC_SUCCESS) {
+        (void)SNI_throwNativeException(return_code, "LLSEC_MAC_IMPL_reset failed");
     }
 }
 
 /**
  * @brief Closes the resources related to the native id.
  *
- * @param[in] algorithm_id				The algorithm ID.
- * @param[in] native_id					The native ID.
+ * @param[in] algorithm_id                 The algorithm ID.
+ * @param[in] native_id                    The native ID.
  *
  * @note Throws NativeException on error.
  */
-void LLSEC_MAC_IMPL_close(int32_t algorithm_id, int32_t native_id)
-{
+void LLSEC_MAC_IMPL_close(int32_t algorithm_id, int32_t native_id) {
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
 
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_MAC_algorithm* algorithm = (LLSEC_MAC_algorithm*)algorithm_id;
 
     // cppcheck-suppress misra-c2012-11.6 // Abstract data type for SNI usage
@@ -310,23 +277,22 @@ void LLSEC_MAC_IMPL_close(int32_t algorithm_id, int32_t native_id)
     // cppcheck-suppress misra-c2012-11.6 // Abstract data type for SNI usage
     // cppcheck-suppress misra-c2012-11.1 // Abstract data type for SNI usage
     if (SNI_unregisterResource((void*)native_id, (SNI_closeFunction)algorithm->close) != SNI_OK) {
-        SNI_throwNativeException(-1, "Can't unregister SNI native resource\n");
+        (void)SNI_throwNativeException(-1, "Can't unregister SNI native resource\n");
     }
 }
+
 /**
  * @brief Gets the id of the native close function.
  *
- * @param[in] algorithm_id				The algorithm ID.
+ * @param[in] algorithm_id                 The algorithm ID.
  *
  * @return the id of the static native close function.
  *
  * @note Throws NativeException on error.
  */
-int32_t LLSEC_MAC_IMPL_get_close_id(int32_t algorithm_id)
-{
+int32_t LLSEC_MAC_IMPL_get_close_id(int32_t algorithm_id) {
     LLSEC_MAC_DEBUG_TRACE("%s \n", __func__);
 
-    // cppcheck-suppress misra-c2012-11.4 // Abstract data type for SNI usage
     LLSEC_MAC_algorithm* algorithm = (LLSEC_MAC_algorithm*)algorithm_id;
     // cppcheck-suppress misra-c2012-11.1 // Abstract data type for SNI usage
     return (int32_t)algorithm->close;

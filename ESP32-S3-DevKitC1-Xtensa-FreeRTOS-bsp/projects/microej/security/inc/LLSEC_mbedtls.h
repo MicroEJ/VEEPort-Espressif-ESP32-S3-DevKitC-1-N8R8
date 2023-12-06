@@ -9,12 +9,14 @@
  * @file
  * @brief Security natives mbedtls structs.
  * @author MicroEJ Developer Team
- * @version 1.2.0
+ * @version 1.4.0
+ * @date 15 November 2023
  */
 
-#ifndef LLSEC_MBEDTLS
-#define LLSEC_MBEDTLS
+#ifndef LLSEC_MBEDTLS_H
+#define LLSEC_MBEDTLS_H
 
+#include <stdint.h>
 #include "mbedtls/pk.h"
 
 typedef enum {
@@ -33,6 +35,11 @@ typedef struct {
     char *key; /*mbedtls_rsa_context or mbedtls_ecdsa_context*/
 } LLSEC_pub_key;
 
+typedef struct {
+    unsigned char* key;
+    int32_t        key_length;
+} LLSEC_secret_key;
+
 extern char *llsec_gen_random_str_internal(int length);
 
-#endif /* LLSEC_MBEDTLS */
+#endif /* LLSEC_MBEDTLS_H */

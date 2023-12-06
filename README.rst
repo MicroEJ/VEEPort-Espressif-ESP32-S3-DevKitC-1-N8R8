@@ -135,13 +135,13 @@ This |VEEPORT| provides the following Foundation Libraries:
    * - KF
      - 1.6
    * - MICROUI
-     - 3.2
+     - 3.4
    * - NET
      - 1.1
    * - NLS
      - 2.0
    * - SECURITY
-     - 1.4
+     - 1.6
    * - SNI
      - 1.4
    * - SSL

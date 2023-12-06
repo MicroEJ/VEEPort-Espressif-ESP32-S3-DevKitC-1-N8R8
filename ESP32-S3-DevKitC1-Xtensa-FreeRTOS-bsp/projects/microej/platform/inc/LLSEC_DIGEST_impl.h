@@ -1,13 +1,13 @@
 /*
  * C
  *
- * Copyright 2017-2021 MicroEJ Corp. All rights reserved.
+ * Copyright 2017-2023 MicroEJ Corp. All rights reserved.
  * This library is provided in source code for use, modification and test, subject to license terms.
  * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
  */
 
-#ifndef __LLSEC_DIGEST_IMPL__
-#define __LLSEC_DIGEST_IMPL__
+#ifndef LLSEC_DIGEST_IMPL_H
+#define LLSEC_DIGEST_IMPL_H
 
 #include <intern/LLSEC_DIGEST_impl.h>
 #include <sni.h>
@@ -17,8 +17,8 @@
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 11 April 2023
+ * @version 2.3.0
+ * @date 9 November 2023
  */
 
 
@@ -100,4 +100,4 @@ void LLSEC_DIGEST_IMPL_update(int32_t algorithm_id, int32_t native_id, uint8_t* 
  */
 void LLSEC_DIGEST_IMPL_digest(int32_t algorithm_id, int32_t native_id, uint8_t* out, int32_t out_offset, int32_t out_length);
 
-#endif //__LLSEC_DIGEST_IMPL__
+#endif //LLSEC_DIGEST_IMPL_H

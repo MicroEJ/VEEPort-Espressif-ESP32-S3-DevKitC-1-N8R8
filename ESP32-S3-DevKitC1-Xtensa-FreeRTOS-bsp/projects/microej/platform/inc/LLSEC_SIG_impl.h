@@ -1,13 +1,13 @@
 /*
  * C
  *
- * Copyright 2017-2021 MicroEJ Corp. All rights reserved.
+ * Copyright 2017-2023 MicroEJ Corp. All rights reserved.
  * This library is provided in source code for use, modification and test, subject to license terms.
  * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
  */
 
-#ifndef __LLSEC_SIG_IMPL__
-#define __LLSEC_SIG_IMPL__
+#ifndef LLSEC_SIG_IMPL_H
+#define LLSEC_SIG_IMPL_H
 
 #include <intern/LLSEC_SIG_impl.h>
 #include <sni.h>
@@ -17,16 +17,16 @@
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.1.0
- * @date 11 April 2023
+ * @version 2.3.0
+ * @date 9 November 2023
  */
 
 /**
  * @brief Gets for the given algorithm the message digest description.
  *
- * @param[in] algorithm_name				Null terminated string that describes the algorithm.
- * @param[out] digest_algorithm_name		Null terminated string that describes the digest algorithm.
- * @param[in] digest_algorithm_name_length	Length of digest_algorithm.
+ * @param[in] algorithm_name				Null terminated string that describes the algorithm
+ * @param[out] digest_algorithm_name		Null terminated string that describes the digest algorithm
+ * @param[in] digest_algorithm_name_length	Length of digest_algorithm (in bytes)
  *
  * @return The algorithm ID on success or -1 on error.
  *
@@ -87,4 +87,4 @@ uint8_t LLSEC_SIG_IMPL_verify(int32_t algorithm_id, uint8_t* signature, int32_t 
 int32_t LLSEC_SIG_IMPL_sign(int32_t algorithm_id, uint8_t* signature, int32_t signature_length, int32_t private_key_id, uint8_t* digest, int32_t digest_length);
 
 
-#endif //__LLSEC_SIG_IMPL__
+#endif //LLSEC_SIG_IMPL_H

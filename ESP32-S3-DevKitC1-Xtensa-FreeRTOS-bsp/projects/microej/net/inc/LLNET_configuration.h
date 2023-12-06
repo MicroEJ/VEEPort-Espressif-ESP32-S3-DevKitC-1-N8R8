@@ -17,6 +17,7 @@
 #define  LLNET_CONFIGURATION_H
 
 #include <lwip/sockets.h>
+#include "LLECOM_NETWORK.h"
 
 #ifdef __cplusplus
 	extern "C" {
@@ -94,7 +95,11 @@
  * By default this macro does nothing.
  */
 #include "lwip_util.h"
-#define llnet_init		llnet_lwip_init
+static inline int32_t llnet_init() {
+	LLECOM_NETWORK_initialize();
+
+	return llnet_lwip_init();
+}
 
 /*
  * Returns true (bool) if we can call the services of the network stack without jeopardizing the system,
