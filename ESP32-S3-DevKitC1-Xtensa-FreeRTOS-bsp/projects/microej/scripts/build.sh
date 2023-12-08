@@ -49,6 +49,7 @@ fi
 python "$ESP_PROJECT_DIR/scripts/combine_binaries.py" "$CURRENT_DIRECTORY/combined.bin" \
 	$BOOTLOADER_BIN_OFFSET "$ESP_BUILD_DIR/bootloader/bootloader.bin" \
 	$PARTITIONS_BIN_OFFSET "$ESP_BUILD_DIR/partition_table/partition-table.bin" \
+	$OTADATA_BIN_OFFSET "$ESP_BUILD_DIR/ota_data_initial.bin" \
 	$APPLICATION_BIN_OFFSET "$ESP_BUILD_DIR/microej.bin"
 if [ $? -ne 0 ]; then
   exit 1

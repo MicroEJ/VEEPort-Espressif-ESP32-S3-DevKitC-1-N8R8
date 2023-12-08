@@ -7,6 +7,16 @@
 ===========
 
 ----------------------
+ [2.4.1] - 2023-12-07
+----------------------
+
+Fixed
+=====
+
+- Fix the scripts used to combine all binaries into a single one.
+- Fix max BLE notification reached error.
+
+----------------------
  [2.4.0] - 2023-11-29
 ----------------------
 

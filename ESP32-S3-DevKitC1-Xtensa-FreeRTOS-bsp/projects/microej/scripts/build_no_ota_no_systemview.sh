@@ -2,7 +2,7 @@
 #
 # BASH
 #
-# Copyright 2022 MicroEJ Corp. All rights reserved.
+# Copyright 2022-2023 MicroEJ Corp. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be found with this software.
 
 # 'build.sh' implementation for Espressif IDF.
@@ -45,6 +45,7 @@ cp build/microej.elf $CURRENT_DIRECTORY/application.out
 python "scripts/combine_binaries.py" "$CURRENT_DIRECTORY/combined.bin" \
 	$BOOTLOADER_BIN_OFFSET "build/bootloader/bootloader.bin" \
 	$PARTITIONS_BIN_OFFSET "build/partitions_no_ota_no_systemview.bin" \
+	$OTADATA_BIN_OFFSET "build/ota_data_initial.bin" \
 	$APPLICATION_BIN_OFFSET "build/microej.bin"
 
 # Restore application directory
