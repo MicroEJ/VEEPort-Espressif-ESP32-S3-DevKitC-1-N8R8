@@ -1,11 +1,11 @@
 ..
-    Copyright 2022-2023 MicroEJ Corp. All rights reserved.
+    Copyright 2022-2024 MicroEJ Corp. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be found with this software.
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
 .. |BOARD_REVISION| replace:: 1.0
 .. |PLATFORM_NAME| replace:: ESP32-S3-DevKitC1 Platform
-.. |PLATFORM_VER| replace:: 2.4.1
+.. |PLATFORM_VER| replace:: 2.5.0
 .. |RCP| replace:: MICROEJ SDK
 .. |PLATFORM| replace:: MicroEJ Platform
 .. |PLATFORMS| replace:: MicroEJ Platforms
@@ -51,9 +51,9 @@ This |PLATFORM| contains the following dependencies:
    * - Architecture (simikou7)
      - 7.20.1
    * - UI Pack (simikou7UI)
-     - 13.7.0
+     - 14.0.0
    * - NET Pack
-     - 10.6.0
+     - 10.7.0
    * - HAL Pack
      - 2.0.2
    * - BLUETOOTH Pack

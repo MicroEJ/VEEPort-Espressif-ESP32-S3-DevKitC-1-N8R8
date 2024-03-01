@@ -24,12 +24,12 @@ extern "C" {
 /*
  * @brief Low-Level API UI major version.
  */
-#define LLUI_MAJOR_VERSION 13
+#define LLUI_MAJOR_VERSION 14
 
 /*
  * @brief Low-Level API UI minor version.
  */
-#define LLUI_MINOR_VERSION 7
+#define LLUI_MINOR_VERSION 0
 
 /*
  * @brief Low-Level API UI patch version.

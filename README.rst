@@ -6,7 +6,7 @@
    :alt: arch_7.20 badge
    :align: left
 ..
-    Copyright 2022-2023 MicroEJ Corp. All rights reserved.
+    Copyright 2022-2024 MicroEJ Corp. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be found with this software.
 
 .. |BOARD_NAME| replace:: ESP32-S3-DevKitC-1-N8R8
@@ -135,13 +135,13 @@ This |VEEPORT| provides the following Foundation Libraries:
    * - KF
      - 1.6
    * - MICROUI
-     - 3.4
+     - 3.5
    * - NET
      - 1.1
    * - NLS
      - 2.0
    * - SECURITY
-     - 1.6
+     - 1.7
    * - SNI
      - 1.4
    * - SSL

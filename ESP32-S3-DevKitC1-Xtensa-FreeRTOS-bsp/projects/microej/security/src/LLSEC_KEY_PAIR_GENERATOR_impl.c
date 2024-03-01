@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2021-2023 MicroEJ Corp. All rights reserved.
+ * Copyright 2021-2024 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief MicroEJ Security low level API implementation for MbedTLS Library.
  * @author MicroEJ Developer Team
- * @version 1.4.0
- * @date 15 November 2023
+ * @version 1.5.0
+ * @date 19 February 2024
  */
 
 #include <LLSEC_mbedtls.h>
@@ -73,17 +73,11 @@ static int32_t LLSEC_KEY_PAIR_GENERATOR_RSA_mbedtls_generateKeyPair(int32_t rsa_
     mbedtls_entropy_init(&entropy);   //init entropy structure
     mbedtls_ctr_drbg_init(&ctr_drbg); //Initial random structure
 
-    /* init rsa structure: padding OAEP + SHA256 */
+    /* init rsa structure: padding PKCS#1 v1.5 */
 #if (MBEDTLS_VERSION_MAJOR == 2)
-    mbedtls_rsa_init(ctx, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
+    mbedtls_rsa_init(ctx, MBEDTLS_RSA_PKCS_V15, MBEDTLS_MD_NONE);
 #elif (MBEDTLS_VERSION_MAJOR == 3)
     mbedtls_rsa_init(ctx);
-    mbedtls_rc = mbedtls_rsa_set_padding(ctx, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    if (LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
-        LLSEC_KEY_PAIR_GENERATOR_DEBUG_TRACE("%s mbedtls_rsa_set_padding (rc = %d)\n", __func__, mbedtls_rc);
-        mbedtls_rsa_free(ctx);
-        return_code = LLSEC_ERROR;
-    }
 #else
     #error "Unsupported mbedTLS major version"
 #endif
@@ -130,14 +124,14 @@ static int32_t LLSEC_KEY_PAIR_GENERATOR_RSA_mbedtls_generateKeyPair(int32_t rsa_
 
     mbedtls_ctr_drbg_free(&ctr_drbg);
     mbedtls_entropy_free(&entropy);
-    if(NULL != pers){
-        // cppcheck-suppress misra-c2012-11.8 // Cast for matching free function signature
-        mbedtls_free((void*)pers);
-    }
+    // cppcheck-suppress misra-c2012-11.8 // Cast for matching free function signature
+    mbedtls_free((void*)pers);
 
     if (LLSEC_SUCCESS == return_code) {
         // cppcheck-suppress misra-c2012-11.6 // Abstract data type for SNI usage
         return_code = (uint32_t)native_id;
+    } else {
+        mbedtls_free(ctx);
     }
 
     return return_code;
@@ -204,14 +198,14 @@ static int32_t LLSEC_KEY_PAIR_GENERATOR_EC_mbedtls_generateKeyPair(uint8_t* ec_c
 
     mbedtls_ctr_drbg_free(&ctr_drbg);
     mbedtls_entropy_free(&entropy);
-    if(NULL != pers) {
-        // cppcheck-suppress misra-c2012-11.8 // Cast for matching free function signature
-        mbedtls_free((void*)pers);
-    }
+    // cppcheck-suppress misra-c2012-11.8 // Cast for matching free function signature
+    mbedtls_free((void*)pers);
 
     if (LLSEC_SUCCESS == return_code) {
         // cppcheck-suppress misra-c2012-11.6 // Abstract data type for SNI usage
         return_code = (uint32_t)native_id;
+    } else {
+        mbedtls_free(ctx);
     }
 
     return return_code;
@@ -229,7 +223,6 @@ static void LLSEC_KEY_PAIR_GENERATOR_mbedtls_close(void* native_id) {
     }
     mbedtls_free(key);
 }
-
 
 int32_t LLSEC_KEY_PAIR_GENERATOR_IMPL_get_algorithm(uint8_t* algorithm_name) {
     int32_t return_code = LLSEC_ERROR;

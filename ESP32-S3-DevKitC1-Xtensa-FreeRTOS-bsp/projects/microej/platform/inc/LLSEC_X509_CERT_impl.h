@@ -12,8 +12,8 @@
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.3.0
- * @date 9 November 2023
+ * @version 2.4.0
+ * @date 16 February 2024
  */
 
 #include <intern/LLSEC_X509_CERT_impl.h>

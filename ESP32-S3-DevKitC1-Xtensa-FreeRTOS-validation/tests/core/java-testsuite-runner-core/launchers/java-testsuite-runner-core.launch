@@ -139,7 +139,7 @@
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationPlatformName" value="Platform"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationPlatformProvider" value="MicroEJ"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationPlatformToolchain" value="GNUv112_xtensa-esp32s3"/>
-<stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationPlatformVersion" value="2.4.1"/>
+<stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationPlatformVersion" value="2.5.0"/>
 <stringAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationProject" value="java-testsuite-runner-core"/>
 <booleanAttribute key="com.is2t.microej.workbench.stdMicroEJLaunchConfigurationVerbose" value="false"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">

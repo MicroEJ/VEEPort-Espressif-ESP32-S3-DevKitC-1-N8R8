@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2017-2023 MicroEJ Corp. All rights reserved.
+ * Copyright 2017-2024 MicroEJ Corp. All rights reserved.
  * This library is provided in source code for use, modification and test, subject to license terms.
  * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
  */
@@ -17,8 +17,8 @@
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 2.3.0
- * @date 9 November 2023
+ * @version 2.4.0
+ * @date 16 February 2024
  */
 
 typedef enum
@@ -83,6 +83,20 @@ int32_t LLSEC_CIPHER_IMPL_get_buffered_length(int32_t nativeTransformationId, in
  * @warning <code>iv</code> must not be used outside of the VM task or saved.
  */
 void LLSEC_CIPHER_IMPL_get_IV(int32_t transformation_id, int32_t native_id, uint8_t* iv, int32_t iv_length);
+
+/**
+ * @brief Sets the initialization vector.
+ *
+ * @param[in] transformation_id			The transformation ID.
+ * @param[in] native_id					The resource's native ID.
+ * @param[in] iv						The initialization vector of the cipher.
+ * @param[in] iv_length				The initialization vector size.
+ *
+ * @note Throws NativeException on error.
+ *
+ * @warning <code>iv</code> must not be used outside of the VM task or saved.
+ */
+void LLSEC_CIPHER_IMPL_set_IV(int32_t transformation_id, int32_t native_id, uint8_t* iv, int32_t iv_length);
 
 /**
  * @brief Gets the length of the initialized vector.

@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2021-2023 MicroEJ Corp. All rights reserved.
+ * Copyright 2021-2024 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief MicroEJ Security low level API implementation for MbedTLS Library.
  * @author MicroEJ Developer Team
- * @version 1.4.0
- * @date 15 November 2023
+ * @version 1.5.0
+ * @date 19 February 2024
  */
 
 #include <LLSEC_ERRORS.h>
@@ -84,6 +84,7 @@ static int mbedtls_mac_HmacSha256_init(void** native_id, uint8_t* key, int32_t k
         }
     }
     if (LLSEC_SUCCESS != return_code) {
+        mbedtls_md_free(md_ctx);
         LLSEC_free(md_ctx);
         return_code = LLSEC_ERROR;
     } else {
@@ -116,7 +117,9 @@ static int mbedtls_mac_reset(void* native_id) {
 
 static void mbedtls_mac_close(void* native_id) {
     LLSEC_MAC_DEBUG_TRACE("%s native_id:%p\n", __func__, native_id);
-    LLSEC_free(native_id);
+    mbedtls_md_context_t* md_ctx = (mbedtls_md_context_t*)native_id;
+    mbedtls_md_free(md_ctx);
+    LLSEC_free(md_ctx);
 }
 
 /**

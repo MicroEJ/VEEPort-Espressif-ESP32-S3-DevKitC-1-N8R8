@@ -1,5 +1,5 @@
 /* 
- * Copyright 2012-2021 MicroEJ Corp. All rights reserved.
+ * Copyright 2012-2023 MicroEJ Corp. All rights reserved.
  * This library is provided in source code for use, modification and test, subject to license terms.
  * Any modification of the source code will break MicroEJ Corp. warranties on the whole library.
  */
@@ -14,6 +14,10 @@
  * @brief Provides some API to generate some MicroUI input events from the adaptation
  * layer.
  */
+
+// --------------------------------------------------------------------------------
+// Includes
+// --------------------------------------------------------------------------------
 
 #include "sni.h"
 

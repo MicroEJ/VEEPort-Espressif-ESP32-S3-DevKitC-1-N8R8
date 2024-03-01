@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2021-2023 MicroEJ Corp. All rights reserved.
+ * Copyright 2021-2024 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief MicroEJ Security low level API implementation for MbedTLS Library.
  * @author MicroEJ Developer Team
- * @version 1.4.0
- * @date 15 November 2023
+ * @version 1.5.0
+ * @date 19 February 2024
  */
 
 #include <LLSEC_DIGEST_impl.h>
@@ -129,6 +129,7 @@ static void mbedtls_digest_close(void* native_id) {
 
     /* Memory deallocation */
     mbedtls_md_free(md_ctx);
+    mbedtls_free(md_ctx);
 }
 
 /*
@@ -159,9 +160,10 @@ static int LLSEC_DIGEST_MD5_init(void** native_id) {
     }
 
     if (LLSEC_SUCCESS != return_code) {
-       mbedtls_md_free(md_ctx);
+        mbedtls_md_free(md_ctx);
+        mbedtls_free(md_ctx);
     } else {
-       *native_id = md_ctx;
+        *native_id = md_ctx;
     }
 
     return return_code;
@@ -196,6 +198,7 @@ static int LLSEC_DIGEST_SHA1_init(void** native_id) {
 
     if (LLSEC_SUCCESS != return_code) {
         mbedtls_md_free(md_ctx);
+        mbedtls_free(md_ctx);
     } else {
         *native_id = md_ctx;
     }
@@ -232,6 +235,7 @@ static int LLSEC_DIGEST_SHA256_init(void** native_id) {
 
     if (LLSEC_SUCCESS != return_code) {
         mbedtls_md_free(md_ctx);
+        mbedtls_free(md_ctx);
     } else {
         *native_id = md_ctx;
     }
@@ -268,6 +272,7 @@ static int LLSEC_DIGEST_SHA512_init(void** native_id) {
 
     if (LLSEC_SUCCESS != return_code) {
         mbedtls_md_free(md_ctx);
+        mbedtls_free(md_ctx);
     } else {
         *native_id = md_ctx;
     }

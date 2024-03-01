@@ -1,10 +1,21 @@
 ..
-    Copyright 2022-2023 MicroEJ Corp. All rights reserved.
+    Copyright 2022-2024 MicroEJ Corp. All rights reserved.
     Use of this source code is governed by a BSD-style license that can be found with this software.
 
 ===========
  Changelog
 ===========
+
+----------------------
+ [2.5.0] - 2024-02-29
+----------------------
+
+Updated
+=======
+
+- Update ui-pack to version 14.0.0.
+- Update net-pack to version 10.7.0.
+- Update security-mbedtls CCO to version 1.5.0.
 
 ----------------------
  [2.4.1] - 2023-12-07

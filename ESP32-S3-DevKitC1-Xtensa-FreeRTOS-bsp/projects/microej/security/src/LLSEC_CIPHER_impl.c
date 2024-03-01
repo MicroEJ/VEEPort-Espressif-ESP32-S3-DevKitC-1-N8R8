@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2021-2023 MicroEJ Corp. All rights reserved.
+ * Copyright 2021-2024 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief MicroEJ Security low level API implementation for MbedTLS Library.
  * @author MicroEJ Developer Team
- * @version 1.4.0
- * @date 15 November 2023
+ * @version 1.5.0
+ * @date 19 February 2024
  */
 
 #include <LLSEC_CIPHER_impl.h>
@@ -22,11 +22,15 @@
 #include <string.h>
 
 #include "mbedtls/aes.h"
+#include "mbedtls/des.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
 
 #define AES_CBC_BLOCK_BITS    (128u)
 #define AES_CBC_BLOCK_BYTES   (AES_CBC_BLOCK_BITS / 8u)
+
+#define DES_CBC_BLOCK_BITS    (64u)
+#define DES_CBC_BLOCK_BYTES   (DES_CBC_BLOCK_BITS / 8u)
 
 /**
  * Cipher init function type
@@ -45,29 +49,50 @@ typedef struct {
     LLSEC_CIPHER_transformation_desc description;
 } LLSEC_CIPHER_transformation;
 
+typedef union {
+	mbedtls_aes_context aes_ctx;
+	mbedtls_des3_context des3_ctx;
+} cipher_ctx;
+
 typedef struct {
     LLSEC_CIPHER_transformation* transformation;
-    mbedtls_aes_context mbedtls_ctx;
+    cipher_ctx mbedtls_ctx;
     int32_t iv_length;
     uint8_t iv[1];
 } LLSEC_CIPHER_ctx;
 
 static int LLSEC_CIPHER_aescbc_init(int32_t transformation_id, void** native_id, uint8_t is_decrypting, uint8_t* key, int32_t key_length, uint8_t* iv, int32_t iv_length);
-static int mbedtls_cipher_decrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output);
-static int mbedtls_cipher_encrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output);
-static void mbedtls_cipher_close(void* native_id);
+static int LLSEC_CIPHER_des3cbc_init(int32_t transformation_id, void** native_id, uint8_t is_decrypting, uint8_t* key, int32_t key_length, uint8_t* iv, int32_t iv_length);
+static int mbedtls_aes_cipher_decrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output);
+static int mbedtls_des3_cipher_decrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output);
+static int mbedtls_aes_cipher_encrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output);
+static int mbedtls_des3_cipher_encrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output);
+static void mbedtls_aes_cipher_close(void* native_id);
+static void mbedtls_des3_cipher_close(void* native_id);
 
 // cppcheck-suppress misra-c2012-8.9 // Define here for code readability even if it called once in this file.
-static LLSEC_CIPHER_transformation available_transformations[1] = {
+static LLSEC_CIPHER_transformation available_transformations[2] = {
     {
         .name = "AES/CBC/NoPadding",
         .init = LLSEC_CIPHER_aescbc_init,
-        .decrypt = mbedtls_cipher_decrypt,
-        .encrypt = mbedtls_cipher_encrypt,
-        .close = mbedtls_cipher_close,
+        .decrypt = mbedtls_aes_cipher_decrypt,
+        .encrypt = mbedtls_aes_cipher_encrypt,
+        .close = mbedtls_aes_cipher_close,
         {
             .block_size = AES_CBC_BLOCK_BYTES,
             .unit_bytes = AES_CBC_BLOCK_BYTES,
+            .cipher_mode = CBC_MODE,
+        },
+    },
+    {
+        .name = "DESede/CBC/NoPadding",
+        .init = LLSEC_CIPHER_des3cbc_init,
+        .decrypt = mbedtls_des3_cipher_decrypt,
+        .encrypt = mbedtls_des3_cipher_encrypt,
+        .close = mbedtls_des3_cipher_close,
+        {
+            .block_size = DES_CBC_BLOCK_BYTES,
+            .unit_bytes = DES_CBC_BLOCK_BYTES,
             .cipher_mode = CBC_MODE,
         },
     }
@@ -82,13 +107,13 @@ static int LLSEC_CIPHER_aescbc_init(int32_t transformation_id, void** native_id,
 
     cipher_ctx = LLSEC_calloc(1, (int32_t)sizeof(LLSEC_CIPHER_ctx) - 1 + iv_length);
     cipher_ctx->transformation = (LLSEC_CIPHER_transformation*) transformation_id;
-    mbedtls_aes_init(&cipher_ctx->mbedtls_ctx);
+    mbedtls_aes_init(&cipher_ctx->mbedtls_ctx.aes_ctx);
 
     if ((uint8_t) 0 != is_decrypting) {
-        mbedtls_rc = mbedtls_aes_setkey_dec(&cipher_ctx->mbedtls_ctx, key, key_length * 8);
+        mbedtls_rc = mbedtls_aes_setkey_dec(&cipher_ctx->mbedtls_ctx.aes_ctx, key, key_length * 8);
         LLSEC_CIPHER_DEBUG_TRACE("%s mbedtls_aes_setkey_dec (rc = %d)\n", __func__, mbedtls_rc);
     } else {
-        mbedtls_rc = mbedtls_aes_setkey_enc(&cipher_ctx->mbedtls_ctx, key, key_length * 8);
+        mbedtls_rc = mbedtls_aes_setkey_enc(&cipher_ctx->mbedtls_ctx.aes_ctx, key, key_length * 8);
         LLSEC_CIPHER_DEBUG_TRACE("%s mbedtls_aes_setkey_enc (rc = %d)\n", __func__, mbedtls_rc);
     }
 
@@ -100,24 +125,84 @@ static int LLSEC_CIPHER_aescbc_init(int32_t transformation_id, void** native_id,
         cipher_ctx->iv_length = iv_length;
         (void) memcpy(cipher_ctx->iv, iv, iv_length);
         *native_id = cipher_ctx;
+    } else {
+        mbedtls_aes_free(&cipher_ctx->mbedtls_ctx.aes_ctx);
+        LLSEC_free(cipher_ctx);
     }
     return return_code;
 }
 
-static int mbedtls_cipher_decrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output) {
-    LLSEC_CIPHER_DEBUG_TRACE("%s \n", __func__);
-    LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
-    return mbedtls_aes_crypt_cbc(&cipher_ctx->mbedtls_ctx, MBEDTLS_AES_DECRYPT, buffer_length, cipher_ctx->iv, buffer, output);
+static int LLSEC_CIPHER_des3cbc_init(int32_t transformation_id, void** native_id, uint8_t is_decrypting, uint8_t* key, int32_t key_length, uint8_t* iv, int32_t iv_length) {
+    LLSEC_CIPHER_DEBUG_TRACE("%s %d\n", __func__, is_decrypting);
+
+    LLSEC_UNUSED_PARAM(key_length);
+
+    LLSEC_CIPHER_ctx* cipher_ctx;
+    int return_code = LLSEC_SUCCESS;
+    int mbedtls_rc = LLSEC_MBEDTLS_SUCCESS;
+
+    cipher_ctx = LLSEC_calloc(1, (int32_t)sizeof(LLSEC_CIPHER_ctx) - 1 + iv_length);
+    cipher_ctx->transformation = (LLSEC_CIPHER_transformation*) transformation_id;
+    mbedtls_des3_init(&cipher_ctx->mbedtls_ctx.des3_ctx);
+
+    if ((uint8_t) 0 != is_decrypting) {
+        mbedtls_rc = mbedtls_des3_set3key_dec(&cipher_ctx->mbedtls_ctx.des3_ctx, key);
+        LLSEC_CIPHER_DEBUG_TRACE("%s mbedtls_des3_set3key_dec (rc = %d)\n", __func__, mbedtls_rc);
+    } else {
+        mbedtls_rc = mbedtls_des3_set3key_enc(&cipher_ctx->mbedtls_ctx.des3_ctx, key);
+        LLSEC_CIPHER_DEBUG_TRACE("%s mbedtls_des3_set3key_enc (rc = %d)\n", __func__, mbedtls_rc);
+    }
+
+    if(LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
+        return_code =  LLSEC_ERROR;
+    }
+
+    if(LLSEC_SUCCESS == return_code) {
+        cipher_ctx->iv_length = iv_length;
+        (void) memcpy(cipher_ctx->iv, iv, iv_length);
+        *native_id = cipher_ctx;
+    } else {
+        mbedtls_des3_free(&cipher_ctx->mbedtls_ctx.des3_ctx);
+        LLSEC_free(cipher_ctx);
+    }
+    return return_code;
 }
 
-static int mbedtls_cipher_encrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output) {
+static int mbedtls_aes_cipher_decrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output) {
     LLSEC_CIPHER_DEBUG_TRACE("%s \n", __func__);
     LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
-    return mbedtls_aes_crypt_cbc(&cipher_ctx->mbedtls_ctx, MBEDTLS_AES_ENCRYPT, buffer_length, cipher_ctx->iv, buffer, output);
+    return mbedtls_aes_crypt_cbc(&cipher_ctx->mbedtls_ctx.aes_ctx, MBEDTLS_AES_DECRYPT, buffer_length, cipher_ctx->iv, buffer, output);
 }
 
-static void mbedtls_cipher_close(void* native_id) {
+static int mbedtls_des3_cipher_decrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output) {
+    LLSEC_CIPHER_DEBUG_TRACE("%s \n", __func__);
+    LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
+    return mbedtls_des3_crypt_cbc(&cipher_ctx->mbedtls_ctx.des3_ctx, MBEDTLS_DES_DECRYPT, buffer_length, cipher_ctx->iv, buffer, output);
+}
+
+static int mbedtls_aes_cipher_encrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output) {
+    LLSEC_CIPHER_DEBUG_TRACE("%s \n", __func__);
+    LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
+    return mbedtls_aes_crypt_cbc(&cipher_ctx->mbedtls_ctx.aes_ctx, MBEDTLS_AES_ENCRYPT, buffer_length, cipher_ctx->iv, buffer, output);
+}
+
+static int mbedtls_des3_cipher_encrypt(void* native_id, uint8_t* buffer, int32_t buffer_length, uint8_t* output) {
+    LLSEC_CIPHER_DEBUG_TRACE("%s \n", __func__);
+    LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
+    return mbedtls_des3_crypt_cbc(&cipher_ctx->mbedtls_ctx.des3_ctx, MBEDTLS_DES_ENCRYPT, buffer_length, cipher_ctx->iv, buffer, output);
+}
+
+static void mbedtls_aes_cipher_close(void* native_id) {
     LLSEC_CIPHER_DEBUG_TRACE("%s native_id %p\n", __func__, native_id);
+    LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
+    mbedtls_aes_free(&cipher_ctx->mbedtls_ctx.aes_ctx);
+    LLSEC_free(native_id);
+}
+
+static void mbedtls_des3_cipher_close(void* native_id) {
+    LLSEC_CIPHER_DEBUG_TRACE("%s native_id %p\n", __func__, native_id);
+    LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
+    mbedtls_des3_free(&cipher_ctx->mbedtls_ctx.des3_ctx);
     LLSEC_free(native_id);
 }
 
@@ -182,7 +267,7 @@ int32_t LLSEC_CIPHER_IMPL_get_buffered_length(int32_t nativeTransformationId, in
  * @param[in] transformation_id            The transformation ID.
  * @param[in] native_id                    The resource's native ID.
  * @param[out] iv                          The initialization vector of the cipher.
- * @param[out] iv_length                   The initialization vector size.
+ * @param[in] iv_length                   The initialization vector size.
  *
  * @note Throws NativeException on error.
  *
@@ -193,6 +278,25 @@ void LLSEC_CIPHER_IMPL_get_IV(int32_t transformation_id, int32_t native_id, uint
     LLSEC_UNUSED_PARAM(transformation_id);
     LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
     (void) memcpy(iv, cipher_ctx->iv, iv_length);
+}
+
+/**
+ * @brief Sets the initialization vector.
+ *
+ * @param[in] transformation_id            The transformation ID.
+ * @param[in] native_id                    The resource's native ID.
+ * @param[in] iv                          The initialization vector of the cipher.
+ * @param[in] iv_length                   The initialization vector size.
+ *
+ * @note Throws NativeException on error.
+ *
+ * @warning <code>iv</code> must not be used outside of the VM task or saved.
+ */
+void LLSEC_CIPHER_IMPL_set_IV(int32_t transformation_id, int32_t native_id, uint8_t* iv, int32_t iv_length) {
+    LLSEC_CIPHER_DEBUG_TRACE("%s \n", __func__);
+    LLSEC_UNUSED_PARAM(transformation_id);
+    LLSEC_CIPHER_ctx* cipher_ctx = (LLSEC_CIPHER_ctx*)native_id;
+    (void) memcpy(cipher_ctx->iv, iv, iv_length);
 }
 
 /**

@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2023 MicroEJ Corp. All rights reserved.
+ * Copyright 2023-2024 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief MicroEJ Security low level API
  * @author MicroEJ Developer Team
- * @version 1.4.0
- * @date 15 November 2023
+ * @version 1.5.0
+ * @date 19 February 2024
  */
 
 #include <LLSEC_SECRET_KEY_impl.h>

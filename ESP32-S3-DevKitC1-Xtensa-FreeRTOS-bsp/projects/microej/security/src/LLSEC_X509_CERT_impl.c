@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2021-2023 MicroEJ Corp. All rights reserved.
+ * Copyright 2021-2024 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief MicroEJ Security low level API implementation for MbedTLS Library.
  * @author MicroEJ Developer Team
- * @version 1.4.0
- * @date 15 November 2023
+ * @version 1.5.0
+ * @date 19 February 2024
  */
 
 #include <LLSEC_X509_CERT_impl.h>
@@ -119,6 +119,7 @@ int32_t LLSEC_X509_CERT_IMPL_parse(int8_t* cert, int32_t off, int32_t len) {
     /* Free the X509 certificate */
     if (NULL != tmp_cert) {
         mbedtls_x509_crt_free(tmp_cert);
+        mbedtls_free(tmp_cert);
     }
 
     return format;
@@ -164,6 +165,7 @@ int32_t LLSEC_X509_CERT_IMPL_get_x500_principal_data(int8_t* cert_data, int32_t 
 
             /* Free the X509 certificate */
             mbedtls_x509_crt_free(x509);
+            mbedtls_free(x509);
 
             return_code = len;
         }
@@ -240,6 +242,7 @@ int32_t LLSEC_X509_CERT_IMPL_get_key(int8_t* cert_data, int32_t cert_data_length
     } else {
         if(NULL != x509) {
             mbedtls_x509_crt_free(x509);
+            mbedtls_free(x509);
         }
         if(NULL != pub_key) {
             mbedtls_free(pub_key);
@@ -273,6 +276,7 @@ int32_t LLSEC_X509_CERT_IMPL_verify(int8_t* cert_data, int32_t cert_data_length,
 
     if(NULL != x509) {
         mbedtls_x509_crt_free(x509);
+        mbedtls_free(x509);
     }
 
     return return_code;
@@ -315,6 +319,7 @@ int32_t LLSEC_X509_CERT_IMPL_check_validity(int8_t* cert_data, int32_t cert_data
 
     if(NULL != x509) {
         mbedtls_x509_crt_free(x509);
+        mbedtls_free(x509);
     }
 
     return return_code;

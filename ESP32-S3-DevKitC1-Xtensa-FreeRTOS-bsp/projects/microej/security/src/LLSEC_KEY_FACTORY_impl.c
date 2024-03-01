@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2021-2023 MicroEJ Corp. All rights reserved.
+ * Copyright 2021-2024 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,8 +9,8 @@
  * @file
  * @brief MicroEJ Security low level API implementation for MbedTLS Library.
  * @author MicroEJ Developer Team
- * @version 1.4.0
- * @date 15 November 2023
+ * @version 1.5.0
+ * @date 19 February 2024
  */
 
 #include <LLSEC_ERRORS.h>
@@ -92,10 +92,6 @@ static int32_t LLSEC_KEY_FACTORY_RSA_mbedtls_get_private_key_data(LLSEC_priv_key
 
     mbedtls_rc = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char*)pers, strlen(pers));
     if(LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
-        mbedtls_ctr_drbg_free(&ctr_drbg);
-        mbedtls_entropy_free(&entropy);
-        // cppcheck-suppress misra-c2012-11.8 // Cast for matching free function signature
-        mbedtls_free((void*)pers);
         (void)SNI_throwNativeException(mbedtls_rc, "mbedtls_ctr_drbg_seed failed");
         return_code = LLSEC_ERROR;
     }
@@ -208,10 +204,6 @@ static int32_t LLSEC_KEY_FACTORY_EC_mbedtls_get_private_key_data(LLSEC_priv_key*
 
     mbedtls_rc = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char*)pers, strlen(pers));
     if (LLSEC_MBEDTLS_SUCCESS != mbedtls_rc) {
-        mbedtls_ctr_drbg_free(&ctr_drbg);
-        mbedtls_entropy_free(&entropy);
-        // cppcheck-suppress misra-c2012-11.8 // Cast for matching free function signature
-        mbedtls_free((void*)pers);
         (void)SNI_throwNativeException(mbedtls_rc, "mbedtls_ctr_drbg_seed failed");
         return_code = LLSEC_ERROR;
     }
